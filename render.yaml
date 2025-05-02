@@ -10,7 +10,7 @@ services:
   - key: NODE_ENV
     value: production
   - key: NEXT_PUBLIC_BACKEND_URL
-    value: https://backend-87oq.onrender.com/
+    value: https://backend-87oq.onrender.com
 - type: web
   name: backend
   env: python
@@ -24,15 +24,5 @@ services:
   - key: PYTHON_VERSION
     value: 3.12.7
   - key: PORT
+    # Don't forget to update the startCommand if you change this.
     value: 10000
-# Uncomment the following to deploy this app as a static site on render
-# - type: web
-#   name: nextjs-static
-#   runtime: static
-#   buildCommand: yarn; yarn build
-#   staticPublishPath: out
-#   pullRequestPreviewsEnabled: true     # optional
-#   envVars:
-#   - key: NODE_ENV
-#     value: production
-
