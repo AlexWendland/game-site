@@ -3,7 +3,7 @@ services:
   name: frontend
   runtime: node
   plan: free
-  buildCommand: cd frontend; npm install
+  buildCommand: cd frontend; npm install; npm run build
   startCommand: cd frontend; npm run start
   autoDeploy: true
   envVars:
