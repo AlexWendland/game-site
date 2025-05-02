@@ -2,6 +2,7 @@
 
 import { fetchBaseData } from "@/lib/apiCalls";
 import { useEffect, useState } from "react";
+import { Game } from "@/components/Game";
 
 export default function Home() {
   const [message, setMessage] = useState("Loading...");
@@ -21,6 +22,7 @@ export default function Home() {
     <>
       <h1>Hello!</h1>
       <p>{message}</p>
+      <Game />
     </>
   );
 }
