@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_API || 'http://localhost:3000';
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
 function apiUrl(path: string): string {
   return `${BASE_URL}${path}`;
