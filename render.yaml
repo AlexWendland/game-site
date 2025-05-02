@@ -19,6 +19,8 @@ services:
   envVars:
   - key: FRONTEND_URL
     value: http://localhost:3000
+  - key: PYTHON_VERSION
+    value: 3.12.7
 # Uncomment the following to deploy this app as a static site on render
 # - type: web
 #   name: nextjs-static
