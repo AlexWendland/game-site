@@ -3,8 +3,8 @@ services:
   name: frontend
   runtime: node
   plan: free
-  buildCommand: yarn; yarn build
-  startCommand: yarn start
+  buildCommand: cd frontend; yarn; yarn build
+  startCommand: cd frontend; yarn start
   autoDeploy: false
   envVars:
   - key: NODE_ENV
