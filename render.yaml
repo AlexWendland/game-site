@@ -1,6 +1,6 @@
 services:
 - type: web
-  name: next-js
+  name: frontend
   runtime: node
   plan: starter
   buildCommand: yarn; yarn build
