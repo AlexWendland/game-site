@@ -23,6 +23,6 @@
     docker build -t render-backend .
   '';
   scripts.docker-up.exec = ''
-    docker run -p 8000:8000 render-backend
+    docker run -p 8000:10000 render-backend
   '';
 }

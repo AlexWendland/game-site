@@ -21,7 +21,8 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 
 ENV NODE_ENV=production
+ENV PORT=10000
 
-EXPOSE 3000
+EXPOSE 10000
 
 CMD ["npm", "start"]
