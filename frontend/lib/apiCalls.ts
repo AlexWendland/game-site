@@ -1,4 +1,5 @@
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+// Hack for now, as environment variables are not working in render
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://backend-87oq.onrender.com';
 
 function apiUrl(path: string): string {
   return `${BASE_URL}${path}`;

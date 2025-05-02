@@ -9,7 +9,6 @@ export default function Home() {
   useEffect(() => {
     fetchBaseData()
       .then((data) => {
-        console.log("Data fetched:", data);
         setMessage(data);
       })
       .catch((err) => {
