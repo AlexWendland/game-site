@@ -5,22 +5,26 @@ services:
   plan: free
   buildCommand: cd frontend; yarn; yarn build
   startCommand: cd frontend; yarn start
-  autoDeploy: false
+  autoDeploy: true
   envVars:
   - key: NODE_ENV
     value: production
+  - key: NEXT_PUBLIC_BACKEND_URL
+    value: https://backend-87oq.onrender.com/
 - type: web
   name: backend
   env: python
   plan: free
   buildCommand: cd backend; poetry install
-  startCommand: cd backend; poetry run fastapi run render_backend/main.py
-  autoDeploy: false
+  startCommand: cd backend; poetry run fastapi run render_backend/main.py --port 10000
+  autoDeploy: true
   envVars:
   - key: FRONTEND_URL
-    value: http://localhost:3000
+    value: https://frontend-vv2s.onrender.com
   - key: PYTHON_VERSION
     value: 3.12.7
+  - key: PORT
+    value: 10000
 # Uncomment the following to deploy this app as a static site on render
 # - type: web
 #   name: nextjs-static
