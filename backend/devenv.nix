@@ -17,6 +17,12 @@
   };
 
   scripts.up.exec = ''
-    poetry run fastapi dev render_backend/main.py
+    poetry run fastapi dev render_backend/main.py --port 8000
+  '';
+  scripts.docker-build.exec = ''
+    docker build -t render-backend .
+  '';
+  scripts.docker-up.exec = ''
+    docker run -p 8000:8000 render-backend
   '';
 }

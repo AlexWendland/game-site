@@ -1,10 +1,10 @@
 services:
 - type: web
   name: frontend
-  runtime: node
+  runtime: docker
   plan: free
-  buildCommand: cd frontend; npm install
-  startCommand: cd frontend; npm run dev
+  dockerfilePath: frontend/dockerfile
+  dockerContext: frontend/
   autoDeploy: true
   envVars:
   - key: NODE_ENV
@@ -13,16 +13,11 @@ services:
     value: https://backend-87oq.onrender.com
 - type: web
   name: backend
-  env: python
+  runtime: docker
   plan: free
-  buildCommand: cd backend; poetry install
-  startCommand: cd backend; poetry run fastapi run render_backend/main.py --port 10000
+  dockerfilePath: backend/dockerfile
+  dockerContext: backend/
   autoDeploy: true
   envVars:
   - key: FRONTEND_URL
     value: https://frontend-vv2s.onrender.com
-  - key: PYTHON_VERSION
-    value: 3.12.7
-  - key: PORT
-    # Don't forget to update the startCommand if you change this.
-    value: 10000
