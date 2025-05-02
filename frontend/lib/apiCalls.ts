@@ -9,6 +9,7 @@ interface BaseResponse {
 }
 
 export async function fetchBaseData<T>(): Promise<string> {
+  console.log(`BACKEND_URL: ${process.env.NEXT_PUBLIC_BACKEND_URL}`);
   const response = await fetch(apiUrl("/"));
   if (!response.ok) {
     throw new Error(`Error fetching data: ${response.statusText}`);

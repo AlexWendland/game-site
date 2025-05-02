@@ -6,8 +6,6 @@ services:
   rootDir: frontend
   autoDeploy: true
   envVars:
-  - key: NODE_ENV
-    value: production
   - key: NEXT_PUBLIC_BACKEND_URL
     value: https://backend-87oq.onrender.com
 - type: web
