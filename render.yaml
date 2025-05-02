@@ -3,8 +3,7 @@ services:
   name: frontend
   runtime: docker
   plan: free
-  dockerfilePath: frontend/dockerfile
-  dockerContext: frontend/
+  rootDir: frontend
   autoDeploy: true
   envVars:
   - key: NODE_ENV
@@ -15,8 +14,7 @@ services:
   name: backend
   runtime: docker
   plan: free
-  dockerfilePath: backend/dockerfile
-  dockerContext: backend/
+  rootDir: backend
   autoDeploy: true
   envVars:
   - key: FRONTEND_URL
