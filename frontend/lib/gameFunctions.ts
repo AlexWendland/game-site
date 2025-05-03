@@ -1,5 +1,9 @@
 import { SquareValue, BoardValue } from "@/types/gameTypes";
 
+export function validateGameID(gameID: string): boolean {
+  return /^[a-zA-Z]{5}$/.test(gameID);
+}
+
 export function calculateWinner(
   squares: BoardValue,
 ): { winner: SquareValue; line: number[] } | null {

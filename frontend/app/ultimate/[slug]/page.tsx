@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Game } from "@/components/Game";
+import { validateGameID } from "@/lib/gameFunctions";
 
 export default async function Page({
   params,
@@ -8,7 +9,7 @@ export default async function Page({
 }) {
   const { slug } = await params;
   // TODO: Extend isValidSlug to use a server call to check if the game exists.
-  const isValidSlug = /^[a-zA-Z]{5}$/.test(slug);
+  const isValidSlug = validateGameID(slug);
 
   if (!isValidSlug) {
     notFound();
