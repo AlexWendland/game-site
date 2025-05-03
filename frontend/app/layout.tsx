@@ -1,9 +1,6 @@
 import "@/styles/globals.css";
-import { Metadata, Viewport } from "next";
-import { Link } from "@heroui/link";
+import { Metadata } from "next";
 import clsx from "clsx";
-
-import { Providers } from "./providers";
 
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
@@ -19,34 +16,25 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
-  ],
-};
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html suppressHydrationWarning lang="en">
+    <html lang="en">
       <head />
       <body
         className={clsx(
-          "min-h-screen bg-background font-sans antialiased",
+          "m-0 p-0 min-h-screen bg-gray-100 font-sans antialiased",
           fontSans.variable,
         )}
       >
-        <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          <div className="relative flex flex-col h-screen">
-            <main className="container mx-auto max-w-8xl pt-16 px-6 flex-grow">
-              {children}
-            </main>
-          </div>
-        </Providers>
+        <div className="relative flex flex-col h-screen">
+          <main className="container mx-auto max-w-8xl pt-16 px-6 flex-grow">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
