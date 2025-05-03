@@ -1,7 +1,9 @@
 import contextlib
 from typing import Any
 
-from render_backend.ultimate import api_functions
+import pytest
+
+from render_backend.ultimate import api_functions, ultimate_models
 
 
 @contextlib.contextmanager
@@ -25,3 +27,13 @@ def test_make_new_game():
         assert game_name != second_game_name
         assert second_game_name in api_functions.GAMES
         assert len(api_functions.GAMES) == 2
+
+def test_get_game_state():
+    """
+    Test that the get_game_state function returns the correct game state.
+    """
+    with set_game_state({"AAAAA": ultimate_models.GameState()}):
+        game_state = api_functions.get_game_state("AAAAA")
+        assert isinstance(game_state, ultimate_models.GameState)
+        with pytest.raises(KeyError):
+            api_functions.get_game_state("BBBBB")
