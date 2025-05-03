@@ -6,7 +6,11 @@ import { NCBoard } from "@/components/NCBoard";
 import { PlayerBoard } from "@/components/PlayerBoard";
 import { Button } from "@heroui/button";
 
-export function Game() {
+type GameProps = {
+  gameID: string;
+};
+
+export function Game({ gameID }: GameProps) {
   const [history, setHistory] = useState<BoardValue[]>([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
   const [usersPlayer, setUsersPlayer] = useState(0);
@@ -55,6 +59,7 @@ export function Game() {
         </div>
         <div className="col-span-1">
           <PlayerBoard
+            gameID={gameID}
             currentUserPlayer={usersPlayer}
             setCurrentUserPlayer={setUsersPlayer}
           />

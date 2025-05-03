@@ -40,3 +40,35 @@ export async function getGameState(game_id: string): Promise<GameState> {
   const data: GameState = await response.json();
   return data;
 }
+
+export async function setPlayer(
+  game_id: string,
+  playerPosition: number,
+  playerName: string,
+): Promise<void> {
+  const res = await fetch(apiUrl(`/ultimate/game/${game_id}/set_player`), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      player_position: playerPosition,
+      player_name: playerName,
+    }),
+  });
+  if (!res.ok) throw new Error("Failed to set player.");
+}
+
+export async function unsetPlayer(
+  game_id: string,
+  playerPosition: number,
+  playerName: string,
+): Promise<void> {
+  const res = await fetch(apiUrl(`/ultimate/game/${game_id}/unset_player`), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      player_position: playerPosition,
+      player_name: playerName,
+    }),
+  });
+  if (!res.ok) throw new Error("Failed to unset player.");
+}

@@ -1,18 +1,33 @@
 import { useCallback } from "react";
 import { Button } from "@heroui/button";
 import clsx from "clsx";
+import { setPlayer, unsetPlayer } from "@/lib/apiCalls";
 
 interface PlayerBoardProps {
+  gameID: string;
   currentUserPlayer: number; // 0 = none, 1 = Cross, 2 = Naught
   setCurrentUserPlayer: (player: number) => void;
 }
 
 export function PlayerBoard({
+  gameID,
   currentUserPlayer,
   setCurrentUserPlayer,
 }: PlayerBoardProps) {
   const handleSelect = useCallback(
-    (player: number) => {
+    async (player: number) => {
+      console.log("Setting player:", player);
+      try {
+        if (currentUserPlayer === player) {
+          await unsetPlayer(gameID, player, "Test Name");
+        } else {
+          await unsetPlayer(gameID, player == 1 ? 2 : 1, "Test Name");
+          await setPlayer(gameID, player, "Test Name");
+        }
+      } catch (error) {
+        console.error("Error setting player:", error);
+        return;
+      }
       setCurrentUserPlayer(currentUserPlayer === player ? 0 : player);
     },
     [currentUserPlayer, setCurrentUserPlayer],

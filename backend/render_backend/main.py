@@ -1,10 +1,14 @@
+import logging
 import os
+from typing import Annotated
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from render_backend import models
+from render_backend import models, utils
 from render_backend.ultimate import api_functions, ultimate_models
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -21,22 +25,80 @@ app.add_middleware(
 )
 
 
+async def validated_game_name(game_name: str) -> str:
+    if not utils.is_game_id_valid(game_name):
+        logger.info(f"Invalid game requested: {game_name}")
+        raise HTTPException(status_code=400, detail=f"Game name {game_name} is not valid")
+    return game_name
+
+
 @app.get("/")
 async def root() -> models.SimpleResponse:
     return models.SimpleResponse(message="Hello world!")
 
+
 @app.get("/ultimate/new_game")
 async def new_game() -> models.SimpleResponse:
     new_game = api_functions.make_new_game()
+    logger.info(f"New game created: {new_game}")
     return models.SimpleResponse(message=new_game)
 
+
 @app.get("/ultimate/game/{game_name}")
-async def get_game(game_name: str) -> ultimate_models.GameState:
+async def get_game(
+    game_name: Annotated[str, Depends(validated_game_name)],
+) -> ultimate_models.GameState:
     """
     Get the game state for a given game name.
     """
     try:
         game_state = api_functions.get_game_state(game_name)
     except KeyError:
+        logger.info(f"Game {new_game} not found.")
         raise HTTPException(status_code=404, detail=f"Game {game_name} not found")
+    logger.info(f"Game state for {new_game} obtained.")
     return game_state
+
+
+@app.put("/ultimate/game/{game_name}/set_player")
+async def set_player(
+    game_name: Annotated[str, Depends(validated_game_name)], player_update: models.PlayerUpdate
+) -> models.SimpleResponse:
+    try:
+        api_functions.set_player(
+            game_name=game_name,
+            player_position=player_update.player_position,
+            player_name=player_update.player_name,
+        )
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Game {game_name} not found")
+    except ValueError:
+        raise HTTPException(
+            status_code=401,
+            detail=f"Game {game_name} has player in position {player_update.player_position}",
+        )
+    return models.SimpleResponse(
+        message=(
+            f"Player {player_update.player_name} has been set to position "
+            f"{player_update.player_position} on game {game_name}"
+        )
+    )
+
+@app.put("/ultimate/game/{game_name}/unset_player")
+async def unset_player(
+    game_name: Annotated[str, Depends(validated_game_name)], player_update: models.PlayerUpdate
+) -> models.SimpleResponse:
+    try:
+        api_functions.unset_player(
+            game_name=game_name,
+            player_position=player_update.player_position,
+            player_name=player_update.player_name,
+        )
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Game {game_name} not found")
+    return models.SimpleResponse(
+        message=(
+            f"Player {player_update.player_name} is no longer in position "
+            f"{player_update.player_position} on game {game_name}."
+        )
+    )

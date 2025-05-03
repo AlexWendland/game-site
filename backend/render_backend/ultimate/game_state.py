@@ -8,7 +8,8 @@ def random_game_name() -> str:
     """
     Generates a new game name randomly.
     """
-    return ''.join([random.choice(string.ascii_uppercase) for _ in range(GAME_NAME_LENGTH)])
+    return "".join([random.choice(string.ascii_uppercase) for _ in range(GAME_NAME_LENGTH)])
+
 
 def non_matching_game_name(curent_games: set[str]) -> str:
     """
