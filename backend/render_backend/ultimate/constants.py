@@ -1,0 +1,1 @@
+GAME_NAME_LENGTH = 5
