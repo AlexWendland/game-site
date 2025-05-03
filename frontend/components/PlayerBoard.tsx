@@ -32,7 +32,7 @@ export function PlayerBoard({
           return (
             <Button
               key={player.id}
-              variant="outline"
+              variant="light"
               className={clsx(
                 "flex items-center justify-between w-full px-4 py-2 text-left",
                 isSelected && "border-blue-500 bg-blue-50",
