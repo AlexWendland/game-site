@@ -1,10 +1,15 @@
+"use client";
+
 import { useState } from "react";
 import { BoardValue } from "@/types/gameTypes";
-import { Board } from "@/components/Board";
+import { NCBoard } from "@/components/NCBoard";
+import { PlayerBoard } from "@/components/PlayerBoard";
+import { Button } from "@heroui/button";
 
 export function Game() {
   const [history, setHistory] = useState<BoardValue[]>([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
+  const [usersPlayer, setUsersPlayer] = useState(0);
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
 
@@ -19,27 +24,41 @@ export function Game() {
   }
 
   const moves = history.map((_, move) => {
-    const description = move > 0 ? `Go to move #${move}` : "Go to game start";
     return (
       <li key={move}>
-        <button
-          onClick={() => jumpTo(move)}
-          className="text-sm text-blue-600 hover:underline"
+        <Button
+          onPress={() => jumpTo(move)}
+          size="sm"
+          color="secondary"
+          className="text-lg"
         >
-          {description}
-        </button>
+          {move}
+        </Button>
       </li>
     );
   });
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 p-4 items-start">
-      <div className="flex-shrink-0">
-        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
-      </div>
-      <div className="text-sm">
-        <h2 className="font-semibold mb-2">History</h2>
-        <ol className="space-y-1">{moves}</ol>
+    <div>
+      <div className="grid grid-cols-8 gap-4 width-full">
+        <div className="col-span-1">
+          <h2 className="font-semibold mb-2 text-xl text-center">History</h2>
+          <ol className="flex flex-wrap gap-4 items-center">{moves}</ol>
+        </div>
+        <div className="col-span-6">
+          <NCBoard
+            xIsNext={xIsNext}
+            currentPlayer={usersPlayer}
+            squares={currentSquares}
+            onPlay={handlePlay}
+          />
+        </div>
+        <div className="col-span-1">
+          <PlayerBoard
+            currentUserPlayer={usersPlayer}
+            setCurrentUserPlayer={setUsersPlayer}
+          />
+        </div>
       </div>
     </div>
   );

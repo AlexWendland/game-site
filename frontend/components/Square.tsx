@@ -14,29 +14,30 @@ export function Square({
 }: SquareProps) {
   const textColor =
     value === "X"
-      ? "text-blue-600"
+      ? "text-black-600"
       : value === "O"
         ? "text-red-500"
-        : "text-gray-700";
+        : "text-transparent";
 
   const classes = clsx(
     "flex items-center justify-center w-full h-full border border-gray-400",
-    "text-3xl font-bold transition-colors duration-300", // animate highlight
-    "transition-transform active:scale-95", // press effect
-    "select-none", // prevent accidental text selection
+    "select-none",
+    "text-9xl",
     textColor,
     isHighlighted ? "bg-yellow-200" : "bg-white",
   );
 
   return (
     <button onClick={onSquareClick} className={classes}>
+      {/* This is used to animate the text */}
       <span
         className={clsx(
           "transition-opacity duration-500",
           value ? "opacity-100" : "opacity-0",
         )}
       >
-        {value}
+        {/* Filler text is invisible until played */}
+        {value ? value : "O"}
       </span>
     </button>
   );
