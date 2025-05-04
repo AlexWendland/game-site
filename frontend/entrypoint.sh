@@ -6,7 +6,4 @@ if [ -f /etc/secrets/auth ]; then
 fi
 set +o allexport
 
-# Dumb test to check if this worked
-echo "NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL"
-
 exec npm start
