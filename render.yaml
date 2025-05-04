@@ -5,9 +5,10 @@ services:
   plan: free
   rootDir: frontend
   autoDeploy: true
-  envVars:
-  - key: NEXT_PUBLIC_BACKEND_URL
-    value: https://backend-87oq.onrender.com
+  # This didn't work for me, so I switched it to load an ENV file instead.
+  # envVars:
+  # - key: NEXT_PUBLIC_BACKEND_URL
+  #   value: https://backend-87oq.onrender.com
 - type: web
   name: backend
   runtime: docker

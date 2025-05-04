@@ -127,11 +127,12 @@ export function GameProvider({
       try {
         await setPlayerAPI(gameID, newPosition, currentUserName);
         setCurrentUserPosition(newPosition);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Error setting player:", err);
+        const message = err instanceof Error ? err.message : String(err);
         addToast({
           title: "Error",
-          description: err.message,
+          description: message,
         });
       }
     }

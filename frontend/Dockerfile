@@ -25,4 +25,7 @@ ENV PORT=10000
 
 EXPOSE 10000
 
-CMD ["npm", "start"]
+# Use the entrypoint to run the server
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
