@@ -16,6 +16,7 @@ import {
   unsetPlayerAPI,
 } from "@/lib/apiCalls";
 import { calculateWinner } from "@/lib/gameFunctions";
+import { addToast } from "@heroui/react";
 
 type GameContextType = {
   // Backend state
@@ -120,9 +121,20 @@ export function GameProvider({
   const updateCurrentUserPosition = async (newPosition: number) => {
     if (currentUserPosition !== 0) {
       unsetPlayerAPI(gameID, currentUserPosition, currentUserName);
+      setCurrentUserPosition(0);
     }
-    setPlayerAPI(gameID, newPosition, currentUserName);
-    setCurrentUserPosition(newPosition);
+    if (newPosition !== currentUserPosition) {
+      try {
+        await setPlayerAPI(gameID, newPosition, currentUserName);
+        setCurrentUserPosition(newPosition);
+      } catch (err) {
+        console.error("Error setting player:", err);
+        addToast({
+          title: "Error",
+          description: err.message,
+        });
+      }
+    }
     await loadGameState();
   };
 
