@@ -1,11 +1,7 @@
-import logging
-
+from render_backend.app_logger import logger
 from render_backend.ultimate import game_state, ultimate_models
 
 GAMES: dict[str, ultimate_models.GameState] = {}
-
-logger = logging.getLogger(__name__)
-
 
 def make_new_game() -> str:
     new_game = game_state.non_matching_game_name(set(GAMES.keys()))

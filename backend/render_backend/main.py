@@ -1,5 +1,4 @@
 import contextlib
-import logging
 import os
 from collections.abc import AsyncIterator
 from typing import Annotated
@@ -8,9 +7,8 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from render_backend import models, utils
+from render_backend.app_logger import logger
 from render_backend.ultimate import api_functions, ultimate_models
-
-logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
