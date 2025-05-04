@@ -18,8 +18,6 @@ import {
 import { calculateWinner } from "@/lib/gameFunctions";
 
 type GameContextType = {
-  // Game identifier
-  gameID: string;
   // Backend state
   history: BoardValue[];
   players: Record<number, string | null>;
@@ -144,13 +142,19 @@ export function GameProvider({
     setCurrentViewedMove(currentMove + 1);
   };
 
+  useEffect(() => {
+    const fetch = async () => {
+      await loadGameState(true);
+    };
+    fetch();
+  }, []);
+
   // Provide tsx
   if (isLoading) return <div>Loading game... </div>;
 
   return (
     <GameContext.Provider
       value={{
-        gameID,
         history,
         players,
         currentMove,

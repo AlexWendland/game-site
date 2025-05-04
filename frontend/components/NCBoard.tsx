@@ -4,7 +4,6 @@ import { useGameContext } from "@/components/GameContext";
 
 export function NCBoard() {
   const {
-    gameID,
     history,
     players,
     currentMove,

@@ -25,7 +25,7 @@ export default async function Page({
         Invite a friend to play with game ID{" "}
         <div className="text-primary font-bold">{gameID}</div>
       </div>
-      <Game gameID={gameID} />
+      <Game />
     </GameProvider>
   );
 }
