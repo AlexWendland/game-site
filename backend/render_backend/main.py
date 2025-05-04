@@ -1,5 +1,7 @@
+import contextlib
 import logging
 import os
+from collections.abc import AsyncIterator
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -24,11 +26,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 async def validated_game_name(game_name: str) -> str:
     if not utils.is_game_id_valid(game_name):
         logger.info(f"Invalid game requested: {game_name}")
         raise HTTPException(status_code=400, detail=f"Game name {game_name} is not valid")
     return game_name
+
+
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    app.state.clients = {
+        "ultimate": {},
+    }
+    yield
 
 
 @app.get("/")
@@ -120,3 +131,4 @@ async def make_move(
     except ValueError:
         raise HTTPException(status_code=401, detail=f"Move {move} is not valid")
     return models.SimpleResponse(message=f"Move {move} made on game {game_name}")
+

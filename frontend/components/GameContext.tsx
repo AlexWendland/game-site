@@ -67,12 +67,13 @@ export function GameProvider({
   // Initial loading of state
   const [isLoading, setIsLoading] = useState(true);
 
-  async function loadGameState(changeView: boolean) {
+  async function loadGameState() {
     try {
       const gameState = await getGameStateAPI(gameID);
+      const changeMove = currentViewedMove === currentMove;
       setHistory(gameState.board_history);
       setPlayers(gameState.players);
-      if (changeView) {
+      if (changeMove) {
         setCurrentViewedMove(gameState.board_history.length - 1);
       }
     } catch (err) {
@@ -81,13 +82,6 @@ export function GameProvider({
       setIsLoading(false);
     }
   }
-
-  useEffect(() => {
-    const fetch = async () => {
-      await loadGameState(true);
-    };
-    fetch();
-  }, []);
 
   // Define meta parameters
 
@@ -120,7 +114,7 @@ export function GameProvider({
       setPlayerAPI(gameID, currentUserPosition, newUser);
     }
     setCurrentUserName(newUser || "");
-    await loadGameState(false);
+    await loadGameState();
   };
 
   const updateCurrentUserPosition = async (newPosition: number) => {
@@ -129,7 +123,7 @@ export function GameProvider({
     }
     setPlayerAPI(gameID, newPosition, currentUserName);
     setCurrentUserPosition(newPosition);
-    await loadGameState(false);
+    await loadGameState();
   };
 
   const makeMove = async (position: number) => {
@@ -138,16 +132,17 @@ export function GameProvider({
     if (currentUserPosition !== currentPlayerNumber) return;
     if (currentViewedMove !== currentMove) return;
     await makeMoveAPI(gameID, currentUserPosition, currentUserName, position);
-    await loadGameState(false);
+    await loadGameState();
     setCurrentViewedMove(currentMove + 1);
   };
 
   useEffect(() => {
-    const fetch = async () => {
-      await loadGameState(true);
-    };
-    fetch();
-  }, []);
+    const interval = setInterval(() => {
+      loadGameState();
+    }, 1000); // every 5 seconds
+
+    return () => clearInterval(interval); // cleanup on unmount
+  }, [currentMove, currentViewedMove]);
 
   // Provide tsx
   if (isLoading) return <div>Loading game... </div>;
