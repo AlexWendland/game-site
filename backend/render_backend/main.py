@@ -18,12 +18,11 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 async def validated_game_name(game_name: str) -> str:
     if not utils.is_game_id_valid(game_name):
@@ -84,6 +83,7 @@ async def set_player(
         )
     )
 
+
 @app.put("/ultimate/game/{game_name}/unset_player")
 async def unset_player(
     game_name: Annotated[str, Depends(validated_game_name)], player_update: models.PlayerUpdate
@@ -102,3 +102,21 @@ async def unset_player(
             f"{player_update.player_position} on game {game_name}."
         )
     )
+
+
+@app.put("/ultimate/game/{game_name}/make_move")
+async def make_move(
+    game_name: Annotated[str, Depends(validated_game_name)], move: models.Move
+) -> models.SimpleResponse:
+    try:
+        api_functions.make_move(
+            game_name=game_name,
+            player_name=move.player_name,
+            player_position=move.player_position,
+            move=move.move,
+        )
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Game {game_name} not found")
+    except ValueError:
+        raise HTTPException(status_code=401, detail=f"Move {move} is not valid")
+    return models.SimpleResponse(message=f"Move {move} made on game {game_name}")

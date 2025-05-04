@@ -1,16 +1,17 @@
-import { SquareValue } from "@/types/gameTypes";
 import clsx from "clsx";
 
 type SquareProps = {
-  value: SquareValue;
+  value: string | null;
   onSquareClick: () => void;
-  isHighlighted?: boolean;
+  isHighlighted: boolean;
+  isInCurrentView: boolean;
 };
 
 export function Square({
   value,
   onSquareClick,
-  isHighlighted = false,
+  isHighlighted,
+  isInCurrentView,
 }: SquareProps) {
   const textColor =
     value === "X"
@@ -29,14 +30,24 @@ export function Square({
 
   return (
     <button onClick={onSquareClick} className={classes}>
-      {/* This is used to animate the text */}
+      {/* 
+        There are 3 states,
+          1. Empty with 0 opacity.
+          2. Filled and visible will 100 opacity.
+          3. Filled but not currently in view with 50 opacity.
+        There are animated transitions between the states.
+        There is also a filler O that is used to hold the shape of the board.
+      */}
       <span
         className={clsx(
           "transition-opacity duration-500",
-          value ? "opacity-100" : "opacity-0",
+          value
+            ? isInCurrentView
+              ? "opacity-100"
+              : "opacity-50"
+            : "opacity-0",
         )}
       >
-        {/* Filler text is invisible until played */}
         {value ? value : "O"}
       </span>
     </button>

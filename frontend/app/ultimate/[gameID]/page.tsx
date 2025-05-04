@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { Game } from "@/components/Game";
 import { validateGameID } from "@/lib/gameFunctions";
-import { getGameState } from "@/lib/apiCalls";
+import { getGameStateAPI } from "@/lib/apiCalls";
+import { GameProvider } from "@/components/GameContext";
 
 export default async function Page({
   params,
@@ -13,15 +14,18 @@ export default async function Page({
     notFound();
   }
   try {
-    await getGameState(gameID);
+    await getGameStateAPI(gameID);
   } catch (error) {
     console.error("Error fetching game state:", error);
     notFound();
   }
   return (
-    <>
-      <div>My Game: {gameID}</div>
+    <GameProvider gameID={gameID}>
+      <div className="text-4xl text-center pb-8">
+        Invite a friend to play with game ID{" "}
+        <div className="text-primary font-bold">{gameID}</div>
+      </div>
       <Game gameID={gameID} />
-    </>
+    </GameProvider>
   );
 }

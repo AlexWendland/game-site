@@ -1,5 +1,5 @@
 import { Button } from "@heroui/react";
-import { makeNewUltimateGame } from "@/lib/apiCalls";
+import { makeNewUltimateGameAPI } from "@/lib/apiCalls";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -9,7 +9,7 @@ export function NewGameButton() {
 
   const onPress = async () => {
     setIsLoading(true);
-    const gameID: string = await makeNewUltimateGame();
+    const gameID: string = await makeNewUltimateGameAPI();
     router.push(`/ultimate/${gameID}`);
   };
 

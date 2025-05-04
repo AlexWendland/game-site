@@ -1,2 +1,2 @@
-export type SquareValue = string | null;
+export type SquareValue = number | null;
 export type BoardValue = SquareValue[];

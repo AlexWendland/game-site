@@ -1,37 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import { BoardValue } from "@/types/gameTypes";
 import { NCBoard } from "@/components/NCBoard";
 import { PlayerBoard } from "@/components/PlayerBoard";
-import { Button } from "@heroui/button";
+import { Button, Input } from "@heroui/react";
+import { useGameContext } from "@/components/GameContext";
 
-type GameProps = {
-  gameID: string;
-};
-
-export function Game({ gameID }: GameProps) {
-  const [history, setHistory] = useState<BoardValue[]>([Array(9).fill(null)]);
-  const [currentMove, setCurrentMove] = useState(0);
-  const [usersPlayer, setUsersPlayer] = useState(0);
-  const xIsNext = currentMove % 2 === 0;
-  const currentSquares = history[currentMove];
-
-  function handlePlay(nextSquares: BoardValue) {
-    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
-    setHistory(nextHistory);
-    setCurrentMove(nextHistory.length - 1);
-  }
-
-  function jumpTo(nextMove: number) {
-    setCurrentMove(nextMove);
-  }
+export function Game() {
+  const {
+    gameID,
+    history,
+    players,
+    currentMove,
+    currentPlayer,
+    winner,
+    winningLine,
+    currentUserName,
+    currentUserPosition,
+    currentViewedMove,
+    setCurrentViewedMove,
+    updateCurrentUserName,
+    updateCurrentUserPosition,
+    makeMove,
+  } = useGameContext();
 
   const moves = history.map((_, move) => {
     return (
       <li key={move}>
         <Button
-          onPress={() => jumpTo(move)}
+          onPress={() => setCurrentViewedMove(move)}
           size="sm"
           color="secondary"
           className="text-lg"
@@ -50,18 +46,15 @@ export function Game({ gameID }: GameProps) {
           <ol className="flex flex-wrap gap-4 items-center">{moves}</ol>
         </div>
         <div className="col-span-6">
-          <NCBoard
-            xIsNext={xIsNext}
-            currentPlayer={usersPlayer}
-            squares={currentSquares}
-            onPlay={handlePlay}
-          />
+          <NCBoard />
         </div>
         <div className="col-span-1">
-          <PlayerBoard
-            gameID={gameID}
-            currentUserPlayer={usersPlayer}
-            setCurrentUserPlayer={setUsersPlayer}
+          <PlayerBoard />
+          <br />
+          <Input
+            onValueChange={updateCurrentUserName}
+            description="Username"
+            color="primary"
           />
         </div>
       </div>

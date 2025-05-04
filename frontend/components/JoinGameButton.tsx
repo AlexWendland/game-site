@@ -1,6 +1,6 @@
 import { Button, Form, Input } from "@heroui/react";
 import { FormEvent, useState } from "react";
-import { getGameState } from "@/lib/apiCalls";
+import { getGameStateAPI } from "@/lib/apiCalls";
 import { validateGameID } from "@/lib/gameFunctions";
 import { useRouter } from "next/navigation";
 
@@ -27,7 +27,7 @@ export function JoinGameButton() {
     setErrors({});
 
     try {
-      await getGameState(gameID);
+      await getGameStateAPI(gameID);
       // If this does not error the game is valid.
       router.push(`/ultimate/${gameID}`);
     } catch (err) {

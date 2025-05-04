@@ -11,13 +11,14 @@ class SimpleResponse(pydantic.BaseModel):
 
     message: str
 
+
 class PlayerUpdate(pydantic.BaseModel):
     """
     A model representing a player update.
     """
 
     player_name: str
-    player_position: Annotated[int, Ge(0), Le(2)]
+    player_position: Annotated[int, Ge(1), Le(2)]
 
     @pydantic.field_validator("player_name", mode="before")
     @classmethod
@@ -28,3 +29,11 @@ class PlayerUpdate(pydantic.BaseModel):
         if len(player_name) == 0:
             raise ValueError("Player name cannot be zero length.")
         return player_name
+
+
+class Move(PlayerUpdate):
+    """
+    A model representing a move.
+    """
+
+    move: Annotated[int, Ge(0)]

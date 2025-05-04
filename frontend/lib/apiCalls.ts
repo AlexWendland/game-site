@@ -8,19 +8,7 @@ function apiUrl(path: string): string {
   return `${BASE_URL}${path}`;
 }
 
-export async function fetchBaseData(): Promise<string> {
-  const response = await fetch(apiUrl("/"));
-  if (!response.ok) {
-    throw new Error(`Error fetching data: ${response.statusText}`);
-  }
-  const data: SimpleResponse = await response.json();
-  if (data.message) {
-    return data.message;
-  }
-  throw new Error("Unexpected response format");
-}
-
-export async function makeNewUltimateGame(): Promise<string> {
+export async function makeNewUltimateGameAPI(): Promise<string> {
   const response = await fetch(apiUrl("/ultimate/new_game"));
   if (!response.ok) {
     throw new Error(`Error fetching data: ${response.statusText}`);
@@ -32,7 +20,7 @@ export async function makeNewUltimateGame(): Promise<string> {
   throw new Error("Unexpected response format");
 }
 
-export async function getGameState(game_id: string): Promise<GameState> {
+export async function getGameStateAPI(game_id: string): Promise<GameState> {
   const response = await fetch(apiUrl(`/ultimate/game/${game_id}`));
   if (!response.ok) {
     throw new Error(`Error fetching data: ${response.statusText}`);
@@ -41,7 +29,7 @@ export async function getGameState(game_id: string): Promise<GameState> {
   return data;
 }
 
-export async function setPlayer(
+export async function setPlayerAPI(
   game_id: string,
   playerPosition: number,
   playerName: string,
@@ -57,7 +45,7 @@ export async function setPlayer(
   if (!res.ok) throw new Error("Failed to set player.");
 }
 
-export async function unsetPlayer(
+export async function unsetPlayerAPI(
   game_id: string,
   playerPosition: number,
   playerName: string,
@@ -71,4 +59,22 @@ export async function unsetPlayer(
     }),
   });
   if (!res.ok) throw new Error("Failed to unset player.");
+}
+
+export async function makeMoveAPI(
+  game_id: string,
+  playerPosition: number,
+  playerName: string,
+  move: number,
+): Promise<void> {
+  const res = await fetch(apiUrl(`/ultimate/game/${game_id}/make_move`), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      player_position: playerPosition,
+      player_name: playerName,
+      move: move,
+    }),
+  });
+  if (!res.ok) throw new Error("Failed to make move.");
 }
