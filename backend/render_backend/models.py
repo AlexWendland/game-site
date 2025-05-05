@@ -82,6 +82,8 @@ class GameParameters(pydantic.BaseModel):
     A model representing game parameters.
     """
 
+class JoinGameRequest(pydantic.BaseModel):
+    player_name: str
 
 # -------------------------------------
 # Legacy Models

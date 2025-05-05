@@ -7,12 +7,73 @@ from render_backend import game_base, models
 from render_backend.app_logger import logger
 
 
+class SessionManager:
+    def __init__(self, max_players: int):
+        self._max_players = max_players
+        self._player_names: dict[WebSocket, str] = {}
+        self._position_to_player: dict[int, WebSocket | None] = {
+            i: None for i in range(max_players)
+        }
+        self._player_to_position: dict[WebSocket, int | None] = {}
+
+    def get_client_position(self, client: WebSocket) -> int | None:
+        self._check_client(client)
+        return self._player_to_position.get(client)
+
+    def add_client(self, client: WebSocket, name: str = "UNKNOWN"):
+        self._player_names[client] = name
+        self._player_to_position[client] = None
+
+
+    def remove_client(self, client: WebSocket):
+        self._check_client(client)
+        self._remove_client_from_position(client)
+        del self._player_names[client]
+        del self._player_to_position[client]
+
+    def get_positions(self) -> dict[int, str | None]:
+        return {
+            pos: self._player_names.get(client) if client else None
+            for pos, client in self._position_to_player.items()
+        }
+
+    def _set_client_name(self, client: WebSocket, name: str):
+        self._check_client(client)
+        self._player_names[client] = name
+
+    def _move_client_position(self, client: WebSocket, new_position: int):
+        self._check_client(client)
+        if new_position < 0 or new_position >= self._max_players:
+            raise ValueError(f"Position {new_position} is out of bounds.")
+        if self._position_to_player[new_position] is not None:
+            raise ValueError(f"Position {new_position} is already taken.")
+        self._remove_client_from_position(client)
+        self._set_client_position(client, new_position)
+
+    def _check_client(self, client: WebSocket):
+        if client not in self._player_names:
+            raise ValueError(f"Client {client} not in session.")
+
+    def _set_client_position(self, client: WebSocket, position: int):
+        self._remove_client_from_position(client)
+        self._position_to_player[position] = client
+        self._player_to_position[client] = position
+
+    def _remove_client_from_position(self, client: WebSocket):
+        position = self._player_to_position.get(client)
+        if position is not None:
+            self._position_to_player[position] = None
+        self._player_to_position[client] = None
+
+
+
 class GameManager:
-    def __init__(self, game_id: str, game: game_base.GameBase):
+    def __init__(self, game_id: str, game: game_base.GameBase, session: SessionManager):
         self._game_id = game_id
         self._clients: list[WebSocket] = []
         self._lock = asyncio.Lock()
         self._game = game
+        self._session = session
         self._is_closed = False
 
     @property
@@ -33,16 +94,18 @@ class GameManager:
         await self._connect(client)
         await self._message_client(
             client=client,
-            message = models.SimpleResponse(
+            message=models.SimpleResponse(
                 parameters=models.SimpleResponseParameters(
                     message=f"Client {client.client} connected."
                 )
-            )
+            ),
         )
         try:
             while not self._is_closed:
                 message_text = await client.receive_text()
-                logger.info(f"Client {client.client} messaged with {message_text} ({type(message_text)}).")
+                logger.info(
+                    f"Client {client.client} messaged with {message_text} ({type(message_text)})."
+                )
                 await self._handle_message(client, message_text)
         except Exception as e:
             logger.exception(f"Error while handling message from client {client.client}: {e}")
@@ -55,6 +118,7 @@ class GameManager:
         logger.info(f"Client {client} joined game {self._game_id}.")
         async with self._lock:
             self._clients.append(client)
+            self._session.add_client(client)
 
     async def _disconnect(self, client: WebSocket):
         async with self._lock:
@@ -65,6 +129,7 @@ class GameManager:
                     pass
                 logger.info(f"Client {client} left game {self._game_id}")
                 self._clients.remove(client)
+                self._session.remove_client(client)
 
     async def _message_client(self, client: WebSocket, message: models.Response):
         disconnect = False
@@ -79,7 +144,6 @@ class GameManager:
         if disconnect:
             await self._disconnect(client)
 
-
     async def _broadcast(self, message: models.Response):
         to_disconnect: list[WebSocket] = []
         async with self._lock:
@@ -91,10 +155,10 @@ class GameManager:
         for client in to_disconnect:
             await self._disconnect(client)
 
-
     async def _handle_message(self, client: WebSocket, message: str):
         time.sleep(1)
         await client.send_text(f"ping {self._game_id}")
+
 
 class BookManager:
     def __init__(self):
@@ -107,10 +171,10 @@ class BookManager:
         logger.info(f"Created game {game_id}.")
 
     async def remove_game(self, game_id: str):
-        if game_id in self._live_games:
-            raise ValueError(f"Game ID to be added {game_id} already exists.")
-        await self._live_games[game_id].close_game()
-        _ = self._live_games.pop(game_id)
+        if game_id not in self._live_games:
+            return
+        manager = self._live_games.pop(game_id)
+        await manager.close_game()
         logger.info(f"Closed game {game_id}.")
 
     def get_game(self, game_id: str) -> GameManager:
@@ -120,4 +184,3 @@ class BookManager:
 
     def get_all_game_ids(self) -> set[str]:
         return set(self._live_games)
-

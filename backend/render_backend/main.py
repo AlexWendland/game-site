@@ -19,6 +19,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info("Book manager created.")
     yield
 
+
 app = FastAPI(lifespan=lifespan)
 
 origins = [
@@ -39,8 +40,6 @@ async def validated_game_name(game_name: str) -> str:
         logger.info(f"Invalid game requested: {game_name}")
         raise HTTPException(status_code=400, detail=f"Game name {game_name} is not valid")
     return game_name
-
-
 
 
 # -------------------------------------
@@ -73,7 +72,6 @@ async def websocket_endpoint(
 ):
     game = app.state.book_manager.get_game(game_name)
     await game.handle_connection(client_websocket)
-
 
 
 # -------------------------------------
