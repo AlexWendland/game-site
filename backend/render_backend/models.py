@@ -23,14 +23,14 @@ class ResponseParameters(pydantic.BaseModel):
 
 class Response(pydantic.BaseModel):
     message_type: ResponseType
-    parameters: ResponseParameters
+    # Implementations should implement there own parameters.
 
 
 class SimpleResponseParameters(ResponseParameters):
     message: str
 
 
-class SimpleResponse(pydantic.BaseModel):
+class SimpleResponse(Response):
     message_type: ResponseType = pydantic.Field(default=ResponseType.SIMPLE, init=False)
     parameters: SimpleResponseParameters
 

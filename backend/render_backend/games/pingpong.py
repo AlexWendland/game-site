@@ -1,19 +1,14 @@
-import abc
-from typing import Any
+from typing import Any, override
 
-from render_backend import models
+from render_backend import game_base, models
 
 
-class GameBase(abc.ABC):
-    """
-    Abstract base class for game implementations.
-    """
-
-    @abc.abstractmethod
+class PingPongGame(game_base.GameBase):
+    @override
     def call_function(
         self, function_name: str, function_parameters: dict[str, Any]
     ) -> models.ErrorResponse | None:
         """
         Get the model to pass the game parameters.
         """
-        pass
+        return None

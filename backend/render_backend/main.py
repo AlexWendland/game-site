@@ -1,6 +1,5 @@
 import contextlib
 import os
-import time
 from collections.abc import AsyncIterator
 from typing import Annotated
 
@@ -9,9 +8,18 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from render_backend import models, utils
 from render_backend.app_logger import logger
+from render_backend.games import PingPongGame
+from render_backend.managers import BookManager, GameManager
 from render_backend.ultimate import api_functions, ultimate_models
 
-app = FastAPI()
+
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    app.state.book_manager = BookManager()
+    logger.info("Book manager created.")
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 origins = [
     os.getenv("FRONTEND_URL", "http://localhost:3000"),
@@ -33,12 +41,6 @@ async def validated_game_name(game_name: str) -> str:
     return game_name
 
 
-@contextlib.asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    app.state.clients = {
-        "ultimate": {},
-    }
-    yield
 
 
 # -------------------------------------
@@ -54,6 +56,8 @@ async def root() -> models.SimpleResponse:
 @app.post("/new_game")
 async def new_game(new_game_request: models.NewGameRequest) -> models.SimpleResponse:
     new_game_id = api_functions.make_new_game()
+    game_manager = GameManager(new_game_id, PingPongGame())
+    app.state.book_manager.add_game(new_game_id, game_manager)
     logger.info(f"New game of {new_game_request.game_name} created: {new_game_id}")
     return models.SimpleResponse(parameters=models.SimpleResponseParameters(message=new_game_id))
 
@@ -62,19 +66,14 @@ async def new_game(new_game_request: models.NewGameRequest) -> models.SimpleResp
 # Game interaction
 # -------------------------------------
 
+
 @app.websocket("/game/{game_name}/ws")
-async def websocket_endpoint(game_name: Annotated[str, Depends(validated_game_name)], client_websocket: WebSocket):
-    await client_websocket.accept()
-    await client_websocket.send_text(f"ping {game_name}")
-    logger.info(f"Client {client_websocket.client} connected.")
-    try:
-        while True:
-            _ = await client_websocket.receive_text()
-            time.sleep(1)
-            logger.info(f"Client {client_websocket.client} pinged.")
-            await client_websocket.send_text(f"ping {game_name}")
-    except Exception:
-        logger.info(f"Client {client_websocket.client} disconnected.")
+async def websocket_endpoint(
+    game_name: Annotated[str, Depends(validated_game_name)], client_websocket: WebSocket
+):
+    game = app.state.book_manager.get_game(game_name)
+    await game.handle_connection(client_websocket)
+
 
 
 # -------------------------------------
