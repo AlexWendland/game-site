@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 import { ToastProvider } from "@heroui/toast";
 import { UserProvider } from "@/context/UserContext";
+import { GameProvider } from "@/context/GameContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -12,7 +13,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <HeroUIProvider navigate={router.push}>
       <ToastProvider />
-      <UserProvider>{children}</UserProvider>
+      <UserProvider>
+        <GameProvider>{children}</GameProvider>
+      </UserProvider>
     </HeroUIProvider>
   );
 }

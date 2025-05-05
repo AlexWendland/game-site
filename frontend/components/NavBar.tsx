@@ -16,6 +16,7 @@ import {
 import { makeNewTicTacToeGameAPI } from "@/lib/apiCalls";
 import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/UserContext";
+import { useGameContext } from "@/context/GameContext";
 
 type ChevronDownProps = React.SVGProps<SVGSVGElement> & {
   fill?: string;
@@ -57,6 +58,15 @@ export function NavBar() {
     chevron: <ChevronDown fill="currentColor" size={16} />,
   };
   const { username, setUsername, clearUsername } = useUserContext();
+  const {
+    gameCode,
+    setGameCode,
+    gameLink,
+    setGameLink,
+    gameState,
+    setGameState,
+    clearGame,
+  } = useGameContext();
   console.log("NavBar userName", username);
   const router = useRouter();
 
@@ -102,8 +112,8 @@ export function NavBar() {
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
-        <NavbarItem isActive>Game code</NavbarItem>
-        <NavbarItem>Game state</NavbarItem>
+        <NavbarItem isActive>{gameCode}</NavbarItem>
+        <NavbarItem>{gameState}</NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
         <NavbarItem>{username}</NavbarItem>

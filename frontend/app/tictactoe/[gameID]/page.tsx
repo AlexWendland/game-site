@@ -9,7 +9,10 @@ export default async function Page({
 }: {
   params: Promise<{ gameID: string }>;
 }) {
+  // Game page parameters
   const { gameID } = await params;
+
+  // Validate page
   if (!validateGameID(gameID)) {
     notFound();
   }
@@ -19,6 +22,7 @@ export default async function Page({
     console.error("Error fetching game state:", error);
     notFound();
   }
+
   return (
     <TicTacToeProvider gameID={gameID}>
       <div className="text-4xl text-center pb-8">

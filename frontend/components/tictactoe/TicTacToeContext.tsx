@@ -20,6 +20,8 @@ import {
 } from "@/lib/apiCalls";
 import { calculateWinner } from "@/lib/gameFunctions";
 import { addToast } from "@heroui/react";
+import { usePathname } from "next/navigation";
+import { useGameContext } from "@/context/GameContext";
 
 type TicTacToeContextType = {
   // Backend state
@@ -110,6 +112,28 @@ export function TicTacToeProvider({
         gameWebSocket.current.close();
         gameWebSocket.current = null;
       }
+    };
+  }, [gameID]);
+
+  // Set game details in context.
+  const {
+    gameCode,
+    setGameCode,
+    gameLink,
+    setGameLink,
+    gameState,
+    setGameState,
+    clearGame,
+  } = useGameContext();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setGameCode(gameID);
+    setGameLink(pathname);
+    setGameState("Pending game start");
+    console.log(pathname);
+    return () => {
+      clearGame();
     };
   }, [gameID]);
 
