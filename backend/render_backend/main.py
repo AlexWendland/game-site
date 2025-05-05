@@ -1,9 +1,10 @@
 import contextlib
 import os
+import time
 from collections.abc import AsyncIterator
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 from render_backend import models, utils
@@ -61,6 +62,20 @@ async def new_game(new_game_request: models.NewGameRequest) -> models.SimpleResp
 # Game interaction
 # -------------------------------------
 
+@app.websocket("/game/{game_name}/ws")
+async def websocket_endpoint(game_name: Annotated[str, Depends(validated_game_name)], client_websocket: WebSocket):
+    await client_websocket.accept()
+    await client_websocket.send_text(f"ping {game_name}")
+    logger.info(f"Client {client_websocket.client} connected.")
+    try:
+        while True:
+            _ = await client_websocket.receive_text()
+            time.sleep(1)
+            logger.info(f"Client {client_websocket.client} pinged.")
+            await client_websocket.send_text(f"ping {game_name}")
+    except Exception:
+        logger.info(f"Client {client_websocket.client} disconnected.")
+
 
 # -------------------------------------
 # Legacy
@@ -77,9 +92,9 @@ async def get_game(
     try:
         game_state = api_functions.get_game_state(game_name)
     except KeyError:
-        logger.info(f"Game {new_game} not found.")
+        logger.info(f"Game {game_name} not found.")
         raise HTTPException(status_code=404, detail=f"Game {game_name} not found")
-    logger.info(f"Game state for {new_game} obtained.")
+    logger.info(f"Game state for {game_name} obtained.")
     return game_state
 
 

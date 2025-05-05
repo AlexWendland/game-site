@@ -1,6 +1,6 @@
 import { GameState, SimpleResponse } from "@/types/apiTypes";
 
-// Hack for now, as environment variables are not working in render
+// Hack for now, as environment variables are not working in renderGameManager
 const BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "https://backend-87oq.onrender.com";
 
@@ -36,11 +36,11 @@ export async function getGameStateAPI(game_id: string): Promise<GameState> {
 }
 
 export async function setPlayerAPI(
-  game_id: string,
+  gameID: string,
   playerPosition: number,
   playerName: string,
 ): Promise<void> {
-  const res = await fetch(apiUrl(`/ultimate/game/${game_id}/set_player`), {
+  const res = await fetch(apiUrl(`/ultimate/game/${gameID}/set_player`), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -52,11 +52,11 @@ export async function setPlayerAPI(
 }
 
 export async function unsetPlayerAPI(
-  game_id: string,
+  gameID: string,
   playerPosition: number,
   playerName: string,
 ): Promise<void> {
-  const res = await fetch(apiUrl(`/ultimate/game/${game_id}/unset_player`), {
+  const res = await fetch(apiUrl(`/ultimate/game/${gameID}/unset_player`), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -68,12 +68,12 @@ export async function unsetPlayerAPI(
 }
 
 export async function makeMoveAPI(
-  game_id: string,
+  gameID: string,
   playerPosition: number,
   playerName: string,
   move: number,
 ): Promise<void> {
-  const res = await fetch(apiUrl(`/ultimate/game/${game_id}/make_move`), {
+  const res = await fetch(apiUrl(`/ultimate/game/${gameID}/make_move`), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -83,4 +83,18 @@ export async function makeMoveAPI(
     }),
   });
   if (!res.ok) throw new Error("Failed to make move.");
+}
+
+export function getGameWebsocket(gameID: string): WebSocket {
+  const socket = new WebSocket(apiUrl(`/game/${gameID}/ws`));
+  socket.onopen = () => {
+    console.log("WebSocket connection opened");
+  };
+  socket.onclose = () => {
+    console.log("WebSocket connection closed");
+  };
+  socket.onerror = (error) => {
+    console.error("WebSocket error:", error);
+  };
+  return socket;
 }

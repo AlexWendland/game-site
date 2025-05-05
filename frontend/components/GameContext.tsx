@@ -14,6 +14,7 @@ import {
   makeMoveAPI,
   setPlayerAPI,
   unsetPlayerAPI,
+  getGameWebsocket,
 } from "@/lib/apiCalls";
 import { calculateWinner } from "@/lib/gameFunctions";
 import { addToast } from "@heroui/react";
@@ -156,6 +157,27 @@ export function GameProvider({
 
     return () => clearInterval(interval); // cleanup on unmount
   }, [currentMove, currentViewedMove]);
+
+  useEffect(() => {
+    const ws = getGameWebsocket(gameID);
+
+    ws.onmessage = (event) => {
+      console.log("Message from server:", event.data);
+      ws.send(`pong ${gameID}`);
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket disconnected");
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [gameID]);
 
   // Provide tsx
   if (isLoading) return <div>Loading game... </div>;
