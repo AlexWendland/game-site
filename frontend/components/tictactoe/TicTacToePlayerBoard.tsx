@@ -1,8 +1,8 @@
 import { Button } from "@heroui/button";
 import clsx from "clsx";
-import { useGameContext } from "@/components/GameContext";
+import { useTicTacToeContext } from "@/components/tictactoe/TicTacToeContext";
 
-export function PlayerBoard() {
+export function TicTacToePlayerBoard() {
   const {
     history,
     players,
@@ -17,7 +17,7 @@ export function PlayerBoard() {
     updateCurrentUserName,
     updateCurrentUserPosition,
     makeMove,
-  } = useGameContext();
+  } = useTicTacToeContext();
 
   const availablePlayers = [
     { id: 1, name: "Cross", icon: "✖️" },

@@ -7,7 +7,7 @@ type SquareProps = {
   isInCurrentView: boolean;
 };
 
-export function Square({
+export function TicTacToeSquare({
   value,
   onSquareClick,
   isHighlighted,

@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { Game } from "@/components/Game";
+import { TicTacToeGame } from "@/components/tictactoe/TicTacToeGame";
+import { TicTacToeProvider } from "@/components/tictactoe/TicTacToeContext";
 import { validateGameID } from "@/lib/gameFunctions";
 import { getGameStateAPI } from "@/lib/apiCalls";
-import { GameProvider } from "@/components/GameContext";
 
 export default async function Page({
   params,
@@ -20,12 +20,12 @@ export default async function Page({
     notFound();
   }
   return (
-    <GameProvider gameID={gameID}>
+    <TicTacToeProvider gameID={gameID}>
       <div className="text-4xl text-center pb-8">
         Invite a friend to play with game ID{" "}
         <div className="text-primary font-bold">{gameID}</div>
       </div>
-      <Game />
-    </GameProvider>
+      <TicTacToeGame />
+    </TicTacToeProvider>
   );
 }

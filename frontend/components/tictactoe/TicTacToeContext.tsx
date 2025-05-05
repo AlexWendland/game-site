@@ -21,7 +21,7 @@ import {
 import { calculateWinner } from "@/lib/gameFunctions";
 import { addToast } from "@heroui/react";
 
-type GameContextType = {
+type TicTacToeContextType = {
   // Backend state
   history: BoardValue[];
   players: Record<number, string | null>;
@@ -41,17 +41,17 @@ type GameContextType = {
   makeMove: (position: number) => void;
 };
 
-const GameContext = createContext<GameContextType | null>(null);
+const TicTacToeContext = createContext<TicTacToeContextType | null>(null);
 
-export const useGameContext = () => {
-  const context = useContext(GameContext);
+export const useTicTacToeContext = () => {
+  const context = useContext(TicTacToeContext);
   if (!context) {
     throw new Error("useGameContext must be used within a GameProvider");
   }
   return context;
 };
 
-export function GameProvider({
+export function TicTacToeProvider({
   gameID,
   children,
 }: {
@@ -113,7 +113,7 @@ export function GameProvider({
     };
   }, [gameID]);
 
-  async function loadGameState() {
+  async function loadTicTacToeState() {
     try {
       const gameState = await getGameStateAPI(gameID);
       const changeMove = currentViewedMove === currentMove;
@@ -160,7 +160,7 @@ export function GameProvider({
       setPlayerAPI(gameID, currentUserPosition, newUser);
     }
     setCurrentUserName(newUser || "");
-    await loadGameState();
+    await loadTicTacToeState();
   };
 
   const updateCurrentUserPosition = async (newPosition: number) => {
@@ -181,7 +181,7 @@ export function GameProvider({
         });
       }
     }
-    await loadGameState();
+    await loadTicTacToeState();
   };
 
   const makeMove = async (position: number) => {
@@ -190,13 +190,13 @@ export function GameProvider({
     if (currentUserPosition !== currentPlayerNumber) return;
     if (currentViewedMove !== currentMove) return;
     await makeMoveAPI(gameID, currentUserPosition, currentUserName, position);
-    await loadGameState();
+    await loadTicTacToeState();
     setCurrentViewedMove(currentMove + 1);
   };
 
   useEffect(() => {
     const interval = setInterval(() => {
-      loadGameState();
+      loadTicTacToeState();
     }, 1000); // every 5 seconds
 
     return () => clearInterval(interval); // cleanup on unmount
@@ -206,7 +206,7 @@ export function GameProvider({
   if (isLoading) return <div>Loading game... </div>;
 
   return (
-    <GameContext.Provider
+    <TicTacToeContext.Provider
       value={{
         history,
         players,
@@ -224,6 +224,6 @@ export function GameProvider({
       }}
     >
       {children}
-    </GameContext.Provider>
+    </TicTacToeContext.Provider>
   );
 }

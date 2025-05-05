@@ -1,8 +1,7 @@
-import { Square } from "@/components/Square";
-import { BoardValue } from "@/types/gameTypes";
-import { useGameContext } from "@/components/GameContext";
+import { TicTacToeSquare } from "@/components/tictactoe/TicTacToeSquare";
+import { useTicTacToeContext } from "@/components/tictactoe/TicTacToeContext";
 
-export function NCBoard() {
+export function TicTacToeBoard() {
   const {
     history,
     players,
@@ -17,7 +16,7 @@ export function NCBoard() {
     updateCurrentUserName,
     updateCurrentUserPosition,
     makeMove,
-  } = useGameContext();
+  } = useTicTacToeContext();
 
   const status = winner
     ? `Winner: ${winner}`
@@ -31,7 +30,7 @@ export function NCBoard() {
       <div className="grid grid-cols-3 gap-2 w-full sm:max-w-[400px] md:max-w-[500px] aspect-square">
         {/* Values in the backend are just the player positions, convert this to X / 0 */}
         {history[currentMove].map((val, i) => (
-          <Square
+          <TicTacToeSquare
             key={i}
             value={val ? (val === 1 ? "X" : "O") : null}
             onSquareClick={() => makeMove(i)}

@@ -1,11 +1,11 @@
 "use client";
 
-import { NCBoard } from "@/components/NCBoard";
-import { PlayerBoard } from "@/components/PlayerBoard";
+import { TicTacToeBoard } from "@/components/tictactoe/TicTacToeBoard";
+import { TicTacToePlayerBoard } from "@/components/tictactoe/TicTacToePlayerBoard";
 import { Button, Input } from "@heroui/react";
-import { useGameContext } from "@/components/GameContext";
+import { useTicTacToeContext as useTicTacToeContext } from "@/components/tictactoe/TicTacToeContext";
 
-export function Game() {
+export function TicTacToeGame() {
   const {
     history,
     players,
@@ -20,7 +20,7 @@ export function Game() {
     updateCurrentUserName,
     updateCurrentUserPosition,
     makeMove,
-  } = useGameContext();
+  } = useTicTacToeContext();
 
   const moves = history.map((_, move) => {
     return (
@@ -45,10 +45,10 @@ export function Game() {
           <ol className="flex flex-wrap gap-4 items-center">{moves}</ol>
         </div>
         <div className="col-span-6">
-          <NCBoard />
+          <TicTacToeBoard />
         </div>
         <div className="col-span-1">
-          <PlayerBoard />
+          <TicTacToePlayerBoard />
           <br />
           <Input
             onValueChange={updateCurrentUserName}
