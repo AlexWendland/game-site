@@ -1,5 +1,5 @@
 import { Button } from "@heroui/react";
-import { makeNewUltimateGameAPI } from "@/lib/apiCalls";
+import { makeNewTicTacToeGameAPI } from "@/lib/apiCalls";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -9,7 +9,7 @@ export function NewGameButton() {
 
   const onPress = async () => {
     setIsLoading(true);
-    const gameID: string = await makeNewUltimateGameAPI();
+    const gameID: string = await makeNewTicTacToeGameAPI();
     router.push(`/ultimate/${gameID}`);
   };
 

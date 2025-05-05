@@ -18,7 +18,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"], # TODO: Fix this.
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -45,11 +45,11 @@ async def root() -> models.SimpleResponse:
     return models.SimpleResponse(message="Hello world!")
 
 
-@app.get("/ultimate/new_game")
-async def new_game() -> models.SimpleResponse:
-    new_game = api_functions.make_new_game()
-    logger.info(f"New game created: {new_game}")
-    return models.SimpleResponse(message=new_game)
+@app.post("/new_game")
+async def new_game(new_game_request: models.NewGameRequest) -> models.SimpleResponse:
+    new_game_id = api_functions.make_new_game()
+    logger.info(f"New game of {new_game_request.game_name} created: {new_game_id}")
+    return models.SimpleResponse(message=new_game_id)
 
 
 @app.get("/ultimate/game/{game_name}")

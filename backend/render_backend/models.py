@@ -1,4 +1,5 @@
-from typing import Annotated
+import enum
+from typing import Annotated, Any
 
 import pydantic
 from annotated_types import Ge, Le
@@ -30,6 +31,18 @@ class PlayerUpdate(pydantic.BaseModel):
             raise ValueError("Player name cannot be zero length.")
         return player_name
 
+class GameTypes(enum.Enum):
+    """
+    An enum representing the different game types.
+    """
+    TICTACTOE = "tictactoe"
+
+class NewGameRequest(pydantic.BaseModel):
+    """
+    A request to make a new game.
+    """
+    game_name: GameTypes
+    paramters : dict[str, Any] = pydantic.Field(default_factory=dict)
 
 class Move(PlayerUpdate):
     """
@@ -37,3 +50,17 @@ class Move(PlayerUpdate):
     """
 
     move: Annotated[int, Ge(0)]
+
+class UserAction(pydantic.BaseModel):
+    """
+    A model representing a user action.
+    """
+
+    action_type: str
+    action_name: str
+    parameters: dict[str, Any]
+
+class StateUpdate(pydantic.BaseModel):
+
+    players: dict[int, str]
+    game_state: dict[str, Any]
