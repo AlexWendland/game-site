@@ -4,13 +4,88 @@ from typing import Annotated, Any
 import pydantic
 from annotated_types import Ge, Le
 
+# -------------------------------------
+# Response Models
+# -------------------------------------
+
+
+class ResponseType(enum.Enum):
+    SIMPLE = "simple"
+    ERROR = "error"
+    GAME_STATE = "game_state"
+
+
+class ResponseParameters(pydantic.BaseModel):
+    """
+    A base class for all response parameters.
+    """
+
+
+class Response(pydantic.BaseModel):
+    message_type: ResponseType
+    parameters: ResponseParameters
+
+
+class SimpleResponseParameters(ResponseParameters):
+    message: str
+
 
 class SimpleResponse(pydantic.BaseModel):
+    message_type: ResponseType = pydantic.Field(default=ResponseType.SIMPLE, init=False)
+    parameters: SimpleResponseParameters
+
+
+class ErrorResponseParameters(ResponseParameters):
+    error_message: str
+
+
+class ErrorResponse(pydantic.BaseModel):
+    message_type: ResponseType = pydantic.Field(default=ResponseType.ERROR, init=False)
+    parameters: ErrorResponseParameters
+
+
+class GameStateParameters(ResponseParameters):
     """
-    A simple response model that can be used to return a message.
+    A model representing game state parameters. This will be extended by each of the games.
     """
 
-    message: str
+
+class GameStateResponse(pydantic.BaseModel):
+    message_type: ResponseType = pydantic.Field(default=ResponseType.GAME_STATE, init=False)
+    parameters: GameStateParameters
+
+
+# -------------------------------------
+# Request Models
+# -------------------------------------
+
+
+class GameTypes(enum.Enum):
+    """
+    An enum representing the different game types.
+    """
+
+    TICTACTOE = "tictactoe"
+
+
+class NewGameRequest(pydantic.BaseModel):
+    """
+    A request to make a new game.
+    """
+
+    game_name: GameTypes
+    paramters: dict[str, Any] = pydantic.Field(default_factory=dict)
+
+
+class GameParameters(pydantic.BaseModel):
+    """
+    A model representing game parameters.
+    """
+
+
+# -------------------------------------
+# Legacy Models
+# -------------------------------------
 
 
 class PlayerUpdate(pydantic.BaseModel):
@@ -31,18 +106,6 @@ class PlayerUpdate(pydantic.BaseModel):
             raise ValueError("Player name cannot be zero length.")
         return player_name
 
-class GameTypes(enum.Enum):
-    """
-    An enum representing the different game types.
-    """
-    TICTACTOE = "tictactoe"
-
-class NewGameRequest(pydantic.BaseModel):
-    """
-    A request to make a new game.
-    """
-    game_name: GameTypes
-    paramters : dict[str, Any] = pydantic.Field(default_factory=dict)
 
 class Move(PlayerUpdate):
     """
@@ -50,6 +113,7 @@ class Move(PlayerUpdate):
     """
 
     move: Annotated[int, Ge(0)]
+
 
 class UserAction(pydantic.BaseModel):
     """
@@ -60,7 +124,7 @@ class UserAction(pydantic.BaseModel):
     action_name: str
     parameters: dict[str, Any]
 
-class StateUpdate(pydantic.BaseModel):
 
+class StateUpdate(pydantic.BaseModel):
     players: dict[int, str]
     game_state: dict[str, Any]

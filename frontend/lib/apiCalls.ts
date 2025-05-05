@@ -20,8 +20,8 @@ export async function makeNewTicTacToeGameAPI(): Promise<string> {
     throw new Error(`Error creating game: ${response.statusText}`);
   }
   const data: SimpleResponse = await response.json();
-  if (data.message) {
-    return data.message;
+  if (data.parameters.message) {
+    return data.parameters.message;
   }
   throw new Error("Unexpected response format");
 }

@@ -1,7 +1,10 @@
 import { BoardValue } from "./gameTypes";
 
 export interface SimpleResponse {
-  message: string;
+  type: string;
+  parameters: {
+    message: string;
+  };
 }
 
 export interface GameState {

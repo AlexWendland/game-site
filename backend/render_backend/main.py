@@ -18,7 +18,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # TODO: Fix this.
+    allow_origins=["*"],  # TODO: Fix this.
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,16 +40,31 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
 
 
+# -------------------------------------
+# Game creation
+# -------------------------------------
+
+
 @app.get("/")
 async def root() -> models.SimpleResponse:
-    return models.SimpleResponse(message="Hello world!")
+    return models.SimpleResponse(parameters=models.SimpleResponseParameters(message="Hello world!"))
 
 
 @app.post("/new_game")
 async def new_game(new_game_request: models.NewGameRequest) -> models.SimpleResponse:
     new_game_id = api_functions.make_new_game()
     logger.info(f"New game of {new_game_request.game_name} created: {new_game_id}")
-    return models.SimpleResponse(message=new_game_id)
+    return models.SimpleResponse(parameters=models.SimpleResponseParameters(message=new_game_id))
+
+
+# -------------------------------------
+# Game interaction
+# -------------------------------------
+
+
+# -------------------------------------
+# Legacy
+# -------------------------------------
 
 
 @app.get("/ultimate/game/{game_name}")
@@ -86,9 +101,11 @@ async def set_player(
             detail=f"Game {game_name} has player in position {player_update.player_position}",
         )
     return models.SimpleResponse(
-        message=(
-            f"Player {player_update.player_name} has been set to position "
-            f"{player_update.player_position} on game {game_name}"
+        parameters=models.SimpleResponseParameters(
+            message=(
+                f"Player {player_update.player_name} has been set to position "
+                f"{player_update.player_position} on game {game_name}"
+            )
         )
     )
 
@@ -106,9 +123,11 @@ async def unset_player(
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Game {game_name} not found")
     return models.SimpleResponse(
-        message=(
-            f"Player {player_update.player_name} is no longer in position "
-            f"{player_update.player_position} on game {game_name}."
+        parameters=models.SimpleResponseParameters(
+            message=(
+                f"Player {player_update.player_name} is no longer in position "
+                f"{player_update.player_position} on game {game_name}."
+            )
         )
     )
 
@@ -128,5 +147,6 @@ async def make_move(
         raise HTTPException(status_code=404, detail=f"Game {game_name} not found")
     except ValueError:
         raise HTTPException(status_code=401, detail=f"Move {move} is not valid")
-    return models.SimpleResponse(message=f"Move {move} made on game {game_name}")
-
+    return models.SimpleResponse(
+        parameters=models.SimpleResponseParameters(message=f"Move {move} made on game {game_name}")
+    )
