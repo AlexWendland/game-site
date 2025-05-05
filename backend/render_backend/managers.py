@@ -1,6 +1,7 @@
 import asyncio
-import time
+from typing import Any
 
+import pydantic
 from fastapi import WebSocket
 
 from render_backend import game_base, models
@@ -24,14 +25,46 @@ class SessionManager:
         self._player_names[client] = name
         self._player_to_position[client] = None
 
-
     def remove_client(self, client: WebSocket):
         self._check_client(client)
         self._remove_client_from_position(client)
         del self._player_names[client]
         del self._player_to_position[client]
 
-    def get_positions(self) -> dict[int, str | None]:
+    def get_session_state_response_for_client(
+        self, client: WebSocket
+    ) -> models.SessionStateResponse:
+        self._check_client(client)
+        return models.SessionStateResponse(
+            parameters=models.SessionStateResponseParameters(
+                player_positions=self._get_positions(),
+                user_position=self._player_to_position.get(client),
+            )
+        )
+
+    def handle_function_call(
+        self, client: WebSocket, function_name: str, function_parameters: dict[str, Any]
+    ) -> models.ErrorResponse | None:
+        match function_name:
+            case "set_player_name":
+                new_name = function_parameters.get("player_name")
+                if new_name is None or not isinstance(new_name, str):
+                    return models.ErrorResponse(
+                        parameters=models.ErrorResponseParameters(
+                            error_message="Player name not provided or is not a string."
+                        )
+                    )
+                logger.info(f"Setting client {client.client} player name to {new_name}.")
+                self._set_client_name(client, new_name)
+                logger.info(f"Client {client.client} player name is now {self._player_names[client]}.")
+            case _:
+                return models.ErrorResponse(
+                    parameters=models.ErrorResponseParameters(
+                        error_message=f"Function {function_name} not supported."
+                    )
+                )
+
+    def _get_positions(self) -> dict[int, str | None]:
         return {
             pos: self._player_names.get(client) if client else None
             for pos, client in self._position_to_player.items()
@@ -64,7 +97,6 @@ class SessionManager:
         if position is not None:
             self._position_to_player[position] = None
         self._player_to_position[client] = None
-
 
 
 class GameManager:
@@ -155,9 +187,71 @@ class GameManager:
         for client in to_disconnect:
             await self._disconnect(client)
 
+    async def _broadcast_session_state(self):
+        to_disconnect: list[WebSocket] = []
+        async with self._lock:
+            for client in self._clients:
+                try:
+                    message = self._session.get_session_state_response_for_client(client)
+                    await client.send_json(message.model_dump_json())
+                except Exception:
+                    to_disconnect.append(client)
+        for client in to_disconnect:
+            await self._disconnect(client)
+
+    async def _broadcast_game_state(self):
+        to_disconnect: list[WebSocket] = []
+        async with self._lock:
+            for client in self._clients:
+                try:
+                    game_position = self._session.get_client_position(client)
+                    message = self._game.get_game_state_response(game_position)
+                    await client.send_json(message.model_dump_json())
+                except Exception:
+                    to_disconnect.append(client)
+        for client in to_disconnect:
+            await self._disconnect(client)
+
     async def _handle_message(self, client: WebSocket, message: str):
-        time.sleep(1)
-        await client.send_text(f"ping {self._game_id}")
+
+        try:
+            parsed_message = models.WebSocketRequest.model_validate_json(message)
+        except pydantic.ValidationError as error:
+            logger.exception("Could not parse message")
+            await self._message_client(
+                client=client,
+                message=models.ErrorResponse(
+                    parameters=models.ErrorResponseParameters(
+                        error_message=f"Invalid message: {error}"
+                    )
+                ),
+            )
+            return
+        match parsed_message.request_type:
+            case models.WebsocketRquestType.SESSION:
+                response = self._session.handle_function_call(
+                    client=client,
+                    function_name=parsed_message.function_name,
+                    function_parameters=parsed_message.parameters,
+                )
+                if response:
+                    await self._message_client(client, response)
+                else:
+                    await self._broadcast_session_state()
+            case models.WebsocketRquestType.GAME:
+                position = self._session.get_client_position(client)
+                if position is None:
+                    return
+                response = self._game.handle_function_call(
+                    player_position=position,
+                    function_name=parsed_message.function_name,
+                    function_parameters=parsed_message.parameters,
+                )
+                if response:
+                    await self._message_client(client, response)
+                else:
+                    await self._broadcast_game_state()
+
 
 
 class BookManager:

@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
   useMemo,
   ReactNode,
 } from "react";
@@ -15,6 +16,7 @@ import {
   setPlayerAPI,
   unsetPlayerAPI,
   getGameWebsocket,
+  setPlayerNameWebsocket,
 } from "@/lib/apiCalls";
 import { calculateWinner } from "@/lib/gameFunctions";
 import { addToast } from "@heroui/react";
@@ -68,6 +70,48 @@ export function GameProvider({
   const [currentViewedMove, setCurrentViewedMove] = useState(0);
   // Initial loading of state
   const [isLoading, setIsLoading] = useState(true);
+  // Websocket
+  const gameWebSocket = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const connectWebSocket = async () => {
+      try {
+        const webSocket = await getGameWebsocket(gameID);
+
+        if (!isMounted) return; // handle fast unmount
+
+        gameWebSocket.current = webSocket;
+
+        setPlayerNameWebsocket("Bob", webSocket);
+
+        webSocket.addEventListener("message", (event) => {
+          console.log("Message from server:", event.data);
+        });
+
+        webSocket.addEventListener("close", () => {
+          console.log("WebSocket disconnected");
+        });
+
+        webSocket.addEventListener("error", (error) => {
+          console.error("WebSocket error:", error);
+        });
+      } catch (err) {
+        console.error("Failed to connect WebSocket:", err);
+      }
+    };
+
+    connectWebSocket();
+
+    return () => {
+      isMounted = false;
+      if (gameWebSocket.current) {
+        gameWebSocket.current.close();
+        gameWebSocket.current = null;
+      }
+    };
+  }, [gameID]);
 
   async function loadGameState() {
     try {
@@ -157,27 +201,6 @@ export function GameProvider({
 
     return () => clearInterval(interval); // cleanup on unmount
   }, [currentMove, currentViewedMove]);
-
-  useEffect(() => {
-    const ws = getGameWebsocket(gameID);
-
-    ws.onmessage = (event) => {
-      console.log("Message from server:", event.data);
-      ws.send(`pong ${gameID}`);
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
-
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    return () => {
-      ws.close();
-    };
-  }, [gameID]);
 
   // Provide tsx
   if (isLoading) return <div>Loading game... </div>;

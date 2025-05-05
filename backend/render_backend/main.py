@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from render_backend import models, utils
 from render_backend.app_logger import logger
 from render_backend.games import PingPongGame
-from render_backend.managers import BookManager, GameManager
+from render_backend.managers import BookManager, GameManager, SessionManager
 from render_backend.ultimate import api_functions, ultimate_models
 
 
@@ -55,7 +55,9 @@ async def root() -> models.SimpleResponse:
 @app.post("/new_game")
 async def new_game(new_game_request: models.NewGameRequest) -> models.SimpleResponse:
     new_game_id = api_functions.make_new_game()
-    game_manager = GameManager(new_game_id, PingPongGame())
+    game = PingPongGame()
+    session = SessionManager(game.get_max_players())
+    game_manager = GameManager(new_game_id, game, session)
     app.state.book_manager.add_game(new_game_id, game_manager)
     logger.info(f"New game of {new_game_request.game_name} created: {new_game_id}")
     return models.SimpleResponse(parameters=models.SimpleResponseParameters(message=new_game_id))

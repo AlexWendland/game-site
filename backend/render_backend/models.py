@@ -13,6 +13,7 @@ class ResponseType(enum.Enum):
     SIMPLE = "simple"
     ERROR = "error"
     GAME_STATE = "game_state"
+    SESSION_STATE = "session_state"
 
 
 class ResponseParameters(pydantic.BaseModel):
@@ -39,20 +40,30 @@ class ErrorResponseParameters(ResponseParameters):
     error_message: str
 
 
-class ErrorResponse(pydantic.BaseModel):
+class ErrorResponse(Response):
     message_type: ResponseType = pydantic.Field(default=ResponseType.ERROR, init=False)
     parameters: ErrorResponseParameters
 
 
-class GameStateParameters(ResponseParameters):
+class GameStateResponseParameters(ResponseParameters):
     """
     A model representing game state parameters. This will be extended by each of the games.
     """
 
 
-class GameStateResponse(pydantic.BaseModel):
+class GameStateResponse(Response):
     message_type: ResponseType = pydantic.Field(default=ResponseType.GAME_STATE, init=False)
-    parameters: GameStateParameters
+    parameters: GameStateResponseParameters
+
+
+class SessionStateResponseParameters(ResponseParameters):
+    player_positions: dict[int, str | None]
+    user_position: int | None
+
+
+class SessionStateResponse(ResponseParameters):
+    message_type: ResponseType = pydantic.Field(default=ResponseType.SESSION_STATE, init=False)
+    parameters: SessionStateResponseParameters
 
 
 # -------------------------------------
@@ -82,8 +93,17 @@ class GameParameters(pydantic.BaseModel):
     A model representing game parameters.
     """
 
-class JoinGameRequest(pydantic.BaseModel):
-    player_name: str
+
+class WebsocketRquestType(enum.Enum):
+    SESSION = "session"
+    GAME = "game"
+
+
+class WebSocketRequest(pydantic.BaseModel):
+    request_type: WebsocketRquestType
+    function_name: str
+    parameters: dict[str, Any]
+
 
 # -------------------------------------
 # Legacy Models

@@ -8,25 +8,29 @@ from render_backend.managers import BookManager, SessionManager
 # SessionManager tests
 # -------------------------------------
 
+
 @pytest.fixture
 def session() -> SessionManager:
     return SessionManager(max_players=3)
+
 
 def test_add_and_get_client_position(session: SessionManager):
     client = Mock()
     session.add_client(client, "Alice")
     assert session.get_client_position(client) is None
 
+
 def test_move_client_position(session: SessionManager):
     client = Mock()
     session.add_client(client, "Bob")
     session._move_client_position(client, 1)
     assert session.get_client_position(client) == 1
-    assert session.get_positions()[1] == "Bob"
+    assert session._get_positions()[1] == "Bob"
     session._move_client_position(client, 2)
     assert session.get_client_position(client) == 2
-    assert session.get_positions()[1] is None
-    assert session.get_positions()[2] == "Bob"
+    assert session._get_positions()[1] is None
+    assert session._get_positions()[2] == "Bob"
+
 
 def test_position_conflict(session: SessionManager):
     c1, c2 = Mock(), Mock()
@@ -36,6 +40,7 @@ def test_position_conflict(session: SessionManager):
     with pytest.raises(ValueError):
         session._move_client_position(c2, 0)
 
+
 def test_remove_client(session: SessionManager):
     client = Mock()
     session.add_client(client, "Alice")
@@ -43,7 +48,8 @@ def test_remove_client(session: SessionManager):
     session.remove_client(client)
     assert client not in session._player_names
     assert client not in session._player_to_position
-    assert session.get_positions()[1] is None
+    assert session._get_positions()[1] is None
+
 
 def test_get_positions(session: SessionManager):
     c1, c2 = Mock(), Mock()
@@ -51,9 +57,10 @@ def test_get_positions(session: SessionManager):
     session.add_client(c2, "Beta")
     session._move_client_position(c1, 0)
     session._move_client_position(c2, 1)
-    positions = session.get_positions()
+    positions = session._get_positions()
     assert positions[0] == "Alpha"
     assert positions[1] == "Beta"
+
 
 def test_invalid_client_operations(session: SessionManager):
     fake = Mock()
@@ -66,6 +73,7 @@ def test_invalid_client_operations(session: SessionManager):
     with pytest.raises(ValueError):
         session._set_client_name(fake, "Other name")
 
+
 def test_get_positions(session: SessionManager):
     c1, c2 = Mock(), Mock()
     session.add_client(c1, "Alpha")
@@ -73,9 +81,10 @@ def test_get_positions(session: SessionManager):
     session._move_client_position(c1, 0)
     session._move_client_position(c2, 1)
     session._set_client_name(c1, "Charlie")
-    positions = session.get_positions()
+    positions = session._get_positions()
     assert positions[0] == "Charlie"
     assert positions[1] == "Beta"
+
 
 # -------------------------------------
 # BookManager tests
@@ -108,7 +117,7 @@ def test_add_duplicate_game_raises(book_manager: BookManager, mock_game_manager:
         book_manager.add_game(game_id, mock_game_manager)
 
 
-def test_get_nonexistent_game_raises(book_manager:BookManager):
+def test_get_nonexistent_game_raises(book_manager: BookManager):
     with pytest.raises(ValueError, match="does not exist"):
         book_manager.get_game("no_such_game")
 
@@ -127,6 +136,7 @@ def test_get_all_game_ids(book_manager: BookManager, mock_game_manager: MagicMoc
     for game_id in ids:
         book_manager.add_game(game_id, mock_game_manager)
     assert book_manager.get_all_game_ids() == ids
+
 
 # -------------------------------------
 # GameManager tests
