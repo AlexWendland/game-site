@@ -41,40 +41,6 @@ def test_get_game_state():
             api_functions.get_game_state("BBBBB")
 
 
-def test_set_player():
-    """
-    Test setting a player in the game state.
-    """
-    game = ultimate_models.GameState()
-    with set_game_state({"ABCDE": game}):
-        assert game.players[1] is None
-
-        api_functions.set_player("ABCDE", 1, "Alice")
-        assert game.players[1] == "Alice"
-
-        api_functions.set_player("ABCDE", 1, "Alice")
-        assert game.players[1] == "Alice"
-
-        with pytest.raises(ValueError):
-            api_functions.set_player("ABCDE", 1, "Bob")
-
-
-def test_unset_player():
-    """
-    Test unsetting a player in the game state.
-    """
-    game = ultimate_models.GameState(players={1: "Alice", 2: None})
-    with set_game_state({"XYZ12": game}):
-        # Unset with correct name
-        api_functions.unset_player("XYZ12", 1, "Alice")
-        assert game.players[1] is None
-
-        # Unset with wrong name should do nothing
-        game.players[1] = "Alice"
-        api_functions.unset_player("XYZ12", 1, "Bob")
-        assert game.players[1] == "Alice"
-
-
 def test_make_move_success():
     """
     Test making a successful move.

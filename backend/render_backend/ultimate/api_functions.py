@@ -17,30 +17,6 @@ def get_game_state(game_name: str) -> ultimate_models.GameState:
     return GAMES[game_name]
 
 
-def set_player(game_name: str, player_position: int, player_name: str) -> None:
-    """
-    Set the player value for a given game name.
-    """
-    logger.info(f"Setting player {player_name} for game {game_name} at position {player_position}")
-    current_player = GAMES[game_name].players[player_position]
-    if current_player is not None and current_player != player_name:
-        logger.info(f"Player {player_name} is already set for game {game_name} ({current_player}.")
-        raise ValueError(f"Player {player_name} is already set for game {game_name}.")
-    GAMES[game_name].players[player_position] = player_name
-
-
-def unset_player(game_name: str, player_position: int, player_name: str) -> None:
-    """
-    Unset the player value for a given game name.
-    """
-    logger.info(
-        f"Unsetting player {player_name} for game {game_name} at position "
-        + f"{player_position}, current player is {GAMES[game_name].players[player_position]}."
-    )
-    if player_name == GAMES[game_name].players[player_position]:
-        GAMES[game_name].players[player_position] = None
-
-
 def make_move(game_name: str, player_position: int, player_name: str, move: int) -> None:
     """
     Make a move for a given game name.

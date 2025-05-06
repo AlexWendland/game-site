@@ -6,7 +6,7 @@ from render_backend import game_base, models
 class PingPongGame(game_base.GameBase):
     @override
     def handle_function_call(
-        self, function_name: str, function_parameters: dict[str, Any]
+        self, player_position: int, function_name: str, function_parameters: dict[str, Any]
     ) -> models.ErrorResponse | None:
         """
         Get the model to pass the game parameters.

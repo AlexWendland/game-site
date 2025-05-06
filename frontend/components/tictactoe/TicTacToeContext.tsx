@@ -84,7 +84,9 @@ export function TicTacToeProvider({
     const connectWebSocket = async () => {
       try {
         const webSocket = await getGameWebsocket(gameID);
-        setPlayerNameWebsocket(username, webSocket);
+        if (username) {
+          setPlayerNameWebsocket(username, webSocket);
+        }
 
         if (!isMounted) return; // handle fast unmount
 
@@ -213,6 +215,7 @@ export function TicTacToeProvider({
     if (history[currentMove][position]) return;
     if (currentUserPosition !== currentPlayerNumber) return;
     if (currentViewedMove !== currentMove) return;
+    if (!username) return;
     await makeMoveAPI(gameID, currentUserPosition, username, position);
     await loadTicTacToeState();
     setCurrentViewedMove(currentMove + 1);

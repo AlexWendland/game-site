@@ -97,55 +97,6 @@ async def get_game(
     return game_state
 
 
-@app.put("/ultimate/game/{game_name}/set_player")
-async def set_player(
-    game_name: Annotated[str, Depends(validated_game_name)], player_update: models.PlayerUpdate
-) -> models.SimpleResponse:
-    try:
-        api_functions.set_player(
-            game_name=game_name,
-            player_position=player_update.player_position,
-            player_name=player_update.player_name,
-        )
-    except KeyError:
-        raise HTTPException(status_code=404, detail=f"Game {game_name} not found")
-    except ValueError:
-        raise HTTPException(
-            status_code=401,
-            detail=f"Game {game_name} has player in position {player_update.player_position}",
-        )
-    return models.SimpleResponse(
-        parameters=models.SimpleResponseParameters(
-            message=(
-                f"Player {player_update.player_name} has been set to position "
-                f"{player_update.player_position} on game {game_name}"
-            )
-        )
-    )
-
-
-@app.put("/ultimate/game/{game_name}/unset_player")
-async def unset_player(
-    game_name: Annotated[str, Depends(validated_game_name)], player_update: models.PlayerUpdate
-) -> models.SimpleResponse:
-    try:
-        api_functions.unset_player(
-            game_name=game_name,
-            player_position=player_update.player_position,
-            player_name=player_update.player_name,
-        )
-    except KeyError:
-        raise HTTPException(status_code=404, detail=f"Game {game_name} not found")
-    return models.SimpleResponse(
-        parameters=models.SimpleResponseParameters(
-            message=(
-                f"Player {player_update.player_name} is no longer in position "
-                f"{player_update.player_position} on game {game_name}."
-            )
-        )
-    )
-
-
 @app.put("/ultimate/game/{game_name}/make_move")
 async def make_move(
     game_name: Annotated[str, Depends(validated_game_name)], move: models.Move

@@ -11,8 +11,10 @@ from render_backend.app_logger import logger
 class SetPlayerParameters(pydantic.BaseModel):
     player_name: str
 
+
 class SetPlayerPositionParameters(pydantic.BaseModel):
     new_position: int
+
 
 class SessionManager:
     def __init__(self, max_players: int):
@@ -61,7 +63,9 @@ class SessionManager:
                             error_message=f"Parameter validation failed for set_player_name: {error}"
                         )
                     )
-                logger.info(f"Setting client {client.client} player name to {parsed_parameters.player_name}.")
+                logger.info(
+                    f"Setting client {client.client} player name to {parsed_parameters.player_name}."
+                )
                 self._set_client_name(client, parsed_parameters.player_name)
                 logger.info(
                     f"Client {client.client} player name is now {self._player_names[client]}."
@@ -77,7 +81,9 @@ class SessionManager:
                             error_message=f"Parameter validation failed for set_player_position: {error}"
                         )
                     )
-                logger.info(f"Setting client {client.client} player position to {parsed_parameters.new_position}.")
+                logger.info(
+                    f"Setting client {client.client} player position to {parsed_parameters.new_position}."
+                )
                 try:
                     self._move_client_position(client, parsed_parameters.new_position)
                 except ValueError as e:
