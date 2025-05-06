@@ -56,8 +56,29 @@ class SessionManager:
                     )
                 logger.info(f"Setting client {client.client} player name to {new_name}.")
                 self._set_client_name(client, new_name)
-                logger.info(f"Client {client.client} player name is now {self._player_names[client]}.")
+                logger.info(
+                    f"Client {client.client} player name is now {self._player_names[client]}."
+                )
+            case "set_player_position":
+                new_position = function_parameters.get("player_position")
+                if new_position is None or not isinstance(new_position, int):
+                    return models.ErrorResponse(
+                        parameters=models.ErrorResponseParameters(
+                            error_message="Player position not provided or is not an int."
+                        )
+                    )
+                logger.info(f"Setting client {client.client} player position to {new_position}.")
+                try:
+                    self._move_client_position(client, new_position)
+                except ValueError as e:
+                    return models.ErrorResponse(
+                        parameters=models.ErrorResponseParameters(error_message=str(e))
+                    )
+            case "leave_player_position":
+                logger.info(f"Client {client.client} leaving position.")
+                self._remove_client_from_position(client)
             case _:
+                logger.info(f"Client {client.client} requested unknow function {function_name}.")
                 return models.ErrorResponse(
                     parameters=models.ErrorResponseParameters(
                         error_message=f"Function {function_name} not supported."
@@ -81,16 +102,12 @@ class SessionManager:
         if self._position_to_player[new_position] is not None:
             raise ValueError(f"Position {new_position} is already taken.")
         self._remove_client_from_position(client)
-        self._set_client_position(client, new_position)
+        self._position_to_player[new_position] = client
+        self._player_to_position[client] = new_position
 
     def _check_client(self, client: WebSocket):
         if client not in self._player_names:
             raise ValueError(f"Client {client} not in session.")
-
-    def _set_client_position(self, client: WebSocket, position: int):
-        self._remove_client_from_position(client)
-        self._position_to_player[position] = client
-        self._player_to_position[client] = position
 
     def _remove_client_from_position(self, client: WebSocket):
         position = self._player_to_position.get(client)
@@ -213,7 +230,6 @@ class GameManager:
             await self._disconnect(client)
 
     async def _handle_message(self, client: WebSocket, message: str):
-
         try:
             parsed_message = models.WebSocketRequest.model_validate_json(message)
         except pydantic.ValidationError as error:
@@ -228,7 +244,7 @@ class GameManager:
             )
             return
         match parsed_message.request_type:
-            case models.WebsocketRquestType.SESSION:
+            case models.WebsocketRequestType.SESSION:
                 response = self._session.handle_function_call(
                     client=client,
                     function_name=parsed_message.function_name,
@@ -238,7 +254,7 @@ class GameManager:
                     await self._message_client(client, response)
                 else:
                     await self._broadcast_session_state()
-            case models.WebsocketRquestType.GAME:
+            case models.WebsocketRequestType.GAME:
                 position = self._session.get_client_position(client)
                 if position is None:
                     return
@@ -251,7 +267,6 @@ class GameManager:
                     await self._message_client(client, response)
                 else:
                     await self._broadcast_game_state()
-
 
 
 class BookManager:

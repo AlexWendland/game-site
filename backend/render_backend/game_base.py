@@ -11,7 +11,7 @@ class GameBase(abc.ABC):
 
     @abc.abstractmethod
     def handle_function_call(
-        self, player_position:int, function_name: str, function_parameters: dict[str, Any]
+        self, player_position: int, function_name: str, function_parameters: dict[str, Any]
     ) -> models.ErrorResponse | None:
         """
         Get the model to pass the game parameters.

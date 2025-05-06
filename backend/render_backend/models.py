@@ -94,13 +94,13 @@ class GameParameters(pydantic.BaseModel):
     """
 
 
-class WebsocketRquestType(enum.Enum):
+class WebsocketRequestType(enum.Enum):
     SESSION = "session"
     GAME = "game"
 
 
 class WebSocketRequest(pydantic.BaseModel):
-    request_type: WebsocketRquestType
+    request_type: WebsocketRequestType
     function_name: str
     parameters: dict[str, Any]
 

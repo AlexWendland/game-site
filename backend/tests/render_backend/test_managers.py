@@ -1,12 +1,28 @@
+from typing import Self, override
 from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
+from render_backend import models
 from render_backend.managers import BookManager, SessionManager
 
 # -------------------------------------
 # SessionManager tests
 # -------------------------------------
+
+
+class DummyWebSocket:
+    def __init__(self, client_id: str):
+        self.client = client_id  # Simulate .client attribute for logging
+        self.client_id = client_id
+
+    @override
+    def __hash__(self):
+        return hash(self.client_id)
+
+    @override
+    def __eq__(self, other: Self):
+        return isinstance(other, DummyWebSocket) and self.client_id == other.client_id
 
 
 @pytest.fixture
@@ -84,6 +100,78 @@ def test_get_positions(session: SessionManager):
     positions = session._get_positions()
     assert positions[0] == "Charlie"
     assert positions[1] == "Beta"
+
+
+def test_set_player_name(session: SessionManager):
+    client = DummyWebSocket("c1")
+    session.add_client(client)
+
+    response = session.handle_function_call(client, "set_player_name", {"player_name": "Alice"})
+    assert response is None
+    assert session._player_names[client] == "Alice"
+
+
+def test_set_player_name_invalid(session: SessionManager):
+    client = DummyWebSocket("c1")
+    session.add_client(client)
+
+    response = session.handle_function_call(client, "set_player_name", {"player_name": 123})
+    assert isinstance(response, models.ErrorResponse)
+    assert "not a string" in response.parameters.error_message
+
+
+def test_set_player_position(session: SessionManager):
+    client = DummyWebSocket("c1")
+    session.add_client(client)
+
+    response = session.handle_function_call(client, "set_player_position", {"player_position": 1})
+    assert response is None
+    assert session.get_client_position(client) == 1
+    assert session._position_to_player[1] == client
+
+
+def test_set_player_position_already_taken(session: SessionManager):
+    client1 = DummyWebSocket("c1")
+    client2 = DummyWebSocket("c2")
+    session.add_client(client1)
+    session.add_client(client2)
+
+    session.handle_function_call(client1, "set_player_position", {"player_position": 1})
+    response = session.handle_function_call(client2, "set_player_position", {"player_position": 1})
+
+    assert isinstance(response, models.ErrorResponse)
+    assert "already taken" in response.parameters.error_message
+
+
+def test_set_player_position_invalid(session: SessionManager):
+    client = DummyWebSocket("c1")
+    session.add_client(client)
+
+    response = session.handle_function_call(
+        client, "set_player_position", {"player_position": "one"}
+    )
+    assert isinstance(response, models.ErrorResponse)
+    assert "not an int" in response.parameters.error_message
+
+
+def test_leave_player_position(session: SessionManager):
+    client = DummyWebSocket("c1")
+    session.add_client(client)
+    session.handle_function_call(client, "set_player_position", {"player_position": 0})
+
+    response = session.handle_function_call(client, "leave_player_position", {})
+    assert response is None
+    assert session.get_client_position(client) is None
+    assert session._position_to_player[0] is None
+
+
+def test_unknown_function_name(session: SessionManager):
+    client = DummyWebSocket("c1")
+    session.add_client(client)
+
+    response = session.handle_function_call(client, "do_nothing", {})
+    assert isinstance(response, models.ErrorResponse)
+    assert "not supported" in response.parameters.error_message
 
 
 # -------------------------------------
