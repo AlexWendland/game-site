@@ -29,7 +29,7 @@ export function JoinGameButton() {
     try {
       await getGameStateAPI(gameID);
       // If this does not error the game is valid.
-      router.push(`/ultimate/${gameID}`);
+      router.push(`/tictactoe/${gameID}`);
     } catch (err) {
       console.log(err);
       setErrors({ GameID: "Invalid game ID" });
