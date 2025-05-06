@@ -13,11 +13,9 @@ export function TicTacToeGame() {
     currentPlayer,
     winner,
     winningLine,
-    currentUserName,
     currentUserPosition,
     currentViewedMove,
     setCurrentViewedMove,
-    updateCurrentUserName,
     updateCurrentUserPosition,
     makeMove,
   } = useTicTacToeContext();
@@ -49,12 +47,6 @@ export function TicTacToeGame() {
         </div>
         <div className="col-span-1">
           <TicTacToePlayerBoard />
-          <br />
-          <Input
-            onValueChange={updateCurrentUserName}
-            description="Username"
-            color="primary"
-          />
         </div>
       </div>
     </div>

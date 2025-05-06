@@ -10,18 +10,19 @@ import {
   ReactNode,
 } from "react";
 import { BoardValue, SquareValue } from "@/types/gameTypes";
+import { getGameStateAPI, makeMoveAPI } from "@/lib/apiCalls";
 import {
-  getGameStateAPI,
-  makeMoveAPI,
-  setPlayerAPI,
-  unsetPlayerAPI,
   getGameWebsocket,
+  leavePlayerPosition,
+  parseWebSocketMessage,
   setPlayerNameWebsocket,
-} from "@/lib/apiCalls";
+  setPlayerPosition,
+} from "@/lib/websocketFunctions";
 import { calculateWinner } from "@/lib/gameFunctions";
 import { addToast } from "@heroui/react";
 import { usePathname } from "next/navigation";
 import { useGameContext } from "@/context/GameContext";
+import { useUserContext } from "@/context/UserContext";
 
 type TicTacToeContextType = {
   // Backend state
@@ -33,13 +34,11 @@ type TicTacToeContextType = {
   winner: SquareValue;
   winningLine: number[];
   // Client state
-  currentUserName: string | null;
-  currentUserPosition: number;
+  currentUserPosition: number | null;
   currentViewedMove: number;
   // Functions
   setCurrentViewedMove: (newMove: number) => void;
-  updateCurrentUserName: (newUser: string | null) => Promise<void>;
-  updateCurrentUserPosition: (newPosition: number) => Promise<void>;
+  updateCurrentUserPosition: (newPosition: number | null) => Promise<void>;
   makeMove: (position: number) => void;
 };
 
@@ -67,13 +66,17 @@ export function TicTacToeProvider({
     2: null,
   });
   // Client state
-  const [currentUserName, setCurrentUserName] = useState("");
-  const [currentUserPosition, setCurrentUserPosition] = useState(0);
+  const [currentUserPosition, setCurrentUserPosition] = useState<number | null>(
+    null,
+  );
   const [currentViewedMove, setCurrentViewedMove] = useState(0);
   // Initial loading of state
   const [isLoading, setIsLoading] = useState(true);
   // Websocket
   const gameWebSocket = useRef<WebSocket | null>(null);
+
+  // Get username
+  const { username, setUsername, clearUsername } = useUserContext();
 
   useEffect(() => {
     let isMounted = true;
@@ -81,15 +84,37 @@ export function TicTacToeProvider({
     const connectWebSocket = async () => {
       try {
         const webSocket = await getGameWebsocket(gameID);
+        setPlayerNameWebsocket(username, webSocket);
 
         if (!isMounted) return; // handle fast unmount
 
         gameWebSocket.current = webSocket;
-
-        setPlayerNameWebsocket("Bob", webSocket);
-
         webSocket.addEventListener("message", (event) => {
-          console.log("Message from server:", event.data);
+          const parsedMessage = parseWebSocketMessage(event);
+
+          switch (parsedMessage.message_type) {
+            case "session_state":
+              setCurrentUserPosition(parsedMessage.parameters.user_position);
+              setPlayers(parsedMessage.parameters.player_positions);
+              break;
+
+            case "error":
+              addToast({
+                title: "Error",
+                description: parsedMessage.parameters.error_message,
+                color: "danger",
+              });
+              break;
+
+            case "game_state":
+              // Do something with parsedMessage.parameters
+              break;
+
+            case "unknown":
+            default:
+              console.warn("Unknown message type:", parsedMessage);
+              break;
+          }
         });
 
         webSocket.addEventListener("close", () => {
@@ -174,38 +199,13 @@ export function TicTacToeProvider({
 
   // Define utility functions
 
-  const updateCurrentUserName = async (newUser: string | null) => {
-    if (!newUser) {
-      if (currentUserPosition !== 0) {
-        unsetPlayerAPI(gameID, currentUserPosition, currentUserName);
-      }
-    } else if (currentUserPosition !== 0) {
-      unsetPlayerAPI(gameID, currentUserPosition, currentUserName);
-      setPlayerAPI(gameID, currentUserPosition, newUser);
+  const updateCurrentUserPosition = async (newPosition: number | null) => {
+    if (newPosition === null) {
+      leavePlayerPosition(gameWebSocket.current);
+      setCurrentUserPosition(null);
+    } else {
+      setPlayerPosition(newPosition, gameWebSocket.current);
     }
-    setCurrentUserName(newUser || "");
-    await loadTicTacToeState();
-  };
-
-  const updateCurrentUserPosition = async (newPosition: number) => {
-    if (currentUserPosition !== 0) {
-      unsetPlayerAPI(gameID, currentUserPosition, currentUserName);
-      setCurrentUserPosition(0);
-    }
-    if (newPosition !== currentUserPosition) {
-      try {
-        await setPlayerAPI(gameID, newPosition, currentUserName);
-        setCurrentUserPosition(newPosition);
-      } catch (err: unknown) {
-        console.error("Error setting player:", err);
-        const message = err instanceof Error ? err.message : String(err);
-        addToast({
-          title: "Error",
-          description: message,
-        });
-      }
-    }
-    await loadTicTacToeState();
   };
 
   const makeMove = async (position: number) => {
@@ -213,17 +213,14 @@ export function TicTacToeProvider({
     if (history[currentMove][position]) return;
     if (currentUserPosition !== currentPlayerNumber) return;
     if (currentViewedMove !== currentMove) return;
-    await makeMoveAPI(gameID, currentUserPosition, currentUserName, position);
+    await makeMoveAPI(gameID, currentUserPosition, username, position);
     await loadTicTacToeState();
     setCurrentViewedMove(currentMove + 1);
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      loadTicTacToeState();
-    }, 1000); // every 5 seconds
-
-    return () => clearInterval(interval); // cleanup on unmount
+    loadTicTacToeState();
+    return () => {};
   }, [currentMove, currentViewedMove]);
 
   // Provide tsx
@@ -238,11 +235,9 @@ export function TicTacToeProvider({
         currentPlayer,
         winner,
         winningLine,
-        currentUserName,
         currentUserPosition,
         currentViewedMove,
         setCurrentViewedMove,
-        updateCurrentUserName,
         updateCurrentUserPosition,
         makeMove,
       }}

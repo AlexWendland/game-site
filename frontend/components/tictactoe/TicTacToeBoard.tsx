@@ -9,11 +9,9 @@ export function TicTacToeBoard() {
     currentPlayer,
     winner,
     winningLine,
-    currentUserName,
     currentUserPosition,
     currentViewedMove,
     setCurrentViewedMove,
-    updateCurrentUserName,
     updateCurrentUserPosition,
     makeMove,
   } = useTicTacToeContext();

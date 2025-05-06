@@ -4,7 +4,7 @@ import { GameState, SimpleResponse } from "@/types/apiTypes";
 const BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "https://backend-87oq.onrender.com";
 
-function apiUrl(path: string): string {
+export function apiUrl(path: string): string {
   return `${BASE_URL}${path}`;
 }
 
@@ -83,47 +83,4 @@ export async function makeMoveAPI(
     }),
   });
   if (!res.ok) throw new Error("Failed to make move.");
-}
-
-export async function getGameWebsocket(gameID: string): Promise<WebSocket> {
-  const socket = new WebSocket(apiUrl(`/game/${gameID}/ws`));
-
-  await waitForSocketOpen(socket);
-
-  socket.addEventListener("close", () => {
-    console.log("WebSocket connection closed");
-  });
-
-  socket.addEventListener("error", (error) => {
-    console.error("WebSocket error:", error);
-  });
-
-  return socket;
-}
-
-function waitForSocketOpen(socket: WebSocket): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (socket.readyState === WebSocket.OPEN) {
-      resolve();
-    } else {
-      socket.addEventListener("open", () => {
-        console.log("WebSocket connection opened");
-        resolve();
-      });
-      socket.addEventListener("error", (err) => reject(err));
-    }
-  });
-}
-
-export function setPlayerNameWebsocket(
-  playerName: string,
-  webSocket: WebSocket,
-): void {
-  webSocket.send(
-    JSON.stringify({
-      request_type: "session",
-      function_name: "set_player_name",
-      parameters: { player_name: playerName },
-    }),
-  );
 }

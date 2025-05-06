@@ -8,6 +8,12 @@ from render_backend import game_base, models
 from render_backend.app_logger import logger
 
 
+class SetPlayerParameters(pydantic.BaseModel):
+    player_name: str
+
+class SetPlayerPositionParameters(pydantic.BaseModel):
+    new_position: int
+
 class SessionManager:
     def __init__(self, max_players: int):
         self._max_players = max_players
@@ -47,29 +53,33 @@ class SessionManager:
     ) -> models.ErrorResponse | None:
         match function_name:
             case "set_player_name":
-                new_name = function_parameters.get("player_name")
-                if new_name is None or not isinstance(new_name, str):
+                try:
+                    parsed_parameters = SetPlayerParameters.model_validate(function_parameters)
+                except pydantic.ValidationError as error:
                     return models.ErrorResponse(
                         parameters=models.ErrorResponseParameters(
-                            error_message="Player name not provided or is not a string."
+                            error_message=f"Parameter validation failed for set_player_name: {error}"
                         )
                     )
-                logger.info(f"Setting client {client.client} player name to {new_name}.")
-                self._set_client_name(client, new_name)
+                logger.info(f"Setting client {client.client} player name to {parsed_parameters.player_name}.")
+                self._set_client_name(client, parsed_parameters.player_name)
                 logger.info(
                     f"Client {client.client} player name is now {self._player_names[client]}."
                 )
             case "set_player_position":
-                new_position = function_parameters.get("player_position")
-                if new_position is None or not isinstance(new_position, int):
+                try:
+                    parsed_parameters = SetPlayerPositionParameters.model_validate(
+                        function_parameters
+                    )
+                except pydantic.ValidationError as error:
                     return models.ErrorResponse(
                         parameters=models.ErrorResponseParameters(
-                            error_message="Player position not provided or is not an int."
+                            error_message=f"Parameter validation failed for set_player_position: {error}"
                         )
                     )
-                logger.info(f"Setting client {client.client} player position to {new_position}.")
+                logger.info(f"Setting client {client.client} player position to {parsed_parameters.new_position}.")
                 try:
-                    self._move_client_position(client, new_position)
+                    self._move_client_position(client, parsed_parameters.new_position)
                 except ValueError as e:
                     return models.ErrorResponse(
                         parameters=models.ErrorResponseParameters(error_message=str(e))

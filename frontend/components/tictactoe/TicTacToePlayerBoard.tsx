@@ -10,18 +10,16 @@ export function TicTacToePlayerBoard() {
     currentPlayer,
     winner,
     winningLine,
-    currentUserName,
     currentUserPosition,
     currentViewedMove,
     setCurrentViewedMove,
-    updateCurrentUserName,
     updateCurrentUserPosition,
     makeMove,
   } = useTicTacToeContext();
 
   const availablePlayers = [
-    { id: 1, name: "Cross", icon: "✖️" },
-    { id: 2, name: "Naught", icon: "⭕" },
+    { id: 0, name: "Cross", icon: "✖️" },
+    { id: 1, name: "Naught", icon: "⭕" },
   ];
 
   return (
@@ -38,7 +36,13 @@ export function TicTacToePlayerBoard() {
                 "flex items-center justify-between w-full px-4 py-2 text-left",
                 isSelected && "border-blue-500 bg-blue-50",
               )}
-              onPress={() => updateCurrentUserPosition(player.id)}
+              onPress={() => {
+                if (currentUserPosition == player.id) {
+                  updateCurrentUserPosition(null);
+                } else {
+                  updateCurrentUserPosition(player.id);
+                }
+              }}
             >
               <span className="flex items-center space-x-2">
                 <span>{player.icon}</span>
