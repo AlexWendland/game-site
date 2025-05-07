@@ -61,7 +61,7 @@ class SessionStateResponseParameters(ResponseParameters):
     user_position: int | None
 
 
-class SessionStateResponse(ResponseParameters):
+class SessionStateResponse(Response):
     message_type: ResponseType = pydantic.Field(default=ResponseType.SESSION_STATE, init=False)
     parameters: SessionStateResponseParameters
 

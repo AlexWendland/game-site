@@ -100,7 +100,7 @@ interface UnknownMessage {
   parameters: null;
 }
 
-type ParsedMessage =
+export type ParsedMessage =
   | SessionStateMessage
   | ErrorMessage
   | GameStateMessage
@@ -121,7 +121,12 @@ export function parseWebSocketMessage(event: MessageEvent): ParsedMessage {
       typeof (data as any).message_type !== "string" ||
       typeof (data as any).parameters !== "object"
     ) {
-      throw new Error("Invalid structure");
+      console.error("Invalid WebSocket message format:", data);
+      console.log("Invalid WebSocket message format:", data);
+      return {
+        message_type: "unknown",
+        parameters: null,
+      };
     }
 
     const { message_type, parameters } = data as any;

@@ -10,15 +10,14 @@ import {
   ReactNode,
 } from "react";
 import { BoardValue, SquareValue } from "@/types/gameTypes";
-import { getGameStateAPI, makeMoveAPI } from "@/lib/apiCalls";
 import {
   getGameWebsocket,
   leavePlayerPosition,
   parseWebSocketMessage,
   setPlayerNameWebsocket,
   setPlayerPosition,
+  ParsedMessage,
 } from "@/lib/websocketFunctions";
-import { calculateWinner } from "@/lib/gameFunctions";
 import { addToast } from "@heroui/react";
 import { usePathname } from "next/navigation";
 import { useGameContext } from "@/context/GameContext";
@@ -28,11 +27,11 @@ type TicTacToeContextType = {
   // Backend state
   history: BoardValue[];
   players: Record<number, string | null>;
+  winner: number | null;
+  winningLine: number[];
   // Metadata on state
   currentMove: number;
   currentPlayer: string | null;
-  winner: SquareValue;
-  winningLine: number[];
   // Client state
   currentUserPosition: number | null;
   currentViewedMove: number;
@@ -41,6 +40,43 @@ type TicTacToeContextType = {
   updateCurrentUserPosition: (newPosition: number | null) => Promise<void>;
   makeMove: (position: number) => void;
 };
+
+type TicTacToeGameState = {
+  history: BoardValue[];
+  winner: SquareValue;
+  winning_line: number[];
+};
+
+function parseGameState(
+  parameters: Record<string, any>,
+): TicTacToeGameState | null {
+  if (
+    typeof (parameters as any).history !== "object" ||
+    !("user_position" in parameters) ||
+    typeof (parameters as any).winning_line !== "object"
+  ) {
+    throw new Error("Invalid structure");
+  }
+  return parameters as TicTacToeGameState;
+}
+
+export function makeMoveOverWebsocket(
+  webSocket: WebSocket | null,
+  position: number,
+): void {
+  if (!webSocket) {
+    return;
+  }
+  webSocket.send(
+    JSON.stringify({
+      request_type: "game",
+      function_name: "make_move",
+      parameters: {
+        position: position,
+      },
+    }),
+  );
+}
 
 const TicTacToeContext = createContext<TicTacToeContextType | null>(null);
 
@@ -65,6 +101,8 @@ export function TicTacToeProvider({
     1: null,
     2: null,
   });
+  const [winner, setWinner] = useState<number | null>(null);
+  const [winningLine, setWinningLine] = useState<number[]>([]);
   // Client state
   const [currentUserPosition, setCurrentUserPosition] = useState<number | null>(
     null,
@@ -84,38 +122,59 @@ export function TicTacToeProvider({
     const connectWebSocket = async () => {
       try {
         const webSocket = await getGameWebsocket(gameID);
+
         if (username) {
           setPlayerNameWebsocket(username, webSocket);
         }
+
+        setIsLoading(false);
 
         if (!isMounted) return; // handle fast unmount
 
         gameWebSocket.current = webSocket;
         webSocket.addEventListener("message", (event) => {
-          const parsedMessage = parseWebSocketMessage(event);
+          try {
+            const parsedMessage = parseWebSocketMessage(event);
 
-          switch (parsedMessage.message_type) {
-            case "session_state":
-              setCurrentUserPosition(parsedMessage.parameters.user_position);
-              setPlayers(parsedMessage.parameters.player_positions);
-              break;
+            switch (parsedMessage.message_type) {
+              case "session_state":
+                setCurrentUserPosition(parsedMessage.parameters.user_position);
+                setPlayers(parsedMessage.parameters.player_positions);
+                break;
 
-            case "error":
-              addToast({
-                title: "Error",
-                description: parsedMessage.parameters.error_message,
-                color: "danger",
-              });
-              break;
+              case "error":
+                addToast({
+                  title: "Error",
+                  description: parsedMessage.parameters.error_message,
+                  color: "danger",
+                });
+                break;
 
-            case "game_state":
-              // Do something with parsedMessage.parameters
-              break;
+              case "game_state": {
+                const gameState = parseGameState(parsedMessage.parameters);
+                if (!gameState) {
+                  console.error(
+                    "Invalid game state: " + parsedMessage.parameters,
+                  );
+                  return;
+                }
+                const oldMove = currentMove;
+                setHistory(gameState.history);
+                setWinningLine(gameState.winning_line);
+                setWinner(gameState.winner);
+                const newMove = currentMove;
+                if (oldMove !== newMove && currentViewedMove === oldMove) {
+                  setCurrentViewedMove(newMove);
+                }
+              }
 
-            case "unknown":
-            default:
-              console.warn("Unknown message type:", parsedMessage);
-              break;
+              case "unknown":
+              default:
+                console.warn("Unknown message type:", parsedMessage);
+                break;
+            }
+          } catch (err) {
+            console.error("Error processing message:", err);
           }
         });
 
@@ -164,34 +223,10 @@ export function TicTacToeProvider({
     };
   }, [gameID]);
 
-  async function loadTicTacToeState() {
-    try {
-      const gameState = await getGameStateAPI(gameID);
-      const changeMove = currentViewedMove === currentMove;
-      setHistory(gameState.board_history);
-      setPlayers(gameState.players);
-      if (changeMove) {
-        setCurrentViewedMove(gameState.board_history.length - 1);
-      }
-    } catch (err) {
-      console.error("Error loading game data:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   // Define meta parameters
 
   const currentMove = useMemo(() => history.length - 1, [history]);
 
-  const winner = useMemo(() => {
-    const result = calculateWinner(history[currentMove]);
-    return result ? result.winner : null;
-  }, [history, currentMove]);
-  const winningLine = useMemo(() => {
-    const result = calculateWinner(history[currentMove]);
-    return result ? result.line : [];
-  }, [history, currentMove]);
   const currentPlayerNumber = useMemo(() => {
     return (currentMove % 2) + 1;
   }, [currentMove]);
@@ -216,15 +251,8 @@ export function TicTacToeProvider({
     if (currentUserPosition !== currentPlayerNumber) return;
     if (currentViewedMove !== currentMove) return;
     if (!username) return;
-    await makeMoveAPI(gameID, currentUserPosition, username, position);
-    await loadTicTacToeState();
-    setCurrentViewedMove(currentMove + 1);
+    makeMoveOverWebsocket(gameWebSocket.current, position);
   };
-
-  useEffect(() => {
-    loadTicTacToeState();
-    return () => {};
-  }, [currentMove, currentViewedMove]);
 
   // Provide tsx
   if (isLoading) return <div>Loading game... </div>;

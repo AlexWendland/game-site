@@ -165,6 +165,7 @@ class GameManager:
                 )
             ),
         )
+        await self._update_client_state(client)
         try:
             while not self._is_closed:
                 message_text = await client.receive_text()
@@ -208,6 +209,13 @@ class GameManager:
                 disconnect = True
         if disconnect:
             await self._disconnect(client)
+
+    async def _update_client_state(self, client: WebSocket):
+        session_state = self._session.get_session_state_response_for_client(client)
+        await self._message_client(client, session_state)
+        game_position = self._session.get_client_position(client)
+        game_state = self._game.get_game_state_response(game_position)
+        await self._message_client(client, game_state)
 
     async def _broadcast(self, message: models.Response):
         to_disconnect: list[WebSocket] = []
