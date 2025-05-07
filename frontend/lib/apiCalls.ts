@@ -1,4 +1,4 @@
-import { GameState, SimpleResponse } from "@/types/apiTypes";
+import { SimpleResponse } from "@/types/apiTypes";
 
 // Hack for now, as environment variables are not working in renderGameManager
 const BASE_URL =
@@ -26,61 +26,7 @@ export async function makeNewTicTacToeGameAPI(): Promise<string> {
   throw new Error("Unexpected response format");
 }
 
-export async function getGameStateAPI(game_id: string): Promise<GameState> {
-  const response = await fetch(apiUrl(`/ultimate/game/${game_id}`));
-  if (!response.ok) {
-    throw new Error(`Error fetching data: ${response.statusText}`);
-  }
-  const data: GameState = await response.json();
-  return data;
-}
-
-export async function setPlayerAPI(
-  gameID: string,
-  playerPosition: number,
-  playerName: string,
-): Promise<void> {
-  const res = await fetch(apiUrl(`/ultimate/game/${gameID}/set_player`), {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      player_position: playerPosition,
-      player_name: playerName,
-    }),
-  });
-  if (!res.ok) throw new Error("Failed to set player.");
-}
-
-export async function unsetPlayerAPI(
-  gameID: string,
-  playerPosition: number,
-  playerName: string,
-): Promise<void> {
-  const res = await fetch(apiUrl(`/ultimate/game/${gameID}/unset_player`), {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      player_position: playerPosition,
-      player_name: playerName,
-    }),
-  });
-  if (!res.ok) throw new Error("Failed to unset player.");
-}
-
-export async function makeMoveAPI(
-  gameID: string,
-  playerPosition: number,
-  playerName: string,
-  move: number,
-): Promise<void> {
-  const res = await fetch(apiUrl(`/ultimate/game/${gameID}/make_move`), {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      player_position: playerPosition,
-      player_name: playerName,
-      move: move,
-    }),
-  });
-  if (!res.ok) throw new Error("Failed to make move.");
+export async function getGameMetadata(gameID: string): Promise<null> {
+  // Update this to get the game metadata.
+  return null;
 }

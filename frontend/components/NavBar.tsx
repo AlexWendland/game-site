@@ -67,7 +67,6 @@ export function NavBar() {
     setGameState,
     clearGame,
   } = useGameContext();
-  console.log("NavBar userName", username);
   const router = useRouter();
 
   const startNewTicTacToe = async () => {

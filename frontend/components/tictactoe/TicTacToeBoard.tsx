@@ -30,7 +30,7 @@ export function TicTacToeBoard() {
         {history[currentMove].map((val, i) => (
           <TicTacToeSquare
             key={i}
-            value={val ? (val === 1 ? "X" : "O") : null}
+            value={val !== null ? (val === 0 ? "X" : "O") : null}
             onSquareClick={() => makeMove(i)}
             isHighlighted={winningLine.includes(i)}
             isInCurrentView={val == history[currentViewedMove][i]}

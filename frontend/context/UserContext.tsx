@@ -49,7 +49,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setUsername(name);
     }
   };
-  console.log("UserProvider username", username);
   if (!username || username === undefined) {
     return (
       <>

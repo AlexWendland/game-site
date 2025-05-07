@@ -11,6 +11,9 @@ class TicTacToeGameStateParameters(models.GameStateResponseParameters):
     winner: int | None
     winning_line: list[int] = pydantic.Field(default_factory=list)
 
+class TicTacToeGameStateResponse(models.GameStateResponse):
+    message_type: models.ResponseType = pydantic.Field(default=models.ResponseType.GAME_STATE, init=False)
+    parameters: TicTacToeGameStateParameters
 
 class MakeMoveParameters(pydantic.BaseModel):
     position: int
@@ -98,11 +101,11 @@ class TicTacToeGame(game_base.GameBase):
                 break
 
     @override
-    def get_game_state_response(self, position: int | None) -> models.GameStateResponse:
+    def get_game_state_response(self, position: int | None) -> TicTacToeGameStateResponse:
         """
         Get the model to pass the game parameters.
         """
-        return models.GameStateResponse(
+        return TicTacToeGameStateResponse(
             parameters=TicTacToeGameStateParameters(
                 history=self._history, winner=self._winner, winning_line=self._winning_line
             )

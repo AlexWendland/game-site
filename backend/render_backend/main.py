@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from render_backend import models, utils
 from render_backend.app_logger import logger
-from render_backend.games import PingPongGame
+from render_backend.games import TicTacToeGame
 from render_backend.managers import BookManager, GameManager, SessionManager
 from render_backend.ultimate import api_functions, ultimate_models
 
@@ -55,7 +55,7 @@ async def root() -> models.SimpleResponse:
 @app.post("/new_game")
 async def new_game(new_game_request: models.NewGameRequest) -> models.SimpleResponse:
     new_game_id = api_functions.make_new_game()
-    game = PingPongGame()
+    game = TicTacToeGame()
     session = SessionManager(game.get_max_players())
     game_manager = GameManager(new_game_id, game, session)
     app.state.book_manager.add_game(new_game_id, game_manager)
@@ -81,8 +81,8 @@ async def websocket_endpoint(
 # -------------------------------------
 
 
-@app.get("/ultimate/game/{game_name}")
-async def get_game(
+@app.get("/game/{game_name}")
+async def get_game_metadata(
     game_name: Annotated[str, Depends(validated_game_name)],
 ) -> ultimate_models.GameState:
     """
@@ -95,23 +95,3 @@ async def get_game(
         raise HTTPException(status_code=404, detail=f"Game {game_name} not found")
     logger.info(f"Game state for {game_name} obtained.")
     return game_state
-
-
-@app.put("/ultimate/game/{game_name}/make_move")
-async def make_move(
-    game_name: Annotated[str, Depends(validated_game_name)], move: models.Move
-) -> models.SimpleResponse:
-    try:
-        api_functions.make_move(
-            game_name=game_name,
-            player_name=move.player_name,
-            player_position=move.player_position,
-            move=move.move,
-        )
-    except KeyError:
-        raise HTTPException(status_code=404, detail=f"Game {game_name} not found")
-    except ValueError:
-        raise HTTPException(status_code=401, detail=f"Move {move} is not valid")
-    return models.SimpleResponse(
-        parameters=models.SimpleResponseParameters(message=f"Move {move} made on game {game_name}")
-    )

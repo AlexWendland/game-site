@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { TicTacToeGame } from "@/components/tictactoe/TicTacToeGame";
 import { TicTacToeProvider } from "@/components/tictactoe/TicTacToeContext";
 import { validateGameID } from "@/lib/gameFunctions";
-import { getGameStateAPI } from "@/lib/apiCalls";
+import { getGameMetadata } from "@/lib/apiCalls";
 
 export default async function Page({
   params,
@@ -17,7 +17,7 @@ export default async function Page({
     notFound();
   }
   try {
-    await getGameStateAPI(gameID);
+    await getGameMetadata(gameID);
   } catch (error) {
     console.error("Error fetching game state:", error);
     notFound();

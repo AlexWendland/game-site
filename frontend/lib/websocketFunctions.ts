@@ -90,6 +90,13 @@ interface ErrorMessage {
   };
 }
 
+interface SimpleMessage {
+  message_type: "simple";
+  parameters: {
+    message: string;
+  };
+}
+
 interface GameStateMessage {
   message_type: "game_state";
   parameters: Record<string, any>; // Define a stricter interface if you can
@@ -103,6 +110,7 @@ interface UnknownMessage {
 export type ParsedMessage =
   | SessionStateMessage
   | ErrorMessage
+  | SimpleMessage
   | GameStateMessage
   | UnknownMessage;
 
@@ -157,6 +165,11 @@ export function parseWebSocketMessage(event: MessageEvent): ParsedMessage {
       case "game_state":
         return {
           message_type: "game_state",
+          parameters,
+        };
+      case "simple":
+        return {
+          message_type: "simple",
           parameters,
         };
     }

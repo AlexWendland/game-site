@@ -53,7 +53,7 @@ class GameStateResponseParameters(ResponseParameters):
 
 class GameStateResponse(Response):
     message_type: ResponseType = pydantic.Field(default=ResponseType.GAME_STATE, init=False)
-    parameters: GameStateResponseParameters
+    # Implementations should implement there own parameters.
 
 
 class SessionStateResponseParameters(ResponseParameters):

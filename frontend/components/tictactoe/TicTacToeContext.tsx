@@ -16,7 +16,6 @@ import {
   parseWebSocketMessage,
   setPlayerNameWebsocket,
   setPlayerPosition,
-  ParsedMessage,
 } from "@/lib/websocketFunctions";
 import { addToast } from "@heroui/react";
 import { usePathname } from "next/navigation";
@@ -52,9 +51,10 @@ function parseGameState(
 ): TicTacToeGameState | null {
   if (
     typeof (parameters as any).history !== "object" ||
-    !("user_position" in parameters) ||
+    !("winner" in parameters) ||
     typeof (parameters as any).winning_line !== "object"
   ) {
+    console.log("Invalid game state format:", parameters);
     throw new Error("Invalid structure");
   }
   return parameters as TicTacToeGameState;
@@ -158,19 +158,18 @@ export function TicTacToeProvider({
                   );
                   return;
                 }
-                const oldMove = currentMove;
                 setHistory(gameState.history);
                 setWinningLine(gameState.winning_line);
                 setWinner(gameState.winner);
-                const newMove = currentMove;
-                if (oldMove !== newMove && currentViewedMove === oldMove) {
-                  setCurrentViewedMove(newMove);
-                }
+                // TODO: Would be nice if this didn't jump if they are looking at the history.
+                // Current issue is we don't want dependencies for this effect on the game state.
+                setCurrentViewedMove(gameState.history.length - 1);
               }
+              case "simple":
+                console.log(parsedMessage.parameters.message);
 
               case "unknown":
               default:
-                console.warn("Unknown message type:", parsedMessage);
                 break;
             }
           } catch (err) {
@@ -199,7 +198,7 @@ export function TicTacToeProvider({
         gameWebSocket.current = null;
       }
     };
-  }, [gameID]);
+  }, [gameID, username]);
 
   // Set game details in context.
   const {
@@ -217,7 +216,6 @@ export function TicTacToeProvider({
     setGameCode(gameID);
     setGameLink(pathname);
     setGameState("Pending game start");
-    console.log(pathname);
     return () => {
       clearGame();
     };
