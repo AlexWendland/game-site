@@ -232,6 +232,15 @@ export function TicTacToeProvider({
     return players[currentPlayerNumber];
   }, [currentPlayerNumber, players]);
 
+  useEffect(() => {
+    if (winner !== null || currentMove === 9) {
+      setGameState("Game over");
+      return;
+    } else if (currentMove > 0) {
+      setGameState("In game");
+    }
+  }, [currentMove, winner]);
+
   // Define utility functions
 
   const updateCurrentUserPosition = async (newPosition: number | null) => {
