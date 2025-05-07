@@ -16,11 +16,12 @@ export function TicTacToeBoard() {
     makeMove,
   } = useTicTacToeContext();
 
-  const status = winner
-    ? `Winner: ${winner}`
-    : currentMove == 9
-      ? "Draw"
-      : `Next player: ${currentPlayer}`;
+  const status =
+    winner !== null
+      ? `Winner: ${players[winner]}`
+      : currentMove == 9
+        ? "Draw"
+        : `Next player: ${currentPlayer}`;
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
