@@ -51,6 +51,7 @@ class TicTacToeGame(game_base.GameBase):
         """
         Make a move for the player.
         """
+        logger.info(f"Player {player_position} wants to move to {move}")
         if self._move_number % 2 != player_position:
             logger.info(f"Player {player_position} is not the current player.")
             return models.ErrorResponse(
@@ -65,6 +66,7 @@ class TicTacToeGame(game_base.GameBase):
                     error_message=f"Move {move} is already taken."
                 )
             )
+        logger.info(f"Player {player_position} moves to {move}")
         new_board = self._history[-1].copy()
         new_board[move] = player_position
         self._history.append(new_board)
@@ -92,6 +94,7 @@ class TicTacToeGame(game_base.GameBase):
             ):
                 self._winner = self._history[-1][line[0]]
                 self._winning_line = line
+                logger.info(f"Player {self._winner} won.")
                 break
 
     @override

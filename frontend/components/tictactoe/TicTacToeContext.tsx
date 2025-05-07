@@ -228,7 +228,7 @@ export function TicTacToeProvider({
   const currentMove = useMemo(() => history.length - 1, [history]);
 
   const currentPlayerNumber = useMemo(() => {
-    return (currentMove % 2) + 1;
+    return currentMove % 2;
   }, [currentMove]);
   const currentPlayer = useMemo(() => {
     return players[currentPlayerNumber];
