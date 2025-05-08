@@ -2,7 +2,7 @@
 
 import { TicTacToeBoard } from "@/components/tictactoe/TicTacToeBoard";
 import { TicTacToePlayerBoard } from "@/components/tictactoe/TicTacToePlayerBoard";
-import { Button, Input } from "@heroui/react";
+import { Button, Pagination } from "@heroui/react";
 import { useTicTacToeContext as useTicTacToeContext } from "@/components/tictactoe/TicTacToeContext";
 
 export function TicTacToeGame() {
@@ -20,30 +20,21 @@ export function TicTacToeGame() {
     makeMove,
   } = useTicTacToeContext();
 
-  const moves = history.map((_, move) => {
-    return (
-      <li key={move}>
-        <Button
-          onPress={() => setCurrentViewedMove(move)}
-          size="sm"
-          color="secondary"
-          className="text-lg"
-        >
-          {move}
-        </Button>
-      </li>
-    );
-  });
-
   return (
     <div>
-      <div className="grid grid-cols-8 gap-4 width-full">
-        <div className="col-span-1">
-          <h2 className="font-semibold mb-2 text-xl text-center">History</h2>
-          <ol className="flex flex-wrap gap-4 items-center">{moves}</ol>
-        </div>
-        <div className="col-span-6">
+      <div className="grid grid-cols-4 gap-4 width-full">
+        <div className="col-span-1"></div>
+        <div className="col-span-2 grid grid-cols-1">
           <TicTacToeBoard />
+          <Pagination
+            className="flex justify-center"
+            page={currentViewedMove + 1}
+            total={currentMove + 1}
+            onChange={(page) => {
+              setCurrentViewedMove(page - 1);
+            }}
+            showControls
+          />
         </div>
         <div className="col-span-1">
           <TicTacToePlayerBoard />

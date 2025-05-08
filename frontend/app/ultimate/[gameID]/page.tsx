@@ -25,6 +25,10 @@ export default async function Page({
 
   return (
     <TicTacToeProvider gameID={gameID}>
+      <div className="text-4xl text-center pb-8">
+        Invite a friend to play with game ID{" "}
+        <div className="text-primary font-bold">{gameID}</div>
+      </div>
       <TicTacToeGame />
     </TicTacToeProvider>
   );

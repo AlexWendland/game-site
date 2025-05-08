@@ -111,7 +111,9 @@ export function NavBar() {
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
-        <NavbarItem isActive>{gameCode}</NavbarItem>
+        <NavbarItem isActive>
+          <div className="text-primary text-xl p-4">{gameCode}</div>
+        </NavbarItem>
         <NavbarItem>{gameState}</NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
