@@ -27,9 +27,11 @@ export function TicTacToeGame() {
         <div className="col-span-2 grid grid-cols-1">
           <TicTacToeBoard />
           <Pagination
+            variant="bordered"
             className="flex justify-center"
             page={currentViewedMove + 1}
             total={currentMove + 1}
+            color="secondary"
             onChange={(page) => {
               setCurrentViewedMove(page - 1);
             }}
