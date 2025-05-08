@@ -1,11 +1,13 @@
 import { Button, Form, Input } from "@heroui/react";
 import { FormEvent, useState } from "react";
 import { validateGameID } from "@/lib/gameFunctions";
-import { redirectToGame } from "@/lib/utils";
+import { getGameMetadata } from "@/lib/apiCalls";
+import { useRouter } from "next/navigation";
 
 export function JoinGameButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const router = useRouter();
 
   const onSubmit = async (formInput: FormEvent<HTMLFormElement>) => {
     formInput.preventDefault();
@@ -25,8 +27,13 @@ export function JoinGameButton() {
     setErrors({});
 
     try {
-      redirectToGame(gameID);
-      setErrors({ GameID: "Invalid game ID" });
+      const gameMetadata = await getGameMetadata(gameID);
+      console.log("gameMetadata", gameMetadata);
+      if (gameMetadata) {
+        router.push(`/${gameMetadata.game_type}/${gameID}`);
+      } else {
+        setErrors({ GameID: "Invalid game ID" });
+      }
     } catch (err) {
       console.log(err);
       setErrors({ GameID: "Invalid game ID" });
