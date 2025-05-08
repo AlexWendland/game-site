@@ -117,14 +117,14 @@ def test_set_player_name_invalid(session: SessionManager):
 
     response = session.handle_function_call(client, "set_player_name", {"player_name": 123})
     assert isinstance(response, models.ErrorResponse)
-    assert "not a string" in response.parameters.error_message
+    assert "Parameter validation failed" in response.parameters.error_message
 
 
 def test_set_player_position(session: SessionManager):
     client = DummyWebSocket("c1")
     session.add_client(client)
 
-    response = session.handle_function_call(client, "set_player_position", {"player_position": 1})
+    response = session.handle_function_call(client, "set_player_position", {"new_position": 1})
     assert response is None
     assert session.get_client_position(client) == 1
     assert session._position_to_player[1] == client
@@ -136,8 +136,8 @@ def test_set_player_position_already_taken(session: SessionManager):
     session.add_client(client1)
     session.add_client(client2)
 
-    session.handle_function_call(client1, "set_player_position", {"player_position": 1})
-    response = session.handle_function_call(client2, "set_player_position", {"player_position": 1})
+    session.handle_function_call(client1, "set_player_position", {"new_position": 1})
+    response = session.handle_function_call(client2, "set_player_position", {"new_position": 1})
 
     assert isinstance(response, models.ErrorResponse)
     assert "already taken" in response.parameters.error_message
@@ -148,16 +148,16 @@ def test_set_player_position_invalid(session: SessionManager):
     session.add_client(client)
 
     response = session.handle_function_call(
-        client, "set_player_position", {"player_position": "one"}
+        client, "set_player_position", {"new_position": "one"}
     )
     assert isinstance(response, models.ErrorResponse)
-    assert "not an int" in response.parameters.error_message
+    assert "Parameter validation failed" in response.parameters.error_message
 
 
 def test_leave_player_position(session: SessionManager):
     client = DummyWebSocket("c1")
     session.add_client(client)
-    session.handle_function_call(client, "set_player_position", {"player_position": 0})
+    session.handle_function_call(client, "set_player_position", {"new_position": 0})
 
     response = session.handle_function_call(client, "leave_player_position", {})
     assert response is None
@@ -201,12 +201,12 @@ def test_add_and_get_game(book_manager: BookManager, mock_game_manager: MagicMoc
 def test_add_duplicate_game_raises(book_manager: BookManager, mock_game_manager: MagicMock):
     game_id = "game1"
     book_manager.add_game(game_id, mock_game_manager)
-    with pytest.raises(ValueError, match="already exists"):
+    with pytest.raises(KeyError, match="already exists"):
         book_manager.add_game(game_id, mock_game_manager)
 
 
 def test_get_nonexistent_game_raises(book_manager: BookManager):
-    with pytest.raises(ValueError, match="does not exist"):
+    with pytest.raises(KeyError, match="does not exist"):
         book_manager.get_game("no_such_game")
 
 

@@ -21,9 +21,11 @@ export function UltimateSquare({
         : "text-transparent";
 
   const classes = clsx(
-    "flex items-center justify-center w-full h-full border border-gray-400",
+    "flex items-center justify-center",
+    "w-full aspect-square",
+    "border border-gray-400",
     "select-none",
-    "text-9xl",
+    "text-5xl",
     textColor,
     isHighlighted ? "bg-yellow-200" : "bg-white",
   );

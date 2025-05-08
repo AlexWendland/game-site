@@ -1,11 +1,9 @@
-import { redirect } from "next/navigation";
-import { UltimateSector } from "@/components/ultimate/UltimateSector";
+import { UltimateGame } from "@/components/ultimate/UltimateGame";
 
 export default function Home() {
-  //redirect("/");
   return (
     <>
-      <UltimateSector />
+      <UltimateGame />
     </>
   );
 }

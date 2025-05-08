@@ -17,7 +17,10 @@ export default async function Page({
     notFound();
   }
   try {
-    await getGameMetadata(gameID);
+    const metdata = await getGameMetadata(gameID);
+    if (metdata.game_type !== "tictactoe") {
+      notFound();
+    }
   } catch (error) {
     console.error("Error fetching game state:", error);
     notFound();

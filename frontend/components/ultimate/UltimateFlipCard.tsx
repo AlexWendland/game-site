@@ -6,7 +6,11 @@ interface FlipCardProps {
   back: React.ReactNode;
 }
 
-export default function FlipCard({ flipped, front, back }: FlipCardProps) {
+export default function UltimateFlipCard({
+  flipped,
+  front,
+  back,
+}: FlipCardProps) {
   return (
     <div className="w-48 h-48 relative" style={{ perspective: "1000px" }}>
       <div

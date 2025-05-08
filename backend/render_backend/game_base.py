@@ -28,3 +28,9 @@ class GameBase(abc.ABC):
         """
         Get the maximum number of players for this game.
         """
+
+    @abc.abstractmethod
+    def get_metadata(self) -> models.GameMetadata:
+        """
+        Get the maximum number of players for this game.
+        """

@@ -1,13 +1,11 @@
 import { Button, Form, Input } from "@heroui/react";
 import { FormEvent, useState } from "react";
-import { getGameMetadata } from "@/lib/apiCalls";
 import { validateGameID } from "@/lib/gameFunctions";
-import { useRouter } from "next/navigation";
+import { redirectToGame } from "@/lib/utils";
 
 export function JoinGameButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const router = useRouter();
 
   const onSubmit = async (formInput: FormEvent<HTMLFormElement>) => {
     formInput.preventDefault();
@@ -27,9 +25,8 @@ export function JoinGameButton() {
     setErrors({});
 
     try {
-      await getGameMetadata(gameID);
-      // If this does not error the game is valid.
-      router.push(`/tictactoe/${gameID}`);
+      redirectToGame(gameID);
+      setErrors({ GameID: "Invalid game ID" });
     } catch (err) {
       console.log(err);
       setErrors({ GameID: "Invalid game ID" });

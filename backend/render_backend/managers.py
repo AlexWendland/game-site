@@ -6,6 +6,7 @@ from fastapi import WebSocket
 
 from render_backend import game_base, models
 from render_backend.app_logger import logger
+from render_backend.utils import non_matching_game_name
 
 
 class SetPlayerParameters(pydantic.BaseModel):
@@ -179,6 +180,9 @@ class GameManager:
 
         await self._disconnect(client)
 
+    def get_metadata(self) -> models.GameMetadata:
+        return self._game.get_metadata()
+
     async def _connect(self, client: WebSocket):
         await client.accept()
         logger.info(f"Client {client} joined game {self._game_id}.")
@@ -299,7 +303,7 @@ class BookManager:
 
     def add_game(self, game_id: str, game_manager: GameManager):
         if game_id in self._live_games:
-            raise ValueError(f"Game ID to be added {game_id} already exists.")
+            raise KeyError(f"Game ID to be added {game_id} already exists.")
         self._live_games[game_id] = game_manager
         logger.info(f"Created game {game_id}.")
 
@@ -312,8 +316,14 @@ class BookManager:
 
     def get_game(self, game_id: str) -> GameManager:
         if game_id not in self._live_games:
-            raise ValueError(f"Game ID {game_id} does not exist.")
+            raise KeyError(f"Game ID {game_id} does not exist.")
         return self._live_games[game_id]
 
     def get_all_game_ids(self) -> set[str]:
-        return set(self._live_games)
+        return set(self._live_games.keys())
+
+    def get_free_game_id(self) -> str:
+        return non_matching_game_name(self.get_all_game_ids())
+
+    def get_game_metadata(self, game_id: str) -> models.GameMetadata:
+        return self.get_game(game_id).get_metadata()
