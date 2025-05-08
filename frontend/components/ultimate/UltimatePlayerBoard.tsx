@@ -40,7 +40,7 @@ export function UltimatePlayerBoard() {
                 <span>{player.name}</span>
               </span>
               <span className="text-sm text-gray-700">
-                {players[player.id]} {isSelected && "(*)"}
+                {players[1]} {isSelected && "(*)"}
               </span>
             </Button>
           );
