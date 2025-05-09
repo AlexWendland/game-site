@@ -25,7 +25,4 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-# Use the entrypoint to run the server
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["npm", "start"]
