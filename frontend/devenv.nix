@@ -15,6 +15,6 @@
     docker build -t games-frontend .
   '';
   scripts.docker-up.exec = ''
-    docker run --env-file .env.local -p 3000:10000 games-frontend
+    docker run --env-file .env.local -p 3000:3000 games-frontend
   '';
 }
