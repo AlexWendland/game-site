@@ -1,7 +1,7 @@
 import abc
 from typing import Any
 
-from render_backend import models
+from games_backend import models
 
 
 class GameBase(abc.ABC):

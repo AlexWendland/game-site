@@ -12,9 +12,9 @@
     npm run dev
   '';
   scripts.docker-build.exec = ''
-    docker build -t render-frontend .
+    docker build -t games-frontend .
   '';
   scripts.docker-up.exec = ''
-    docker run --env-file .env.local -p 3000:10000 render-frontend
+    docker run --env-file .env.local -p 3000:10000 games-frontend
   '';
 }

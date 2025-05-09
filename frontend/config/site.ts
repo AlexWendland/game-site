@@ -1,6 +1,6 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "An example site set up with render",
-  description: "An example site!",
+  name: "Alex's game",
+  description: "A site for fun and the whole family!",
 };

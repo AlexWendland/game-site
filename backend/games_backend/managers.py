@@ -4,9 +4,9 @@ from typing import Any
 import pydantic
 from fastapi import WebSocket
 
-from render_backend import game_base, models
-from render_backend.app_logger import logger
-from render_backend.utils import non_matching_game_name
+from games_backend import game_base, models
+from games_backend.app_logger import logger
+from games_backend.utils import non_matching_game_name
 
 
 class SetPlayerParameters(pydantic.BaseModel):

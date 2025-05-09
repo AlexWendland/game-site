@@ -17,12 +17,12 @@
   };
 
   scripts.up.exec = ''
-    poetry run fastapi dev render_backend/main.py --port 8000
+    poetry run fastapi dev games_backend/main.py --port 8000
   '';
   scripts.docker-build.exec = ''
-    docker build -t render-backend .
+    docker build -t games-backend .
   '';
   scripts.docker-up.exec = ''
-    docker run -p 8000:10000 render-backend
+    docker run -p 8000:8000 games-backend
   '';
 }

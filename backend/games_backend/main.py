@@ -6,10 +6,10 @@ from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
-from render_backend import models, utils
-from render_backend.app_logger import logger
-from render_backend.games import TicTacToeGame, UltimateGame
-from render_backend.managers import BookManager, GameManager, SessionManager
+from games_backend import models, utils
+from games_backend.app_logger import logger
+from games_backend.games import TicTacToeGame, UltimateGame
+from games_backend.managers import BookManager, GameManager, SessionManager
 
 
 @contextlib.asynccontextmanager

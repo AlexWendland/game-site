@@ -2,7 +2,7 @@ import { SimpleResponse } from "@/types/apiTypes";
 
 // Hack for now, as environment variables are not working in renderGameManager
 const BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "https://backend-87oq.onrender.com";
+  process.env.NEXT_PUBLIC_BACKEND_URL || "https://games.awendland.co.uk/api";
 
 export function apiUrl(path: string): string {
   return `${BASE_URL}${path}`;

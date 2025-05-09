@@ -23,8 +23,8 @@ ENV VIRTUAL_ENV=/app/.venv \
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY render_backend ./render_backend
+COPY games_backend ./games_backend
 
-EXPOSE 10000
+EXPOSE 8000
 
-CMD ["fastapi", "run", "render_backend/main.py", "--host", "0.0.0.0", "--port", "10000"]
+CMD ["fastapi", "run", "games_backend/main.py", "--host", "0.0.0.0", "--port", "8000"]

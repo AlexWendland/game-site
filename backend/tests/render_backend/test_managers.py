@@ -3,8 +3,8 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
-from render_backend import models
-from render_backend.managers import BookManager, SessionManager
+from games_backend import models
+from games_backend.managers import BookManager, SessionManager
 
 # -------------------------------------
 # SessionManager tests

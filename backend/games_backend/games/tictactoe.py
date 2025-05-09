@@ -2,9 +2,9 @@ from typing import Any, override
 
 import pydantic
 
-from render_backend import game_base, models
-from render_backend.app_logger import logger
-from render_backend.games.utils import check_tic_tac_toe_winner
+from games_backend import game_base, models
+from games_backend.app_logger import logger
+from games_backend.games.utils import check_tic_tac_toe_winner
 
 
 class TicTacToeGameStateParameters(models.GameStateResponseParameters):
