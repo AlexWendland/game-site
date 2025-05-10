@@ -83,7 +83,7 @@ export function NavBar() {
   };
 
   return (
-    <Navbar className="bg-gray-200">
+    <Navbar className="bg-gray-200" shouldHideOnScroll>
       <NavbarBrand>
         <img src="/logo.svg" alt="Logo" width="30" />
         <Link href="/">
