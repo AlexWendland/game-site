@@ -23,7 +23,7 @@ export function TicTacToePlayerBoard() {
   ];
 
   return (
-    <div className="w-full max-w-sm border rounded-xl p-4 bg-white shadow-md">
+    <div className="w-full max-w-sm border rounded-xl p-4 bg-gray-50 shadow-md">
       <h2 className="text-center text-xl font-semibold mb-4">Players</h2>
       <div className="space-y-3">
         {availablePlayers.map((player) => {

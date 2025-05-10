@@ -13,7 +13,10 @@ import {
   DropdownMenu,
 } from "@heroui/react";
 
-import { makeNewTicTacToeGameAPI } from "@/lib/apiCalls";
+import {
+  makeNewTicTacToeGameAPI,
+  makeNewUltimateGameAPI,
+} from "@/lib/apiCalls";
 import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/UserContext";
 import { useGameContext } from "@/context/GameContext";
@@ -74,14 +77,19 @@ export function NavBar() {
     router.push(`/tictactoe/${gameID}`);
   };
 
+  const startNewUltimateGame = async () => {
+    const gameID: string = await makeNewUltimateGameAPI();
+    router.push(`/ultimate/${gameID}`);
+  };
+
   return (
-    <Navbar>
+    <Navbar className="bg-gray-200">
       <NavbarBrand>
-        <Link color="primary" href="/">
-          Alex's Games
+        <Link href="/">
+          <div className="text-bold text-2xl text-primary">Alex's Games</div>
         </Link>
       </NavbarBrand>
-      <NavbarContent className="hidden sm:flex gap-4" justify="center">
+      <NavbarContent className="hidden md:flex gap-4" justify="center">
         <Dropdown>
           <NavbarItem>
             <DropdownTrigger>
@@ -106,20 +114,45 @@ export function NavBar() {
               key="Tic Tac Toe"
               description="The classic 0 and X game."
               onPress={startNewTicTacToe}
+              startContent={
+                <img
+                  className="w-16"
+                  src="/tictactoe.jpg"
+                  alt="Tic Tac Toe board"
+                />
+              }
             >
               Tic Tac Toe
+            </DropdownItem>
+            <DropdownItem
+              key="Ultimate Tic Tac Toe"
+              description="Next level 0 and X."
+              onPress={startNewUltimateGame}
+              startContent={
+                <img
+                  className="w-16"
+                  src="/ultimate.jpg"
+                  alt="Ultimate Tic Tac Toe board"
+                />
+              }
+            >
+              Ultimate Tic Tac Toe
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
         <NavbarItem isActive>
-          <div className="text-primary text-xl p-4">{gameCode}</div>
+          <div className="text-primary text-xl p-4 hidden lg:block">
+            {gameCode}
+          </div>
         </NavbarItem>
-        <NavbarItem>{gameState}</NavbarItem>
+        <NavbarItem>
+          <div className="hidden lg:block">{gameState}</div>
+        </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
         <NavbarItem>{username}</NavbarItem>
         <NavbarItem>
-          <Button color="primary" onPress={clearUsername}>
+          <Button color="default" onPress={clearUsername}>
             Switch User Name
           </Button>
         </NavbarItem>

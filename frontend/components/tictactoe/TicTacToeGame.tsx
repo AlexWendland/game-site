@@ -22,9 +22,12 @@ export function TicTacToeGame() {
 
   return (
     <div>
-      <div className="grid grid-cols-4 gap-4 width-full">
-        <div className="col-span-1"></div>
-        <div className="col-span-2 grid grid-cols-1">
+      <div className="grid grid-cols-1 justify-items-center md:grid-cols-4 gap-4 width-full">
+        <div className="col-span-1 md:hidden">
+          <TicTacToePlayerBoard />
+        </div>
+        <div className="md:col-span-1 hidden md:block"></div>
+        <div className="md:col-span-2 grid grid-cols-1">
           <TicTacToeBoard />
           <Pagination
             variant="bordered"
@@ -38,7 +41,7 @@ export function TicTacToeGame() {
             showControls
           />
         </div>
-        <div className="col-span-1">
+        <div className="col-span-1 hidden md:block justify-items-end">
           <TicTacToePlayerBoard />
         </div>
       </div>

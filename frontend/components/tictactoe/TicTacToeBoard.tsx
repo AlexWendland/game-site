@@ -21,7 +21,7 @@ export function TicTacToeBoard() {
       ? `Winner: ${players[winner]}`
       : currentMove == 9
         ? "Draw"
-        : `Next player: ${currentPlayer}`;
+        : `Next player: ${currentPlayer === null ? "Unassigned" : currentPlayer}`;
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">

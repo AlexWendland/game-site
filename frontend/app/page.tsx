@@ -1,12 +1,13 @@
 "use client";
 
 import { JoinGameButton } from "@/components/JoinGameButton";
-import { Button } from "@heroui/button";
 import {
   makeNewTicTacToeGameAPI,
   makeNewUltimateGameAPI,
 } from "@/lib/apiCalls";
 import { useRouter } from "next/navigation";
+
+import { Card, CardBody, CardFooter, Image } from "@heroui/react";
 
 export default function Home() {
   const router = useRouter();
@@ -21,26 +22,47 @@ export default function Home() {
     router.push(`/ultimate/${gameID}`);
   };
 
+  const games = [
+    {
+      name: "Tic Tac Toe",
+      description: "Your classic 0 and X game!",
+      onClick: startNewTicTacToeGame,
+      image: "/tictactoe.jpg",
+    },
+    {
+      name: "Ultimate Tic Tac Toe",
+      description: "A more complex version of Tic Tac Toe",
+      onClick: startNewUltimateGame,
+      image: "/ultimate.jpg",
+    },
+  ];
+
   return (
     <>
-      <h1>Welcome to my game site, there are some games here!</h1>
-      <p className="p-4">You can join someones game...</p>
-      <br />
       <div className="flex justify-center">
         <JoinGameButton />
       </div>
-      <p className="p-4">Or start a new game...</p>
-      <div className="flex">
-        <div className="p-4">
-          <Button onPress={startNewTicTacToeGame} color="secondary">
-            Tic Tac Toe
-          </Button>
-        </div>
-        <div className="p-4">
-          <Button onPress={startNewUltimateGame} color="secondary">
-            Ultimate Tic Tac Toe
-          </Button>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 pt-6 justify-items-center">
+        {games.map((game, index) => (
+          <div className="w-64 h-full p-4 align-middle" key={index}>
+            <Card key={index} isPressable shadow="sm" onPress={game.onClick}>
+              <CardBody className="overflow-visible p-0">
+                <Image
+                  alt={game.name}
+                  className="w-full object-cover h-[140px]"
+                  radius="lg"
+                  shadow="sm"
+                  src={game.image}
+                  width="100%"
+                />
+              </CardBody>
+              <CardFooter className="text-small">
+                <b>{game.name}</b>
+                <p className="text-default-500">{game.description}</p>
+              </CardFooter>
+            </Card>
+          </div>
+        ))}
       </div>
     </>
   );
