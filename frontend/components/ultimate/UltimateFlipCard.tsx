@@ -1,13 +1,13 @@
 import React from "react";
 
 interface FlipCardProps {
-  flipped: boolean;
+  showBack: boolean;
   front: React.ReactNode;
   back: React.ReactNode;
 }
 
 export default function UltimateFlipCard({
-  flipped,
+  showBack,
   front,
   back,
 }: FlipCardProps) {
@@ -17,7 +17,7 @@ export default function UltimateFlipCard({
         className="w-full h-full absolute transition-transform duration-700"
         style={{
           transformStyle: "preserve-3d",
-          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+          transform: showBack ? "rotateY(180deg)" : "rotateY(0deg)",
         }}
       >
         <div

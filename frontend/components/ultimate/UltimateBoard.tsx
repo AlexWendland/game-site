@@ -1,12 +1,24 @@
 import { UltimateSector } from "@/components/ultimate/UltimateSector";
+import { useUltimateSectorContext } from "./UltimateContext";
 
 export function UltimateBoard() {
-  const indicies = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  const { sectorsOwned, winningSectorLine, currentMove, currentViewedMove } =
+    useUltimateSectorContext();
   return (
     <div className="grid grid-cols-3 gap-2 w-full sm:max-w-[500px] md:max-w-[600px]">
-      {/* Values in the backend are just the player positions, convert this to X / 0 */}
-      {indicies.map((val, i) => (
-        <UltimateSector />
+      {sectorsOwned.map((val, i) => (
+        <UltimateSector
+          key={i}
+          sectorIndex={i}
+          sectorWinningMove={
+            val === null ? val : val < currentViewedMove ? val : null
+          }
+          isHighlighted={
+            currentMove === currentViewedMove
+              ? winningSectorLine.includes(i)
+              : false
+          }
+        />
       ))}
     </div>
   );

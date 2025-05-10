@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { TicTacToeGame } from "@/components/tictactoe/TicTacToeGame";
-import { TicTacToeProvider } from "@/components/tictactoe/TicTacToeContext";
 import { validateGameID } from "@/lib/gameFunctions";
 import { getGameMetadata } from "@/lib/apiCalls";
+import { UltimateProvider } from "@/components/ultimate/UltimateContext";
+import { UltimateGame } from "@/components/ultimate/UltimateGame";
 
 export default async function Page({
   params,
@@ -18,7 +18,7 @@ export default async function Page({
   }
   try {
     const metdata = await getGameMetadata(gameID);
-    if (metdata.game_type !== "tictactoe") {
+    if (metdata.game_type !== "ultimate") {
       notFound();
     }
   } catch (error) {
@@ -27,8 +27,8 @@ export default async function Page({
   }
 
   return (
-    <TicTacToeProvider gameID={gameID}>
-      <TicTacToeGame />
-    </TicTacToeProvider>
+    <UltimateProvider gameID={gameID}>
+      <UltimateGame />
+    </UltimateProvider>
   );
 }

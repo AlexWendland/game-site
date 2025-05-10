@@ -1,12 +1,10 @@
 import { Button } from "@heroui/button";
 import clsx from "clsx";
+import { useUltimatePlayerContext } from "./UltimateContext";
 
 export function UltimatePlayerBoard() {
-  const players = {
-    0: "Player 1",
-    1: "Player 2",
-  };
-  const currentUserPosition = 1;
+  const { players, currentUserPosition, updateCurrentUserPosition } =
+    useUltimatePlayerContext();
 
   const availablePlayers = [
     { id: 0, name: "Cross", icon: "✖️" },
@@ -29,9 +27,9 @@ export function UltimatePlayerBoard() {
               )}
               onPress={() => {
                 if (currentUserPosition == player.id) {
-                  // updateCurrentUserPosition(null);
+                  updateCurrentUserPosition(null);
                 } else {
-                  // updateCurrentUserPosition(player.id);
+                  updateCurrentUserPosition(player.id);
                 }
               }}
             >
@@ -40,7 +38,7 @@ export function UltimatePlayerBoard() {
                 <span>{player.name}</span>
               </span>
               <span className="text-sm text-gray-700">
-                {players[1]} {isSelected && "(*)"}
+                {players[player.id]} {isSelected && "(*)"}
               </span>
             </Button>
           );

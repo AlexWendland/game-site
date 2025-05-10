@@ -27,7 +27,7 @@ export function UltimateSquare({
     "select-none",
     "text-5xl",
     textColor,
-    isHighlighted ? "bg-yellow-200" : "bg-white",
+    isHighlighted ? "bg-yellow-100" : "bg-white",
   );
 
   return (

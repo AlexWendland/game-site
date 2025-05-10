@@ -1,21 +1,40 @@
 import { UltimateSquare } from "@/components/ultimate/UltimateSquare";
+import { useUltimateSectorBoardContext } from "./UltimateContext";
 
-interface UltimateSectorBoardProps {
-  keys: number[];
-  moves: number[];
-}
+export function UltimateSectorBoard({ sectorIndex }: { sectorIndex: number }) {
+  const {
+    moves,
+    sectorToPlayIn,
+    currentMove,
+    currentViewedMove,
+    winner,
+    makeMove,
+  } = useUltimateSectorBoardContext();
 
-export function UltimateSectorBoard({ keys, moves }: UltimateSectorBoardProps) {
+  const boardMoves = moves.slice(sectorIndex * 9, (sectorIndex + 1) * 9);
+  const lookingAtLastMove =
+    winner !== null && currentViewedMove === currentMove;
+  const sectorIsPlayable =
+    sectorToPlayIn[currentViewedMove] === null ||
+    sectorToPlayIn[currentViewedMove] === sectorIndex;
+  const valueInView = (val: number | null): boolean => {
+    return val !== null && val < currentViewedMove;
+  };
+
   return (
     <div className="grid grid-cols-3 gap-2 w-full">
       {/* Values in the backend are just the player positions, convert this to X / 0 */}
-      {keys.map((val, i) => (
+      {boardMoves.map((val, i) => (
         <UltimateSquare
-          key={val}
-          value={moves[i] !== null ? (moves[i] % 2 === 0 ? "X" : "O") : null}
-          onSquareClick={() => {}}
-          isHighlighted={false}
-          isInCurrentView={true}
+          key={i}
+          value={val !== null ? (val % 2 === 0 ? "X" : "O") : null}
+          onSquareClick={() => {
+            makeMove(i + sectorIndex * 9);
+          }}
+          isHighlighted={
+            !lookingAtLastMove && sectorIsPlayable && !valueInView(val)
+          }
+          isInCurrentView={valueInView(val)}
         />
       ))}
     </div>
