@@ -25,7 +25,7 @@ export function TicTacToeSquare({
     "select-none",
     "text-9xl",
     textColor,
-    isHighlighted ? "bg-yellow-200" : "bg-white",
+    isHighlighted ? "bg-yellow-200" : "bg-gray-50",
   );
 
   return (
@@ -48,7 +48,11 @@ export function TicTacToeSquare({
             : "opacity-0",
         )}
       >
-        {value ? value : "O"}
+        {value === "X" ? (
+          <img src="/cross.svg" className="p-1" />
+        ) : (
+          <img src="/nought.svg" className="p-1" />
+        )}
       </span>
     </button>
   );

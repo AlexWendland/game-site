@@ -1,11 +1,11 @@
-import { Fira_Code as FontMono, Inter as FontSans } from "next/font/google";
+import { Comic_Neue as FontSans } from "next/font/google";
 
 export const fontSans = FontSans({
-  subsets: ["latin"],
+  weight: ["300", "400", "700"],
   variable: "--font-sans",
 });
 
-export const fontMono = FontMono({
-  subsets: ["latin"],
-  variable: "--font-mono",
+export const fontMono = FontSans({
+  weight: ["300", "400", "700"],
+  variable: "--font-sans",
 });

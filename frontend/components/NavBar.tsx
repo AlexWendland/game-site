@@ -85,6 +85,7 @@ export function NavBar() {
   return (
     <Navbar className="bg-gray-200">
       <NavbarBrand>
+        <img src="/logo.svg" alt="Logo" width="30" />
         <Link href="/">
           <div className="text-bold text-xl text-primary">Alex's Games</div>
         </Link>

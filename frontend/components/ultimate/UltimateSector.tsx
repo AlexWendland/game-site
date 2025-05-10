@@ -24,27 +24,19 @@ export function UltimateSector({
   const sectorWinner =
     sectorWinningMove === null ? null : sectorWinningMove % 2;
 
-  const backText = sectorWinner == 0 ? "✖️" : "⭕";
-  const textColor =
-    sectorWinner === 0
-      ? "text-gray-900"
-      : sectorWinner === 1
-        ? "text-red-500"
-        : "text-transparent";
-
-  const textSize = "text-[80px] sm:text-[150px]";
-
   const back = (
     <div
       className={clsx(
         boxCSS,
         "border",
-        textColor,
-        textSize,
         isHighlighted ? "bg-yellow-200" : "bg-white",
       )}
     >
-      {backText}
+      {sectorWinner === 0 ? (
+        <img src="/cross.svg" className="p-1 sm:p-2" />
+      ) : (
+        <img src="/nought.svg" className="p-1 sm:p-2" />
+      )}
     </div>
   );
 

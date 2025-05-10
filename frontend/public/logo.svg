@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="53.832184mm"
+   height="50.910667mm"
+   viewBox="0 0 53.832184 50.910667"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   sodipodi:docname="logo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.94116071"
+     inkscape:cx="283.16099"
+     inkscape:cy="348.50583"
+     inkscape:window-width="2556"
+     inkscape:window-height="1407"
+     inkscape:window-x="2560"
+     inkscape:window-y="29"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:page
+       x="0"
+       y="0"
+       width="53.832184"
+       height="50.910667"
+       id="page2"
+       margin="0 1.6096704 0 0"
+       bleed="0" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-30.072841,-56.220516)">
+    <text
+       xml:space="preserve"
+       style="font-size:50.8px;font-family:'ComicShannsMono Nerd Font';-inkscape-font-specification:'ComicShannsMono Nerd Font';fill:#aa4400;stroke-width:0.264583"
+       x="29.31004"
+       y="105.25778"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="stroke-width:0.264583"
+         x="29.31004"
+         y="105.25778">A</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:50.8px;font-family:'ComicShannsMono Nerd Font';-inkscape-font-specification:'ComicShannsMono Nerd Font';fill:#aa4400;stroke-width:0.264583"
+       x="53.719482"
+       y="92.158333"
+       id="text2"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         style="stroke-width:0.264583"
+         x="53.719482"
+         y="92.158333">G</tspan></text>
+  </g>
+</svg>

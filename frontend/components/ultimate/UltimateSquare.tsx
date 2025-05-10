@@ -13,25 +13,11 @@ export function UltimateSquare({
   isHighlighted,
   isInCurrentView,
 }: SquareProps) {
-  const textColor =
-    value === "X"
-      ? "text-gray-900"
-      : value === "O"
-        ? "text-red-500"
-        : "text-transparent";
-
-  const textSize = "text-sm sm:text-4xl";
-
   const classes = clsx(
     "flex items-center justify-center",
-    "w-[26px] h-[26px] sm:w-[50px] sm:h-[50px]",
-    "select-none",
     "aspect-square",
     "border border-gray-400",
     isHighlighted ? "bg-yellow-100" : "bg-gray-50",
-    "text-center",
-    textSize,
-    textColor,
   );
 
   return (
@@ -54,7 +40,11 @@ export function UltimateSquare({
             : "opacity-0",
         )}
       >
-        {value === "X" ? "✖️" : "⭕"}
+        {value === "X" ? (
+          <img src="/cross.svg" className="p-0.5" />
+        ) : (
+          <img src="/nought.svg" className="p-0.5" />
+        )}
       </span>
     </button>
   );
