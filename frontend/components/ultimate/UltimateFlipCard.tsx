@@ -12,7 +12,10 @@ export default function UltimateFlipCard({
   back,
 }: FlipCardProps) {
   return (
-    <div className="w-48 h-48 relative" style={{ perspective: "1000px" }}>
+    <div
+      className="w-28 h-28 sm:w-48 sm:h-48 relative"
+      style={{ perspective: "1000px" }}
+    >
       <div
         className="w-full h-full absolute transition-transform duration-700"
         style={{

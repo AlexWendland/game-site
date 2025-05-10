@@ -35,7 +35,7 @@ export default function RootLayout({
         <Providers>
           <NavBar />
           <div className="relative flex flex-col h-screen">
-            <main className="container mx-auto max-w-8xl pt-8 px-6 flex-grow">
+            <main className="container mx-auto max-w-8xl pt-8 flex-grow">
               {children}
             </main>
           </div>

@@ -17,36 +17,29 @@ export function UltimateGame() {
 
   const gameStatus =
     winner !== null
-      ? `Winner: ${players[winner % 2] || "Unknown"}`
+      ? `Winner: ${players[winner % 2] || "Unassigned"}`
       : currentMove == 81
         ? // TODO: Work out how to determine a draw properly
           "Draw"
-        : `Next player: ${currentPlayer}`;
+        : `Next player: ${currentPlayer || "Unassigned"}`;
 
   return (
-    <div>
-      <div className="text-lg font-semibold text-center">{gameStatus}</div>
-      <div className="grid grid-cols-4 gap-4 width-full">
-        <div className="col-span-1"></div>
-        <div className="col-span-2 grid grid-cols-1">
-          <UltimateBoard />
-          <br />
-          <Pagination
-            variant="bordered"
-            className="flex justify-center"
-            page={currentViewedMove + 1}
-            total={currentMove + 1}
-            color="secondary"
-            onChange={(page) => {
-              setCurrentViewedMove(page - 1);
-            }}
-            showControls
-          />
-        </div>
-        <div className="col-span-1">
-          <UltimatePlayerBoard />
-        </div>
-      </div>
+    <div className="grid grid-cols-1 justify-items-center width-full">
+      <div className="text-lg font-semibold text-center pb-4">{gameStatus}</div>
+      <UltimatePlayerBoard />
+      <UltimateBoard />
+      <br />
+      <Pagination
+        variant="bordered"
+        className="flex justify-center"
+        page={currentViewedMove + 1}
+        total={currentMove + 1}
+        color="secondary"
+        onChange={(page) => {
+          setCurrentViewedMove(page - 1);
+        }}
+        showControls
+      />
     </div>
   );
 }

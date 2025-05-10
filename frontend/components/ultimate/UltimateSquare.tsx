@@ -15,19 +15,24 @@ export function UltimateSquare({
 }: SquareProps) {
   const textColor =
     value === "X"
-      ? "text-black-600"
+      ? "text-gray-900"
       : value === "O"
         ? "text-red-500"
         : "text-transparent";
 
+  const textSize =
+    value === "X" ? "text-[22px] sm:text-5xl" : "text-sm sm:text-4xl";
+
   const classes = clsx(
     "flex items-center justify-center",
-    "w-full aspect-square",
-    "border border-gray-400",
+    "w-[26px] h-[26px] sm:w-[50px] sm:h-[50px]",
     "select-none",
-    "text-5xl",
+    "aspect-square",
+    "border border-gray-400",
+    isHighlighted ? "bg-yellow-100" : "bg-gray-50",
+    "text-center",
+    textSize,
     textColor,
-    isHighlighted ? "bg-yellow-100" : "bg-white",
   );
 
   return (
@@ -50,7 +55,7 @@ export function UltimateSquare({
             : "opacity-0",
         )}
       >
-        {value ? value : "O"}
+        {value === "X" ? "✖️" : "⭕"}
       </span>
     </button>
   );

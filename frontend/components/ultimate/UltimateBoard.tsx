@@ -5,7 +5,7 @@ export function UltimateBoard() {
   const { sectorsOwned, winningSectorLine, currentMove, currentViewedMove } =
     useUltimateSectorContext();
   return (
-    <div className="grid grid-cols-3 gap-2 w-full sm:max-w-[500px] md:max-w-[600px]">
+    <div className="grid grid-cols-3 gap-2 w-full max-w-96 sm:max-w-[600px] pt-10">
       {sectorsOwned.map((val, i) => (
         <UltimateSector
           key={i}

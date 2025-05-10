@@ -22,7 +22,7 @@ export function UltimateSectorBoard({ sectorIndex }: { sectorIndex: number }) {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-2 w-full">
+    <div className="grid grid-cols-3 gap-2 w-full h-full justify-items-center">
       {/* Values in the backend are just the player positions, convert this to X / 0 */}
       {boardMoves.map((val, i) => (
         <UltimateSquare
