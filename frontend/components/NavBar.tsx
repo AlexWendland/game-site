@@ -87,7 +87,9 @@ export function NavBar() {
       <NavbarBrand>
         <img src="/logo.svg" alt="Logo" width="30" />
         <Link href="/">
-          <div className="text-bold text-xl text-primary">Alex's Games</div>
+          <div className="text-bold text-xl text-primary pl-2">
+            Alex's Games
+          </div>
         </Link>
       </NavbarBrand>
       <NavbarContent className="hidden md:flex gap-4" justify="center">
