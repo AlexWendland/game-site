@@ -20,8 +20,7 @@ export function UltimateSquare({
         ? "text-red-500"
         : "text-transparent";
 
-  const textSize =
-    value === "X" ? "text-[22px] sm:text-5xl" : "text-sm sm:text-4xl";
+  const textSize = "text-sm sm:text-4xl";
 
   const classes = clsx(
     "flex items-center justify-center",

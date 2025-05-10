@@ -32,10 +32,7 @@ export function UltimateSector({
         ? "text-red-500"
         : "text-transparent";
 
-  const textSize =
-    sectorWinner === 0
-      ? "text-9xl sm:text-[210px]"
-      : "text-[80px] sm:text-[150px]";
+  const textSize = "text-[80px] sm:text-[150px]";
 
   const back = (
     <div
