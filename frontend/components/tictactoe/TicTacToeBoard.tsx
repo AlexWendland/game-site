@@ -18,7 +18,7 @@ export function TicTacToeBoard() {
 
   const status =
     winner !== null
-      ? `Winner: ${players[winner]}`
+      ? `Winner: ${players[winner] === null ? "Unassigned" : players[winner]}`
       : currentMove == 9
         ? "Draw"
         : `Next player: ${currentPlayer === null ? "Unassigned" : currentPlayer}`;

@@ -86,7 +86,7 @@ export function NavBar() {
     <Navbar className="bg-gray-200">
       <NavbarBrand>
         <Link href="/">
-          <div className="text-bold text-2xl text-primary">Alex's Games</div>
+          <div className="text-bold text-xl text-primary">Alex's Games</div>
         </Link>
       </NavbarBrand>
       <NavbarContent className="hidden md:flex gap-4" justify="center">
@@ -150,10 +150,10 @@ export function NavBar() {
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
-        <NavbarItem>{username}</NavbarItem>
+        <NavbarItem className="hidden sm:block">{username}</NavbarItem>
         <NavbarItem>
           <Button color="default" onPress={clearUsername}>
-            Switch User Name
+            Switch Username
           </Button>
         </NavbarItem>
       </NavbarContent>
