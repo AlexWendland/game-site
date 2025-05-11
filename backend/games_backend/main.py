@@ -10,7 +10,9 @@ from games_backend import models, utils
 from games_backend.app_logger import logger
 from games_backend.games.tictactoe import TicTacToeGame
 from games_backend.games.ultimate import UltimateGame
-from games_backend.managers import BookManager, GameManager, SessionManager
+from games_backend.manager.book_manager import BookManager
+from games_backend.manager.game_manager import GameManager
+from games_backend.manager.session_manager import SessionManager
 
 
 @contextlib.asynccontextmanager
@@ -41,11 +43,13 @@ async def validated_game_name(game_name: str) -> str:
         raise HTTPException(status_code=400, detail=f"Game name {game_name} is not valid")
     return game_name
 
+
 def get_book_manager() -> BookManager:
     """
     Dependency to get the book manager.
     """
     return app.state.book_manager
+
 
 # -------------------------------------
 # REST API
@@ -58,7 +62,9 @@ async def root() -> models.SimpleResponse:
 
 
 @app.post("/new_game/tictactoe")
-async def new_tic_tac_toe_game(book_manager: Annotated[BookManager, Depends(get_book_manager)]) -> models.SimpleResponse:
+async def new_tic_tac_toe_game(
+    book_manager: Annotated[BookManager, Depends(get_book_manager)],
+) -> models.SimpleResponse:
     new_game_id = book_manager.get_free_game_id()
     game = TicTacToeGame()
     session = SessionManager(game.get_max_players())
@@ -69,7 +75,9 @@ async def new_tic_tac_toe_game(book_manager: Annotated[BookManager, Depends(get_
 
 
 @app.post("/new_game/ultimate")
-async def new_ultimate_game(book_manager: Annotated[BookManager, Depends(get_book_manager)]) -> models.SimpleResponse:
+async def new_ultimate_game(
+    book_manager: Annotated[BookManager, Depends(get_book_manager)],
+) -> models.SimpleResponse:
     new_game_id = book_manager.get_free_game_id()
     game = UltimateGame()
     session = SessionManager(game.get_max_players())

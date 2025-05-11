@@ -14,9 +14,7 @@ class TicTacToeGameStateParameters(models.GameStateResponseParameters):
 
 
 class TicTacToeGameStateResponse(models.GameStateResponse):
-    message_type: models.ResponseType = pydantic.Field(
-        default=models.ResponseType.GAME_STATE, init=False
-    )
+    message_type: models.ResponseType = pydantic.Field(default=models.ResponseType.GAME_STATE, init=False)
     parameters: TicTacToeGameStateParameters
 
 
@@ -41,9 +39,7 @@ class TicTacToeGame(game_base.GameBase):
         if function_name != "make_move":
             logger.info(f"Player {player_position} requested unknow function {function_name}.")
             return models.ErrorResponse(
-                parameters=models.ErrorResponseParameters(
-                    error_message=f"Function {function_name} not supported."
-                )
+                parameters=models.ErrorResponseParameters(error_message=f"Function {function_name} not supported.")
             )
         try:
             parsed_move_parameters = MakeMoveParameters(**function_parameters)
@@ -70,9 +66,7 @@ class TicTacToeGame(game_base.GameBase):
         if self._history[-1][move] is not None:
             logger.info(f"Move {move} is already taken.")
             return models.ErrorResponse(
-                parameters=models.ErrorResponseParameters(
-                    error_message=f"Move {move} is already taken."
-                )
+                parameters=models.ErrorResponseParameters(error_message=f"Move {move} is already taken.")
             )
         logger.info(f"Player {player_position} moves to {move}")
         new_board = self._history[-1].copy()

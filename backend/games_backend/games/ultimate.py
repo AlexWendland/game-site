@@ -16,9 +16,7 @@ class UltimateGameStateParameters(models.GameStateResponseParameters):
 
 
 class UltimateGameStateResponse(models.GameStateResponse):
-    message_type: models.ResponseType = pydantic.Field(
-        default=models.ResponseType.GAME_STATE, init=False
-    )
+    message_type: models.ResponseType = pydantic.Field(default=models.ResponseType.GAME_STATE, init=False)
     parameters: UltimateGameStateParameters
 
 
@@ -47,9 +45,7 @@ class UltimateGame(game_base.GameBase):
         if function_name != "make_move":
             logger.info(f"Player {player_position} requested unknow function {function_name}.")
             return models.ErrorResponse(
-                parameters=models.ErrorResponseParameters(
-                    error_message=f"Function {function_name} not supported."
-                )
+                parameters=models.ErrorResponseParameters(error_message=f"Function {function_name} not supported.")
             )
         try:
             parsed_move_parameters = MakeMoveParameters(**function_parameters)
@@ -76,20 +72,15 @@ class UltimateGame(game_base.GameBase):
         if self._current_board[move] is not None:
             logger.info(f"Position {move} is already taken.")
             return models.ErrorResponse(
-                parameters=models.ErrorResponseParameters(
-                    error_message=f"Position {move} is already taken."
-                )
+                parameters=models.ErrorResponseParameters(error_message=f"Position {move} is already taken.")
             )
-        if (
-            self._sector_to_play[-1] is not None
-            and self._sector_to_play[-1] != move // 9
-        ):
-            logger.info(
-                f"Position {move} is not in sector {self._sector_to_play[-1]} - the current sector to play in."
-            )
+        if self._sector_to_play[-1] is not None and self._sector_to_play[-1] != move // 9:
+            logger.info(f"Position {move} is not in sector {self._sector_to_play[-1]} - the current sector to play in.")
             return models.ErrorResponse(
                 parameters=models.ErrorResponseParameters(
-                    error_message=f"Move {move} is not in sector {self._sector_to_play[-1]} - the current sector to play in."
+                    error_message=(
+                        f"Move {move} is not in sector {self._sector_to_play[-1]} - the current sector to" + " play in."
+                    )
                 )
             )
         if self._current_sectors[move // 9] is not None:
@@ -106,9 +97,7 @@ class UltimateGame(game_base.GameBase):
         self._check_winner()
         self._move_number += 1
         sector_to_play = move % 9
-        self._sector_to_play.append(
-            sector_to_play if self._current_sectors[sector_to_play] is None else None
-        )
+        self._sector_to_play.append(sector_to_play if self._current_sectors[sector_to_play] is None else None)
         return None
 
     def _check_sector_winner(self, move: int) -> None:
