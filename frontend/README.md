@@ -4,7 +4,9 @@ Simple frontend to understand react.
 
 ## Todo list
 
-- [ ] Switch O/X text with picture
 - [ ] Add auth to the front/backend.
-- [ ] Switch to actual ultimate tic tac toe.
-- [ ] Web first development, how about that.
+- [ ] Edit SVG images to get rid of the background.
+- [ ] Convert game pictures to svg and purge background.
+- [ ] Add Bingo to games.
+- [ ] Add Topological connect four to games.
+- [ ] Switch to redis in the backend.
