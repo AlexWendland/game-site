@@ -87,7 +87,7 @@ export function NavBar() {
       <NavbarBrand>
         <img src="/logo.svg" alt="Logo" width="30" />
         <Link href="/">
-          <div className="text-bold text-xl text-primary pl-2">
+          <div className="font-bold text-2xl text-orange-800 pl-2">
             Alex's Games
           </div>
         </Link>
@@ -112,6 +112,7 @@ export function NavBar() {
             itemClasses={{
               base: "gap-4",
             }}
+            className="bg-gray-50"
           >
             <DropdownItem
               key="Tic Tac Toe"
