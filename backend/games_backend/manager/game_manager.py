@@ -1,4 +1,5 @@
 import asyncio
+from typing import Self
 
 import pydantic
 from fastapi import WebSocket
@@ -18,8 +19,12 @@ class GameManager:
         self._is_closed = False
 
     @property
-    def is_closed(self):
+    def is_closed(self) -> bool:
         return self._is_closed
+
+    @property
+    def is_active(self) -> bool:
+        return len(self._clients) > 0
 
     async def close_game(self):
         if self._is_closed:
@@ -53,6 +58,15 @@ class GameManager:
 
     def get_metadata(self) -> models.GameMetadata:
         return self._game.get_metadata()
+
+    def get_game(self) -> game_base.GameBase:
+        return self._game
+
+    @classmethod
+    def from_game_and_id(cls, game_id: str, game: game_base.GameBase) -> Self:
+        session = SessionManager(game.get_max_players())
+        return cls(game_id=game_id, game=game, session=session)
+
 
     async def _connect(self, client: WebSocket):
         await client.accept()

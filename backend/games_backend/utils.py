@@ -2,6 +2,10 @@ import random
 import re
 import string
 
+from fastapi import HTTPException
+
+from games_backend.app_logger import logger
+
 GAME_NAME_LENGTH = 5
 
 
@@ -26,3 +30,10 @@ def _random_game_name() -> str:
     Generates a new game name randomly.
     """
     return "".join([random.choice(string.ascii_uppercase) for _ in range(GAME_NAME_LENGTH)])
+
+
+async def validated_game_name(game_name: str) -> str:
+    if not is_game_id_valid(game_name):
+        logger.info(f"Invalid game requested: {game_name}")
+        raise HTTPException(status_code=400, detail=f"Game name {game_name} is not valid")
+    return game_name
