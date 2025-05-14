@@ -33,9 +33,9 @@ export function UltimateSector({
       )}
     >
       {sectorWinner === 0 ? (
-        <img src="/cross.svg" className="p-1 sm:p-2" />
+        <img src="/cross.png" className="p-1 sm:p-2" />
       ) : (
-        <img src="/nought.svg" className="p-1 sm:p-2" />
+        <img src="/nought.png" className="p-1 sm:p-2" />
       )}
     </div>
   );

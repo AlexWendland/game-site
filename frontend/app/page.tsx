@@ -27,13 +27,13 @@ export default function Home() {
       name: "Tic Tac Toe",
       description: "Your classic 0 and X game!",
       onClick: startNewTicTacToeGame,
-      image: "/tictactoe.jpg",
+      image: "/tictactoe.png",
     },
     {
       name: "Ultimate Tic Tac Toe",
       description: "A more complex version of Tic Tac Toe",
       onClick: startNewUltimateGame,
-      image: "/ultimate.jpg",
+      image: "/ultimate.png",
     },
   ];
 
@@ -42,11 +42,17 @@ export default function Home() {
       <div className="flex justify-center">
         <JoinGameButton />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 pt-6 justify-items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 pt-6 justify-center justify-items-center">
         {games.map((game, index) => (
-          <div className="w-64 h-full p-4 align-middle" key={index}>
-            <Card key={index} isPressable shadow="sm" onPress={game.onClick}>
-              <CardBody className="overflow-visible p-0">
+          <div className="p-4" key={index}>
+            <Card
+              key={index}
+              isPressable
+              shadow="sm"
+              onPress={game.onClick}
+              className="bg-gray-100 w-52"
+            >
+              <CardBody className="overflow-visible p-0 bg-gray-50">
                 <Image
                   alt={game.name}
                   className="w-full object-cover h-[140px]"
@@ -56,7 +62,7 @@ export default function Home() {
                   width="100%"
                 />
               </CardBody>
-              <CardFooter className="text-small">
+              <CardFooter className="text-small grid grid-cols-1">
                 <b>{game.name}</b>
                 <p className="text-default-500">{game.description}</p>
               </CardFooter>

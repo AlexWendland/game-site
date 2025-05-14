@@ -41,9 +41,9 @@ export function UltimateSquare({
         )}
       >
         {value === "X" ? (
-          <img src="/cross.svg" className="p-0.5" />
+          <img src="/cross.png" className="p-0.5" />
         ) : (
-          <img src="/nought.svg" className="p-0.5" />
+          <img src="/nought.png" className="p-0.5" />
         )}
       </span>
     </button>

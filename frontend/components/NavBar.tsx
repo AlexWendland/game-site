@@ -120,7 +120,7 @@ export function NavBar() {
               startContent={
                 <img
                   className="w-16"
-                  src="/tictactoe.jpg"
+                  src="/tictactoe.png"
                   alt="Tic Tac Toe board"
                 />
               }
@@ -134,7 +134,7 @@ export function NavBar() {
               startContent={
                 <img
                   className="w-16"
-                  src="/ultimate.jpg"
+                  src="/ultimate.png"
                   alt="Ultimate Tic Tac Toe board"
                 />
               }

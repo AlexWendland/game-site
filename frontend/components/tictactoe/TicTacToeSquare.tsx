@@ -49,9 +49,9 @@ export function TicTacToeSquare({
         )}
       >
         {value === "X" ? (
-          <img src="/cross.svg" className="p-1" />
+          <img src="/cross.png" className="p-1" />
         ) : (
-          <img src="/nought.svg" className="p-1" />
+          <img src="/nought.png" className="p-1" />
         )}
       </span>
     </button>

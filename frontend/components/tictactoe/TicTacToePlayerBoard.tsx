@@ -18,8 +18,8 @@ export function TicTacToePlayerBoard() {
   } = useTicTacToeContext();
 
   const availablePlayers = [
-    { id: 0, name: "Cross", icon: <img src="/cross.svg" width="30" /> },
-    { id: 1, name: "Nought", icon: <img src="/nought.svg" width="30" /> },
+    { id: 0, name: "Cross", icon: <img src="/cross.png" width="30" /> },
+    { id: 1, name: "Nought", icon: <img src="/nought.png" width="30" /> },
   ];
 
   return (
