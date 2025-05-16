@@ -1,4 +1,5 @@
 import asyncio
+import uuid
 from typing import Self
 
 import pydantic
@@ -12,7 +13,8 @@ from games_backend.manager.session_manager import SessionManager
 class GameManager:
     def __init__(self, game_id: str, game: game_base.GameBase, session: SessionManager):
         self._game_id = game_id
-        self._clients: list[WebSocket] = []
+        self._id_to_endpoint: dict[str, WebSocket] = {}
+        self._endpoint_to_id: dict[WebSocket, str] = {}
         self._lock = asyncio.Lock()
         self._game = game
         self._session = session
@@ -24,37 +26,37 @@ class GameManager:
 
     @property
     def is_active(self) -> bool:
-        return len(self._clients) > 0
+        return len(self._endpoint_to_id) > 0
 
     async def close_game(self):
         if self._is_closed:
             return
         async with self._lock:
-            for client in self._clients:
-                await self._disconnect(client)
+            for client_id in self._endpoint_to_id.values():
+                await self._disconnect(client_id)
         self._is_closed = True
 
     async def handle_connection(self, client: WebSocket):
         if self._is_closed:
             raise ValueError(f"Game ({self._game_id}) is closed can not add new clients.")
-        await self._connect(client)
-        await self._message_client(
-            client=client,
+        client_id = await self._connect_human(client)
+        await self._message_client_locked(
+            client_id=client_id,
             message=models.SimpleResponse(
-                parameters=models.SimpleResponseParameters(message=f"Client {client.client} connected.")
+                parameters=models.SimpleResponseParameters(message=f"Client {client_id} connected.")
             ),
         )
-        await self._update_client_state(client)
+        await self._update_client_state(client_id)
         try:
             while not self._is_closed:
                 message_text = await client.receive_text()
-                logger.info(f"Client {client.client} messaged with {message_text} ({type(message_text)}).")
-                await self._handle_message(client, message_text)
-        except Exception as e:
-            logger.exception(f"Error while handling message from client {client.client}: {e}")
-            logger.info(f"Client {client.client} closed connection.")
+                logger.info(f"Client {client_id} messaged with {message_text} ({type(message_text)}).")
+                await self._handle_message(client_id, message_text)
+        except Exception:
+            logger.exception(f"Error while handling message from client {client_id}.")
 
-        await self._disconnect(client)
+        logger.info(f"Client {client_id} closed connection.")
+        await self._disconnect(client_id)
 
     def get_metadata(self) -> models.GameMetadata:
         return self._game.get_metadata()
@@ -68,87 +70,83 @@ class GameManager:
         return cls(game_id=game_id, game=game, session=session)
 
 
-    async def _connect(self, client: WebSocket):
+    async def _connect_human(self, client: WebSocket) -> str:
         await client.accept()
-        logger.info(f"Client {client} joined game {self._game_id}.")
+        client_id = str(uuid.uuid4())
+        logger.info(f"Client {client} ({client_id}) joined game {self._game_id}.")
         async with self._lock:
-            self._clients.append(client)
-            self._session.add_client(client)
+            self._endpoint_to_id[client] = client_id
+            self._id_to_endpoint[client_id] = client
+            self._session.add_client(client_id)
+        return client_id
 
-    async def _disconnect(self, client: WebSocket):
+    async def _disconnect(self, client_id: str):
+        client = self._id_to_endpoint.get(client_id)
         async with self._lock:
-            if client in self._clients:
+            if isinstance(client, WebSocket):
                 try:
                     await client.close()
                 except Exception:
                     pass
-                logger.info(f"Client {client} left game {self._game_id}")
-                self._clients.remove(client)
-                self._session.remove_client(client)
+                logger.info(f"Client {client} ({client_id}) left game {self._game_id}")
+                del self._endpoint_to_id[client]
+                del self._id_to_endpoint[client_id]
+                self._session.remove_client(client_id)
+            # Add AI disconnect here
 
-    async def _message_client(self, client: WebSocket, message: models.Response):
+    async def _message_client_locked(self, client_id: str, message: models.Response):
         disconnect = False
         async with self._lock:
-            try:
-                if client in self._clients:
-                    await client.send_json(message.model_dump_json())
-                else:
-                    logger.info("Tried to send message to {client} not in game.")
-            except Exception:
-                disconnect = True
+            disconnect = await self._message_client(client_id, message)
         if disconnect:
-            await self._disconnect(client)
+            await self._disconnect(client_id)
 
-    async def _update_client_state(self, client: WebSocket):
-        session_state = self._session.get_session_state_response_for_client(client)
-        await self._message_client(client, session_state)
-        game_position = self._session.get_client_position(client)
+    async def _message_client(self, client_id: str, message: models.Response) -> bool:
+        client = self._id_to_endpoint.get(client_id)
+        if isinstance(client, WebSocket):
+            try:
+                await client.send_json(message.model_dump_json())
+            except Exception:
+                return True
+        # Add AI messaging here
+        return False
+
+
+    async def _update_client_state(self, client_id: str):
+        session_state = self._session.get_session_state_response_for_client(client_id)
+        await self._message_client_locked(client_id, session_state)
+        game_position = self._session.get_client_position(client_id)
         game_state = self._game.get_game_state_response(game_position)
-        await self._message_client(client, game_state)
-
-    async def _broadcast(self, message: models.Response):
-        to_disconnect: list[WebSocket] = []
-        async with self._lock:
-            for client in self._clients:
-                try:
-                    await client.send_json(message.model_dump_json())
-                except Exception:
-                    to_disconnect.append(client)
-        for client in to_disconnect:
-            await self._disconnect(client)
+        await self._message_client_locked(client_id, game_state)
 
     async def _broadcast_session_state(self):
-        to_disconnect: list[WebSocket] = []
+        to_disconnect: list[str] = []
         async with self._lock:
-            for client in self._clients:
-                try:
-                    message = self._session.get_session_state_response_for_client(client)
-                    await client.send_json(message.model_dump_json())
-                except Exception:
-                    to_disconnect.append(client)
-        for client in to_disconnect:
-            await self._disconnect(client)
+            for client_id in self._endpoint_to_id.values():
+                message = self._session.get_session_state_response_for_client(client_id)
+                if await self._message_client(client_id, message):
+                    to_disconnect.append(client_id)
+        for client_id in to_disconnect:
+            await self._disconnect(client_id)
 
     async def _broadcast_game_state(self):
-        to_disconnect: list[WebSocket] = []
+        to_disconnect: list[str] = []
         async with self._lock:
-            for client in self._clients:
-                try:
-                    game_position = self._session.get_client_position(client)
-                    message = self._game.get_game_state_response(game_position)
-                    await client.send_json(message.model_dump_json())
-                except Exception:
-                    to_disconnect.append(client)
-        for client in to_disconnect:
-            await self._disconnect(client)
+            for client_id in self._id_to_endpoint:
+                game_position = self._session.get_client_position(client_id)
+                message = self._game.get_game_state_response(game_position)
+                if await self._message_client(client_id, message):
+                    to_disconnect.append(client_id)
+        for client_id in to_disconnect:
+            await self._disconnect(client_id)
 
-    async def _handle_message(self, client: WebSocket, message: str):
+    async def _handle_message(self, client_id: str, message: str):
         try:
             parsed_message = models.WebSocketRequest.model_validate_json(message)
         except pydantic.ValidationError as error:
             logger.exception("Could not parse message")
-            await self._message_client(
-                client=client,
+            await self._message_client_locked(
+                client_id=client_id,
                 message=models.ErrorResponse(
                     parameters=models.ErrorResponseParameters(error_message=f"Invalid message: {error}")
                 ),
@@ -157,16 +155,16 @@ class GameManager:
         match parsed_message.request_type:
             case models.WebsocketRequestType.SESSION:
                 response = self._session.handle_function_call(
-                    client=client,
+                    client_id=client_id,
                     function_name=parsed_message.function_name,
                     function_parameters=parsed_message.parameters,
                 )
                 if response:
-                    await self._message_client(client, response)
+                    await self._message_client_locked(client_id, response)
                 else:
                     await self._broadcast_session_state()
             case models.WebsocketRequestType.GAME:
-                position = self._session.get_client_position(client)
+                position = self._session.get_client_position(client_id)
                 if position is None:
                     return
                 response = self._game.handle_function_call(
@@ -175,6 +173,6 @@ class GameManager:
                     function_parameters=parsed_message.parameters,
                 )
                 if response:
-                    await self._message_client(client, response)
+                    await self._message_client_locked(client_id, response)
                 else:
                     await self._broadcast_game_state()
