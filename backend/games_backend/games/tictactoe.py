@@ -1,8 +1,11 @@
+import random
+from abc import ABC, abstractmethod
 from typing import Any, override
 
 import pydantic
 
 from games_backend import game_base, models
+from games_backend.ai_base import GameAI
 from games_backend.app_logger import logger
 from games_backend.games.utils import check_tic_tac_toe_winner
 
@@ -105,9 +108,88 @@ class TicTacToeGame(game_base.GameBase):
         return 2
 
     @override
+    def get_game_ai(self) -> dict[str, type[GameAI]]:
+        return {
+            TicTacToeRandomAI.get_ai_type(): TicTacToeRandomAI,
+            TicTacToeBlockAI.get_ai_type(): TicTacToeBlockAI,
+        }
+
+    @override
     def get_metadata(self) -> models.GameMetadata:
         return models.GameMetadata(
             game_type=models.GameType.TICTACTOE,
             max_players=2,
             parameters=models.GameParameters(),
         )
+
+
+class TicTacToeAI(GameAI, ABC):
+    def __init__(self, position: int):
+        self._board: list[None | int] = [None] * 9
+        self._current_player = sum(state is None for state in self._board) % 2
+        super().__init__(position)
+
+    @override
+    def update_game_state(self, game_state: TicTacToeGameStateResponse) -> None | models.WebSocketRequest:
+        self._board = game_state.parameters.history[-1]
+        self._current_player = sum(state is None for state in self._board) % 2
+        if self._position == self._current_player:
+            move = self.make_move()
+            return models.WebSocketRequest(
+                request_type=models.WebSocketRequestType.GAME,
+                function_name="make_move",
+                parameters={"position": move},
+            )
+
+    @abstractmethod
+    def make_move(self) -> int: ...
+
+    @property
+    def available_moves(self) -> list[int]:
+        return [i for i, state in enumerate(self._board) if state is None]
+
+    @property
+    def opponents_winning_moves(self) -> list[int]:
+        winning_moves = []
+        for move in self.available_moves:
+            board = self._board.copy()
+            board[move] = self._current_player + 1 % 2
+            if check_tic_tac_toe_winner(board):
+                winning_moves.append(move)
+        return winning_moves
+
+    @property
+    def winning_moves(self) -> list[int]:
+        winning_moves = []
+        for move in self.available_moves:
+            board = self._board.copy()
+            board[move] = self._current_player
+            if check_tic_tac_toe_winner(board):
+                winning_moves.append(move)
+        return winning_moves
+
+
+class TicTacToeRandomAI(TicTacToeAI):
+    @override
+    def make_move(self) -> int:
+        return random.choice(self.available_moves)
+
+    @override
+    @classmethod
+    def get_ai_type(cls) -> str:
+        return "random"
+
+
+class TicTacToeBlockAI(TicTacToeAI):
+    @override
+    def make_move(self) -> int:
+        if self.opponents_winning_moves:
+            return random.choice(self.opponents_winning_moves)
+        if self.winning_moves:
+            return random.choice(self.winning_moves)
+        return random.choice(self.available_moves)
+
+    @override
+    @classmethod
+    def get_ai_type(cls) -> str:
+        return "blocker"

@@ -21,7 +21,7 @@ class DBManager(abc.ABC):
 
 class InMemoryDBManager(DBManager):
     def __init__(self):
-        self._games: dict[str,GameBase] = {}
+        self._games: dict[str, GameBase] = {}
 
     @override
     async def save_game(self, game_id: str, game: GameBase) -> None:
@@ -44,5 +44,6 @@ class InMemoryDBManager(DBManager):
     @override
     async def get_all_game_ids(self) -> set[str]:
         return set(self._games.keys())
+
 
 # TODO: Make redis db manager

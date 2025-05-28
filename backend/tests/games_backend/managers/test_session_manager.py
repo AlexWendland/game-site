@@ -9,6 +9,7 @@ from games_backend.manager.session_manager import SessionManager
 # SessionManager tests
 # -------------------------------------
 
+
 @pytest.fixture
 def session() -> SessionManager:
     return SessionManager(max_players=3)

@@ -91,12 +91,13 @@ class GameMetadata(pydantic.BaseModel):
 # -------------------------------------
 
 
-class WebsocketRequestType(enum.Enum):
+class WebSocketRequestType(enum.Enum):
     SESSION = "session"
     GAME = "game"
+    AI = "ai"
 
 
 class WebSocketRequest(pydantic.BaseModel):
-    request_type: WebsocketRequestType
+    request_type: WebSocketRequestType
     function_name: str
     parameters: dict[str, Any]

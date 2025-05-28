@@ -85,7 +85,8 @@ class SessionManager:
 
     def _get_positions(self) -> dict[int, str | None]:
         return {
-            pos: self._player_names.get(client_id) if client_id else None for pos, client_id in self._position_to_player.items()
+            pos: self._player_names.get(client_id) if client_id else None
+            for pos, client_id in self._position_to_player.items()
         }
 
     def _set_client_name(self, client_id: str, name: str):
