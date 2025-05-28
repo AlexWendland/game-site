@@ -171,6 +171,19 @@ class GameManager:
         for client_id in to_disconnect:
             await self._disconnect(client_id)
 
+    async def _broadcast_ai_state(self):
+        to_disconnect: list[str] = []
+        ai_players = self._ai_manager.get_ai_players()
+        message = models.AIStateResponse(
+            parameters=models.AIStateResponseParameters(ai_players=ai_players)
+        )
+        async with self._player_lock:
+            for client_id in self._id_to_player:
+                if await self._message_client(client_id, message):
+                    to_disconnect.append(client_id)
+        for client_id in to_disconnect:
+            await self._disconnect(client_id)
+
     async def _handle_message(self, client_id: str, message: str):
         try:
             parsed_message = models.WebSocketRequest.model_validate_json(message)
@@ -222,6 +235,8 @@ class GameManager:
                 )
                 if response:
                     await self._message_client_locked(client_id, response)
+                else:
+                    await self._broadcast_ai_state()
 
         async with self._action_lock:
             while len(self._action_bus) != 0:

@@ -9,6 +9,7 @@ export function TicTacToeGame() {
   const {
     history,
     players,
+    aiPlayers,
     currentMove,
     currentPlayer,
     winner,

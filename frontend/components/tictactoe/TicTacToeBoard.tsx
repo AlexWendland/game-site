@@ -5,6 +5,7 @@ export function TicTacToeBoard() {
   const {
     history,
     players,
+    aiPlayers,
     currentMove,
     currentPlayer,
     winner,

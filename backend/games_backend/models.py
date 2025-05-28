@@ -13,6 +13,7 @@ class ResponseType(enum.Enum):
     ERROR = "error"
     GAME_STATE = "game_state"
     SESSION_STATE = "session_state"
+    AI_PLAYERS = "ai_players"
 
 
 class ResponseParameters(pydantic.BaseModel):
@@ -64,6 +65,13 @@ class SessionStateResponse(Response):
     message_type: ResponseType = pydantic.Field(default=ResponseType.SESSION_STATE, init=False)
     parameters: SessionStateResponseParameters
 
+
+class AIStateResponseParameters(ResponseParameters):
+    ai_players: dict[int, str]
+
+class AIStateResponse(Response):
+    message_type: ResponseType = pydantic.Field(default=ResponseType.AI_PLAYERS, init=False)
+    parameters: AIStateResponseParameters
 
 class GameParameters(pydantic.BaseModel):
     """

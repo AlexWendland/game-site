@@ -55,6 +55,13 @@ class AIManager:
             if ai_instance.position is not None
         }
 
+    def get_ai_players(self) -> dict[int, str]:
+        return {
+            ai_instance.position: type(ai_instance).get_ai_type()
+            for ai_instance in self._ai_instances.values()
+            if ai_instance.position is not None
+        }
+
     async def handle_function_call(
         self, requester_client_id: str, function_name: str, function_parameters: dict[str, Any]
     ) -> models.ErrorResponse | None:

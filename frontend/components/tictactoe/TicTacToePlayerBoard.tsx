@@ -1,11 +1,13 @@
 import { Button } from "@heroui/button";
 import clsx from "clsx";
 import { useTicTacToeContext } from "@/components/tictactoe/TicTacToeContext";
+import { addAIPlayer, removeAIPlayer } from "@/lib/websocketFunctions";
 
 export function TicTacToePlayerBoard() {
   const {
     history,
     players,
+    aiPlayers,
     currentMove,
     currentPlayer,
     winner,

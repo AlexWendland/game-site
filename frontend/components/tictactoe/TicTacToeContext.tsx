@@ -20,12 +20,13 @@ import {
 import { addToast } from "@heroui/react";
 import { usePathname } from "next/navigation";
 import { useGameContext } from "@/context/GameContext";
-import { useUserContext } from "@/context/UserContext";
+import { getUserName } from "@/context/UserContext";
 
 type TicTacToeContextType = {
   // Backend state
   history: BoardValue[];
   players: Record<number, string | null>;
+  aiPlayers: Record<number, string>;
   winner: number | null;
   winningLine: number[];
   // Metadata on state
@@ -101,6 +102,7 @@ export function TicTacToeProvider({
     1: null,
     2: null,
   });
+  const [aiPlayers, setAIPlayers] = useState<Record<number, string>>({});
   const [winner, setWinner] = useState<number | null>(null);
   const [winningLine, setWinningLine] = useState<number[]>([]);
   // Client state
@@ -113,8 +115,7 @@ export function TicTacToeProvider({
   // Websocket
   const gameWebSocket = useRef<WebSocket | null>(null);
 
-  // Get username
-  const { username, setUsername, clearUsername } = useUserContext();
+  const username = getUserName();
 
   useEffect(() => {
     let isMounted = true;
@@ -140,6 +141,10 @@ export function TicTacToeProvider({
               case "session_state":
                 setCurrentUserPosition(parsedMessage.parameters.user_position);
                 setPlayers(parsedMessage.parameters.player_positions);
+                break;
+
+              case "ai_players":
+                setAIPlayers(parsedMessage.parameters.ai_players);
                 break;
 
               case "error":
@@ -269,6 +274,7 @@ export function TicTacToeProvider({
       value={{
         history,
         players,
+        aiPlayers,
         currentMove,
         currentPlayer,
         winner,
