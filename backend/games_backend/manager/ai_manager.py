@@ -85,7 +85,7 @@ class AIManager:
                 except pydantic.ValidationError as error:
                     return models.ErrorResponse(
                         parameters=models.ErrorResponseParameters(
-                            error_message=f"Parameter validation failed for add_ai: {error}"
+                            error_message=f"Parameter validation failed for remove_ai: {error}"
                         )
                     )
                 logger.info(f"Client {requester_client_id} is removing AI in position {parsed_parameters.position}.")
