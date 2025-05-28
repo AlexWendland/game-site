@@ -153,7 +153,7 @@ class TicTacToeAI(GameAI, ABC):
         winning_moves = []
         for move in self.available_moves:
             board = self._board.copy()
-            board[move] = self._current_player + 1 % 2
+            board[move] = (self._current_player + 1) % 2
             if check_tic_tac_toe_winner(board):
                 winning_moves.append(move)
         return winning_moves
