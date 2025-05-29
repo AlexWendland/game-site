@@ -121,6 +121,8 @@ class GameManager:
             del self._player_to_id[client]
             del self._id_to_player[client_id]
             self._session.remove_client(client_id)
+        await self._broadcast_session_state()
+        await self._broadcast_ai_state()
 
     async def _message_client_locked(self, client_id: str, message: models.Response):
         disconnect = False

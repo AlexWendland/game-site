@@ -16,29 +16,39 @@ import {
   parseWebSocketMessage,
   setPlayerNameWebsocket,
   setPlayerPosition,
+  addAIPlayerOverWebsocket,
+  removeAIPlayerOverWebsocket,
 } from "@/lib/websocketFunctions";
 import { addToast } from "@heroui/react";
 import { usePathname } from "next/navigation";
 import { useGameContext } from "@/context/GameContext";
 import { getUserName } from "@/context/UserContext";
 
-type TicTacToeContextType = {
-  // Backend state
+type TicTacToeBoardContextType = {
   history: BoardValue[];
-  players: Record<number, string | null>;
-  aiPlayers: Record<number, string>;
-  winner: number | null;
+  currentMove: number;
   winningLine: number[];
-  // Metadata on state
+  currentViewedMove: number;
+  makeMove: (position: number) => void;
+};
+
+type TicTacToeGameContextType = {
+  players: Record<number, string | null>;
   currentMove: number;
   currentPlayer: string | null;
-  // Client state
-  currentUserPosition: number | null;
+  winner: number | null;
   currentViewedMove: number;
-  // Functions
   setCurrentViewedMove: (newMove: number) => void;
+};
+
+type TicTacToePlayerContextType = {
+  players: Record<number, string | null>;
+  aiPlayers: Record<number, string>;
+  currentUserPosition: number | null;
+  aiModels: string[];
   updateCurrentUserPosition: (newPosition: number | null) => Promise<void>;
-  makeMove: (position: number) => void;
+  removeAIPlayer: (position: number) => Promise<void>;
+  addAIPlayer: (position: number, model: string) => Promise<void>;
 };
 
 type TicTacToeGameState = {
@@ -79,12 +89,42 @@ export function makeMoveOverWebsocket(
   );
 }
 
-const TicTacToeContext = createContext<TicTacToeContextType | null>(null);
+const TicTacToeBoardContext = createContext<TicTacToeBoardContextType | null>(
+  null,
+);
+const TicTacToePlayerContext = createContext<TicTacToePlayerContextType | null>(
+  null,
+);
+const TicTacToeGameContext = createContext<TicTacToeGameContextType | null>(
+  null,
+);
 
-export const useTicTacToeContext = () => {
-  const context = useContext(TicTacToeContext);
+export const useTicTacToeBoardContext = () => {
+  const context = useContext(TicTacToeBoardContext);
   if (!context) {
-    throw new Error("useGameContext must be used within a GameProvider");
+    throw new Error(
+      "useTicTacToeBoardContext must be used within a TicTacToeProvider",
+    );
+  }
+  return context;
+};
+
+export const useTicTacToePlayerContext = () => {
+  const context = useContext(TicTacToePlayerContext);
+  if (!context) {
+    throw new Error(
+      "useTicTacToePlayerContext must be used within a TicTacToeProvider",
+    );
+  }
+  return context;
+};
+
+export const useTicTacToeGameContext = () => {
+  const context = useContext(TicTacToeGameContext);
+  if (!context) {
+    throw new Error(
+      "useTicTacToeGameContext must be used within a TicTacToeProvider",
+    );
   }
   return context;
 };
@@ -266,27 +306,53 @@ export function TicTacToeProvider({
     makeMoveOverWebsocket(gameWebSocket.current, position);
   };
 
+  const removeAIPlayer = async (position: number) => {
+    removeAIPlayerOverWebsocket(gameWebSocket.current, position);
+  };
+
+  const addAIPlayer = async (position: number, model: string) => {
+    addAIPlayerOverWebsocket(gameWebSocket.current, position, model);
+  };
+
+  const aiModels = ["random", "blocker"];
+
   // Provide tsx
   if (isLoading) return <div>Loading game... </div>;
 
   return (
-    <TicTacToeContext.Provider
+    <TicTacToeBoardContext.Provider
       value={{
         history,
-        players,
-        aiPlayers,
         currentMove,
-        currentPlayer,
-        winner,
         winningLine,
-        currentUserPosition,
         currentViewedMove,
-        setCurrentViewedMove,
-        updateCurrentUserPosition,
         makeMove,
       }}
     >
-      {children}
-    </TicTacToeContext.Provider>
+      <TicTacToePlayerContext.Provider
+        value={{
+          players,
+          aiPlayers,
+          currentUserPosition,
+          aiModels,
+          updateCurrentUserPosition,
+          addAIPlayer,
+          removeAIPlayer,
+        }}
+      >
+        <TicTacToeGameContext.Provider
+          value={{
+            players,
+            currentMove,
+            currentPlayer,
+            winner,
+            currentViewedMove,
+            setCurrentViewedMove,
+          }}
+        >
+          {children}
+        </TicTacToeGameContext.Provider>
+      </TicTacToePlayerContext.Provider>
+    </TicTacToeBoardContext.Provider>
   );
 }

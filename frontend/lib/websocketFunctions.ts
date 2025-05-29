@@ -75,7 +75,10 @@ export function leavePlayerPosition(webSocket: WebSocket | null): void {
   );
 }
 
-export function removeAIPlayer(webSocket: WebSocket | null, position: number): void {
+export function removeAIPlayerOverWebsocket(
+  webSocket: WebSocket | null,
+  position: number,
+): void {
   if (!webSocket) {
     return;
   }
@@ -83,12 +86,16 @@ export function removeAIPlayer(webSocket: WebSocket | null, position: number): v
     JSON.stringify({
       request_type: "ai",
       function_name: "remove_ai",
-      parameters: {position: position},
+      parameters: { position: position },
     }),
   );
 }
 
-export function addAIPlayer(webSocket: WebSocket | null, position: number, model: string): void {
+export function addAIPlayerOverWebsocket(
+  webSocket: WebSocket | null,
+  position: number,
+  model: string,
+): void {
   if (!webSocket) {
     return;
   }
@@ -96,7 +103,7 @@ export function addAIPlayer(webSocket: WebSocket | null, position: number, model
     JSON.stringify({
       request_type: "ai",
       function_name: "add_ai",
-      parameters: {position: position, ai_model: model},
+      parameters: { position: position, ai_model: model },
     }),
   );
 }
@@ -187,10 +194,7 @@ export function parseWebSocketMessage(event: MessageEvent): ParsedMessage {
         }
         break;
       case "ai_players":
-        if (
-          parameters &&
-          typeof parameters.ai_players === "object"
-        ) {
+        if (parameters && typeof parameters.ai_players === "object") {
           return {
             message_type: "ai_players",
             parameters,

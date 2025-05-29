@@ -71,6 +71,11 @@ class TicTacToeGame(game_base.GameBase):
             return models.ErrorResponse(
                 parameters=models.ErrorResponseParameters(error_message=f"Move {move} is already taken.")
             )
+        if self._winner is not None:
+            logger.info(f"Game already has a winner: {self._winner}.")
+            return models.ErrorResponse(
+                parameters=models.ErrorResponseParameters(error_message=f"Game already has a winner: {self._winner}.")
+            )
         logger.info(f"Player {player_position} moves to {move}")
         new_board = self._history[-1].copy()
         new_board[move] = player_position
@@ -126,14 +131,26 @@ class TicTacToeGame(game_base.GameBase):
 class TicTacToeAI(GameAI, ABC):
     def __init__(self, position: int):
         self._board: list[None | int] = [None] * 9
-        self._current_player = sum(state is None for state in self._board) % 2
         super().__init__(position)
+
+    @property
+    def move_number(self) -> int:
+        return sum(state is not None for state in self._board)
+
+    @property
+    def current_player(self) -> int:
+        return self.move_number % 2
+
+    @property
+    def game_over(self) -> bool:
+        return self.move_number >= 9 or len(check_tic_tac_toe_winner(self._board)) != 0
 
     @override
     def update_game_state(self, game_state: TicTacToeGameStateResponse) -> None | models.WebSocketRequest:
         self._board = game_state.parameters.history[-1]
-        self._current_player = sum(state is None for state in self._board) % 2
-        if self._position == self._current_player:
+        if self._position == self.current_player:
+            if self.game_over:
+                return None
             move = self.make_move()
             return models.WebSocketRequest(
                 request_type=models.WebSocketRequestType.GAME,
@@ -153,7 +170,7 @@ class TicTacToeAI(GameAI, ABC):
         winning_moves = []
         for move in self.available_moves:
             board = self._board.copy()
-            board[move] = (self._current_player + 1) % 2
+            board[move] = (self.current_player + 1) % 2
             if check_tic_tac_toe_winner(board):
                 winning_moves.append(move)
         return winning_moves
@@ -163,7 +180,7 @@ class TicTacToeAI(GameAI, ABC):
         winning_moves = []
         for move in self.available_moves:
             board = self._board.copy()
-            board[move] = self._current_player
+            board[move] = self.current_player
             if check_tic_tac_toe_winner(board):
                 winning_moves.append(move)
         return winning_moves

@@ -3,23 +3,17 @@
 import { TicTacToeBoard } from "@/components/tictactoe/TicTacToeBoard";
 import { TicTacToePlayerBoard } from "@/components/tictactoe/TicTacToePlayerBoard";
 import { Pagination } from "@heroui/react";
-import { useTicTacToeContext as useTicTacToeContext } from "@/components/tictactoe/TicTacToeContext";
+import { useTicTacToeGameContext } from "@/components/tictactoe/TicTacToeContext";
 
 export function TicTacToeGame() {
   const {
-    history,
     players,
-    aiPlayers,
     currentMove,
     currentPlayer,
     winner,
-    winningLine,
-    currentUserPosition,
     currentViewedMove,
     setCurrentViewedMove,
-    updateCurrentUserPosition,
-    makeMove,
-  } = useTicTacToeContext();
+  } = useTicTacToeGameContext();
 
   const status =
     winner !== null
