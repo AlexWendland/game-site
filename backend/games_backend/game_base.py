@@ -2,6 +2,7 @@ import abc
 from typing import Any
 
 from games_backend import models
+from games_backend.ai_base import GameAI
 
 
 class GameBase(abc.ABC):
@@ -27,6 +28,12 @@ class GameBase(abc.ABC):
     def get_max_players(self) -> int:
         """
         Get the maximum number of players for this game.
+        """
+
+    @abc.abstractmethod
+    def get_game_ai(self) -> dict[str, type[GameAI]]:
+        """
+        Mapping from model names to their classes.
         """
 
     @abc.abstractmethod

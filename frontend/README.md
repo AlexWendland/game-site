@@ -2,6 +2,18 @@
 
 Simple frontend to understand react.
 
+## Run
+
+When you first get this repo run
+```
+$ npm install
+```
+Then you should be safe to run
+```
+$ up
+```
+which will start the dev server.
+
 ## Todo list
 
 - [ ] Add auth to the front/backend.

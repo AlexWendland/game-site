@@ -75,11 +75,51 @@ export function leavePlayerPosition(webSocket: WebSocket | null): void {
   );
 }
 
+export function removeAIPlayerOverWebsocket(
+  webSocket: WebSocket | null,
+  position: number,
+): void {
+  if (!webSocket) {
+    return;
+  }
+  webSocket.send(
+    JSON.stringify({
+      request_type: "ai",
+      function_name: "remove_ai",
+      parameters: { position: position },
+    }),
+  );
+}
+
+export function addAIPlayerOverWebsocket(
+  webSocket: WebSocket | null,
+  position: number,
+  model: string,
+): void {
+  if (!webSocket) {
+    return;
+  }
+  webSocket.send(
+    JSON.stringify({
+      request_type: "ai",
+      function_name: "add_ai",
+      parameters: { position: position, ai_model: model },
+    }),
+  );
+}
+
 interface SessionStateMessage {
   message_type: "session_state";
   parameters: {
     player_positions: Record<number, string | null>;
     user_position: number | null;
+  };
+}
+
+interface AIStateMessage {
+  message_type: "ai_players";
+  parameters: {
+    ai_players: Record<number, string>;
   };
 }
 
@@ -112,7 +152,8 @@ export type ParsedMessage =
   | ErrorMessage
   | SimpleMessage
   | GameStateMessage
-  | UnknownMessage;
+  | UnknownMessage
+  | AIStateMessage;
 
 export function parseWebSocketMessage(event: MessageEvent): ParsedMessage {
   try {
@@ -152,7 +193,14 @@ export function parseWebSocketMessage(event: MessageEvent): ParsedMessage {
           };
         }
         break;
-
+      case "ai_players":
+        if (parameters && typeof parameters.ai_players === "object") {
+          return {
+            message_type: "ai_players",
+            parameters,
+          };
+        }
+        break;
       case "error":
         if (parameters && typeof parameters.error_message === "string") {
           return {

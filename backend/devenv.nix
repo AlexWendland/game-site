@@ -1,6 +1,8 @@
 { pkgs, lib, config, inputs, ... }:
 {
   packages = [ 
+    pkgs.python312
+    pkgs.poetry
     pkgs.ruff
     pkgs.mypy
   ];

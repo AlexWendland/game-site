@@ -18,6 +18,7 @@ def mock_game_manager() -> MagicMock:
     game_manager.close_game = AsyncMock()
     return game_manager
 
+
 @pytest.mark.asyncio
 async def test_add_and_get_game(book_manager: BookManager, mock_game_manager: MagicMock):
     game_id = "game1"
@@ -32,6 +33,7 @@ def test_add_duplicate_game_raises(book_manager: BookManager, mock_game_manager:
     with pytest.raises(KeyError, match="already exists"):
         book_manager.add_game(game_id, mock_game_manager)
 
+
 @pytest.mark.asyncio
 async def test_get_nonexistent_game_raises(book_manager: BookManager):
     with pytest.raises(KeyError, match=r"no_such_game"):
@@ -45,6 +47,7 @@ async def test_remove_game(book_manager: BookManager, mock_game_manager: MagicMo
     await book_manager.remove_game(game_id)
     mock_game_manager.close_game.assert_awaited_once()
     assert game_id not in await book_manager.get_all_game_ids()
+
 
 @pytest.mark.asyncio
 async def test_get_all_game_ids(book_manager: BookManager, mock_game_manager: MagicMock):

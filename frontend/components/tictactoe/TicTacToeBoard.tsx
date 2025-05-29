@@ -1,20 +1,9 @@
 import { TicTacToeSquare } from "@/components/tictactoe/TicTacToeSquare";
-import { useTicTacToeContext } from "@/components/tictactoe/TicTacToeContext";
+import { useTicTacToeBoardContext } from "@/components/tictactoe/TicTacToeContext";
 
 export function TicTacToeBoard() {
-  const {
-    history,
-    players,
-    currentMove,
-    currentPlayer,
-    winner,
-    winningLine,
-    currentUserPosition,
-    currentViewedMove,
-    setCurrentViewedMove,
-    updateCurrentUserPosition,
-    makeMove,
-  } = useTicTacToeContext();
+  const { history, currentMove, winningLine, currentViewedMove, makeMove } =
+    useTicTacToeBoardContext();
 
   return (
     <div className="grid grid-cols-3 gap-2 max-w-[600px] max-h-[600px] aspect-square">

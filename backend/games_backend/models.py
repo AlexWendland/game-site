@@ -13,6 +13,7 @@ class ResponseType(enum.Enum):
     ERROR = "error"
     GAME_STATE = "game_state"
     SESSION_STATE = "session_state"
+    AI_PLAYERS = "ai_players"
 
 
 class ResponseParameters(pydantic.BaseModel):
@@ -65,6 +66,15 @@ class SessionStateResponse(Response):
     parameters: SessionStateResponseParameters
 
 
+class AIStateResponseParameters(ResponseParameters):
+    ai_players: dict[int, str]
+
+
+class AIStateResponse(Response):
+    message_type: ResponseType = pydantic.Field(default=ResponseType.AI_PLAYERS, init=False)
+    parameters: AIStateResponseParameters
+
+
 class GameParameters(pydantic.BaseModel):
     """
     Custom game specific information can be provided here.
@@ -91,12 +101,13 @@ class GameMetadata(pydantic.BaseModel):
 # -------------------------------------
 
 
-class WebsocketRequestType(enum.Enum):
+class WebSocketRequestType(enum.Enum):
     SESSION = "session"
     GAME = "game"
+    AI = "ai"
 
 
 class WebSocketRequest(pydantic.BaseModel):
-    request_type: WebsocketRequestType
+    request_type: WebSocketRequestType
     function_name: str
     parameters: dict[str, Any]

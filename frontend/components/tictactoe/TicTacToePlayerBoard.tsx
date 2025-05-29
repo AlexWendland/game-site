@@ -1,21 +1,16 @@
-import { Button } from "@heroui/button";
-import clsx from "clsx";
-import { useTicTacToeContext } from "@/components/tictactoe/TicTacToeContext";
+import { useTicTacToePlayerContext } from "@/components/tictactoe/TicTacToeContext";
+import { TicTacToePlayerSlot } from "./TicTacToePlayerSlot";
 
 export function TicTacToePlayerBoard() {
   const {
-    history,
     players,
-    currentMove,
-    currentPlayer,
-    winner,
-    winningLine,
+    aiPlayers,
     currentUserPosition,
-    currentViewedMove,
-    setCurrentViewedMove,
+    aiModels,
     updateCurrentUserPosition,
-    makeMove,
-  } = useTicTacToeContext();
+    removeAIPlayer,
+    addAIPlayer,
+  } = useTicTacToePlayerContext();
 
   const availablePlayers = [
     { id: 0, name: "Cross", icon: <img src="/cross.png" width="30" /> },
@@ -28,30 +23,30 @@ export function TicTacToePlayerBoard() {
       <div className="space-y-3">
         {availablePlayers.map((player) => {
           const isSelected = currentUserPosition === player.id;
+          const isAI = player.id in aiPlayers;
+          const isOccupied = players[player.id] !== null;
           return (
-            <Button
+            <TicTacToePlayerSlot
               key={player.id}
-              variant="light"
-              className={clsx(
-                "flex items-center justify-between w-full px-4 py-2 text-left",
-                isSelected && "border-blue-500 bg-blue-50",
-              )}
-              onPress={() => {
-                if (currentUserPosition == player.id) {
-                  updateCurrentUserPosition(null);
-                } else {
-                  updateCurrentUserPosition(player.id);
-                }
+              playerName={players[player.id]}
+              icon={player.icon}
+              isCurrentUser={isSelected}
+              isOccupiedByHuman={isOccupied && !isAI}
+              isOccupiedByAI={isAI}
+              aiModels={aiModels}
+              movePlayer={() => {
+                updateCurrentUserPosition(player.id);
               }}
-            >
-              <span className="flex items-center space-x-2">
-                <span>{player.icon}</span>
-                <span>{player.name}</span>
-              </span>
-              <span className="text-sm text-gray-700">
-                {players[player.id]} {isSelected && "(*)"}
-              </span>
-            </Button>
+              removePlayer={() => {
+                updateCurrentUserPosition(null);
+              }}
+              addAIPlayer={(model: string) => {
+                addAIPlayer(player.id, model);
+              }}
+              removeAIPlayer={() => {
+                removeAIPlayer(player.id);
+              }}
+            />
           );
         })}
       </div>

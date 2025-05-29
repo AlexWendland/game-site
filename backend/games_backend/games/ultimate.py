@@ -135,6 +135,14 @@ class UltimateGame(game_base.GameBase):
         return 2
 
     @override
+    def get_game_ai(self) -> dict[str, type[game_base.GameAI]]:
+        """
+        Mapping from model names to their classes.
+        """
+        # TODO: Implement AI for Ultimate game
+        return {}
+
+    @override
     def get_metadata(self) -> models.GameMetadata:
         return models.GameMetadata(
             game_type=models.GameType.ULTIMATE,
