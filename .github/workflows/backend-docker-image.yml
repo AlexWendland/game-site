@@ -2,9 +2,7 @@ name: Push backend docker image
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
 jobs:
   push_to_registry:
