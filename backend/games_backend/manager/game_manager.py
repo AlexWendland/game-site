@@ -176,9 +176,7 @@ class GameManager:
     async def _broadcast_ai_state(self):
         to_disconnect: list[str] = []
         ai_players = self._ai_manager.get_ai_players()
-        message = models.AIStateResponse(
-            parameters=models.AIStateResponseParameters(ai_players=ai_players)
-        )
+        message = models.AIStateResponse(parameters=models.AIStateResponseParameters(ai_players=ai_players))
         async with self._player_lock:
             for client_id in self._id_to_player:
                 if await self._message_client(client_id, message):

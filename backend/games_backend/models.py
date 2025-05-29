@@ -69,9 +69,11 @@ class SessionStateResponse(Response):
 class AIStateResponseParameters(ResponseParameters):
     ai_players: dict[int, str]
 
+
 class AIStateResponse(Response):
     message_type: ResponseType = pydantic.Field(default=ResponseType.AI_PLAYERS, init=False)
     parameters: AIStateResponseParameters
+
 
 class GameParameters(pydantic.BaseModel):
     """
