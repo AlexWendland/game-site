@@ -40,7 +40,7 @@ class TicTacToeGame(game_base.GameBase):
         Get the model to pass the game parameters.
         """
         if function_name != "make_move":
-            logger.info(f"Player {player_position} requested unknow function {function_name}.")
+            logger.info(f"Player {player_position} requested unknown function {function_name}.")
             return models.ErrorResponse(
                 parameters=models.ErrorResponseParameters(error_message=f"Function {function_name} not supported.")
             )

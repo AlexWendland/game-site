@@ -78,7 +78,7 @@ class SessionManager:
                 logger.info(f"Client {client_id} leaving position.")
                 self._remove_client_from_position(client_id)
             case _:
-                logger.info(f"Client {client_id} requested unknow function {function_name}.")
+                logger.info(f"Client {client_id} requested unknown function {function_name}.")
                 return models.ErrorResponse(
                     parameters=models.ErrorResponseParameters(error_message=f"Function {function_name} not supported.")
                 )

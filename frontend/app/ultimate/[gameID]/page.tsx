@@ -17,8 +17,8 @@ export default async function Page({
     notFound();
   }
   try {
-    const metdata = await getGameMetadata(gameID);
-    if (metdata.game_type !== "ultimate") {
+    const metadata = await getGameMetadata(gameID);
+    if (metadata.game_type !== "ultimate") {
       notFound();
     }
   } catch (error) {

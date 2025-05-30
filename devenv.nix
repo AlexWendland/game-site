@@ -47,4 +47,18 @@
   scripts.front-docker-up.exec = ''
     cd frontend && docker run --env-file .env.local -p 3000:3000 games-frontend
   '';
+
+  git-hooks.hooks = {
+    ruff.enable = true;
+    ruff-format.enable = true;
+    typos.enable = true;
+    pytest = {
+      enable = true;
+      name = "Pytest";
+      entry = "bash -c 'devenv shell && cd backend && poetry run pytest'";
+      pass_filenames = false;
+      args = [ "--maxfail=1" "--disable-warnings" "--tb=short" ];
+      always_run = true;
+    };
+  };
 }
