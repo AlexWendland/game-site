@@ -1,8 +1,11 @@
+import random
+from abc import ABC, abstractmethod
 from typing import Any, override
 
 import pydantic
 
 from games_backend import game_base, models
+from games_backend.ai_base import GameAI
 from games_backend.app_logger import logger
 from games_backend.games.utils import check_tic_tac_toe_winner
 
@@ -139,8 +142,10 @@ class UltimateGame(game_base.GameBase):
         """
         Mapping from model names to their classes.
         """
-        # TODO: Implement AI for Ultimate game
-        return {}
+        return {
+            UltimateRandomAI.get_ai_type(): UltimateRandomAI,
+            UltimateTacticianAI.get_ai_type(): UltimateTacticianAI,
+        }
 
     @override
     def get_metadata(self) -> models.GameMetadata:
@@ -149,3 +154,148 @@ class UltimateGame(game_base.GameBase):
             max_players=2,
             parameters=models.GameParameters(),
         )
+
+
+class UltimateAI(GameAI, ABC):
+    def __init__(self, position: int, name: str):
+        self._moves: list[None | int] = [None] * 81
+        self._sector_to_play: int | None = None
+        self._sectors_owned: list[None | int] = [None] * 9
+        self._winner: int | None = None
+        super().__init__(position, name)
+
+    @property
+    def move_number(self) -> int:
+        return sum(state is not None for state in self._moves)
+
+    @property
+    def current_player(self) -> int:
+        return self.move_number % 2
+
+    @property
+    def game_over(self) -> bool:
+        return self._winner is not None
+
+    @property
+    def opponent(self) -> int:
+        return (self.current_player + 1) % 2
+
+    @property
+    def board(self) -> list[None | int]:
+        return [move % 2 if move is not None else None for move in self._moves]
+
+    @override
+    def update_game_state(self, game_state: UltimateGameStateResponse) -> None | models.WebSocketRequest:
+        self._moves: list[None | int] = game_state.parameters.moves
+        self._sector_to_play: int | None = game_state.parameters.sector_to_play[-1]
+        self._sectors_owned: list[None | int] = game_state.parameters.sectors_owned
+        self._winner: int | None = game_state.parameters.winner
+        if self._position == self.current_player:
+            if self.game_over:
+                return None
+            move = self.make_move()
+            return models.WebSocketRequest(
+                request_type=models.WebSocketRequestType.GAME,
+                function_name="make_move",
+                parameters={"position": move},
+            )
+
+    @abstractmethod
+    def make_move(self) -> int: ...
+
+    @property
+    def available_moves(self) -> list[int]:
+        if self._sector_to_play is not None:
+            start = self._sector_to_play * 9
+            end = start + 9
+            return [i for i in range(start, end) if self._moves[i] is None]
+        return [i for i, state in enumerate(self._moves) if state is None]
+
+    def get_winning_moves_in_sector(self, sector: int, player: int) -> list[int]:
+        start = sector * 9
+        end = start + 9
+        board = [move % 2 if move is not None else None for move in self._moves[start:end]]
+        available_moves = [i for i, move in enumerate(board) if move is None]
+        winning_moves: list[int] = []
+        for move in available_moves:
+            board_copy = board.copy()
+            board_copy[move] = player
+            if check_tic_tac_toe_winner(board_copy):
+                winning_moves.append(move + start)
+        return winning_moves
+
+    def get_winning_sectors(self, player: int) -> list[int]:
+        winning_sectors: list[int] = []
+        available_sectors = [i for i, sector in enumerate(self._sectors_owned) if sector is None]
+        for sector in available_sectors:
+            sector_copy = self._sectors_owned.copy()
+            sector_copy[sector] = player
+            if check_tic_tac_toe_winner(sector_copy):
+                winning_sectors.append(sector)
+        return winning_sectors
+
+
+class UltimateRandomAI(UltimateAI):
+    """
+    Completely random AI.
+    """
+
+    @override
+    @classmethod
+    def get_ai_type(cls) -> str:
+        return "random"
+
+    def make_move(self) -> int:
+        available_moves = self.available_moves
+        if not available_moves:
+            raise ValueError("No available moves left.")
+        return random.choice(available_moves)
+
+
+class UltimateTacticianAI(UltimateAI):
+    """
+    Tactician AI that tries to win or block the opponent.
+    """
+
+    @override
+    @classmethod
+    def get_ai_type(cls) -> str:
+        return "tactician"
+
+    def make_move(self) -> int:
+        available_moves = self.available_moves
+        if not available_moves:
+            raise ValueError("No available moves left.")
+
+        if self._sector_to_play is not None:
+            winning_moves = self.get_winning_moves_in_sector(self._sector_to_play, self.current_player)
+            if winning_moves:
+                return random.choice(winning_moves)
+
+            opponent_winning_moves = self.get_winning_moves_in_sector(self._sector_to_play, self.opponent)
+            if opponent_winning_moves:
+                return random.choice(opponent_winning_moves)
+
+            return random.choice(available_moves)
+
+        winning_sectors = self.get_winning_sectors(self.current_player)
+
+        winning_moves: list[int] = []
+
+        for sector in winning_sectors:
+            winning_moves += self.get_winning_moves_in_sector(sector, self.current_player)
+
+        if winning_moves:
+            return random.choice(winning_moves)
+
+        opponent_winning_sectors = self.get_winning_sectors(self.opponent)
+
+        opponent_winning_moves: list[int] = []
+
+        for sector in opponent_winning_sectors:
+            opponent_winning_moves += self.get_winning_moves_in_sector(sector, self.opponent)
+
+        if opponent_winning_moves:
+            return random.choice(opponent_winning_moves)
+
+        return random.choice(available_moves)
