@@ -9,8 +9,8 @@ from games_backend.manager.ai_manager import AIManager
 
 
 class MockGameAI(GameAI):
-    def __init__(self, position: int):
-        super().__init__(position)
+    def __init__(self, position: int, name: str):
+        super().__init__(position, name)
         self.id = f"ai_{position}"
 
     @override
@@ -24,8 +24,8 @@ class MockGameAI(GameAI):
 
 
 class AnotherMockGameAI(GameAI):
-    def __init__(self, position: int):
-        super().__init__(position)
+    def __init__(self, position: int, name: str):
+        super().__init__(position, name)
         self.id = f"another_ai_{position}"
 
     @override

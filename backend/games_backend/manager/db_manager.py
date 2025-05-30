@@ -36,7 +36,7 @@ class InMemoryDBManager(DBManager):
 
     @override
     async def delete_game(self, game_id: str) -> None:
-        logger.info(f"Deleteing {game_id} from in memory DB.")
+        logger.info(f"Deleting {game_id} from in memory DB.")
         if game_id not in self._games:
             return
         _ = self._games.pop(game_id)

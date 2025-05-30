@@ -16,11 +16,11 @@ def is_game_id_valid(game_id: str) -> bool:
     return bool(re.fullmatch(r"[A-Z]{5}", game_id))
 
 
-def non_matching_game_name(curent_games: set[str]) -> str:
+def non_matching_game_name(current_games: set[str]) -> str:
     """
     Generates a new game name that is not in the current set of games.
     """
-    while (this_game := _random_game_name()) in curent_games:
+    while (this_game := _random_game_name()) in current_games:
         pass
     return this_game
 
