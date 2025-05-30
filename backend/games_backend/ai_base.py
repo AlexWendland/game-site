@@ -10,7 +10,7 @@ class GameAI(ABC):
         self._name: str = name
 
     @property
-    def name(self) -> str | None:
+    def name(self) -> str:
         return self._name
 
     def handle_message(self, message: Response) -> None | WebSocketRequest:

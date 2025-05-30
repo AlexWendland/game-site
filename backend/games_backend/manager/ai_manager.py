@@ -150,8 +150,8 @@ class AIManager:
         )
 
     def get_new_name(self) -> str:
-        current_names = {ai.name for ai in self._ai_instances.values() if ai.name}
-        while True:
-            name = f"AI-{random.choice(NAMES)}"
-            if name not in current_names:
-                return name
+        used_names = {ai.name[3:] for ai in self._ai_instances.values() if ai.name and ai.name.startswith("AI-")}
+        available_names = list(set(NAMES) - used_names)
+        if not available_names:
+            return "AI-alfred"
+        return f"AI-{random.choice(available_names)}"
