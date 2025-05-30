@@ -1,3 +1,4 @@
+import random
 from collections.abc import Awaitable
 from typing import Any, Callable, Self
 
@@ -6,6 +7,7 @@ import pydantic
 from games_backend import models
 from games_backend.ai_base import GameAI
 from games_backend.app_logger import logger
+from games_backend.constants import NAMES
 
 
 class AddAIParameters(pydantic.BaseModel):
@@ -114,14 +116,14 @@ class AIManager:
                 )
 
     async def _add_ai(self, ai_model: str, position: int) -> models.ErrorResponse | None:
-        ai_instance = self._game_models[ai_model](position=position)
+        ai_instance = self._game_models[ai_model](position=position, name=self.get_new_name())
         ai_id = await self._add_ai_to_game(ai_instance)
         await self._act_as_ai(
             ai_id,
             models.WebSocketRequest(
                 request_type=models.WebSocketRequestType.SESSION,
                 function_name="set_player_name",
-                parameters={"player_name": "AI-alfred"},
+                parameters={"player_name": ai_instance.name},
             ),
         )
         await self._act_as_ai(
@@ -146,3 +148,10 @@ class AIManager:
                 request_type=models.WebSocketRequestType.GAME, function_name="get_game_state", parameters={}
             ),
         )
+
+    def get_new_name(self) -> str:
+        current_names = {ai.name for ai in self._ai_instances.values() if ai.name}
+        while True:
+            name = f"AI-{random.choice(NAMES)}"
+            if name not in current_names:
+                return name
