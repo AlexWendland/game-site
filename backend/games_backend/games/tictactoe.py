@@ -129,9 +129,9 @@ class TicTacToeGame(game_base.GameBase):
 
 
 class TicTacToeAI(GameAI, ABC):
-    def __init__(self, position: int):
+    def __init__(self, position: int, name: str):
         self._board: list[None | int] = [None] * 9
-        super().__init__(position)
+        super().__init__(position, name)
 
     @property
     def move_number(self) -> int:
