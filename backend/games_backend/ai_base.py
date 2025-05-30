@@ -5,8 +5,13 @@ from games_backend.models import GameStateResponse, Response, ResponseType, Sess
 
 
 class GameAI(ABC):
-    def __init__(self, position: int):
+    def __init__(self, position: int, name: str):
         self._position: int | None = position
+        self._name: str = name
+
+    @property
+    def name(self) -> str | None:
+        return self._name
 
     def handle_message(self, message: Response) -> None | WebSocketRequest:
         if message.message_type == ResponseType.SESSION_STATE:
