@@ -314,7 +314,7 @@ export function TicTacToeProvider({
     addAIPlayerOverWebsocket(gameWebSocket.current, position, model);
   };
 
-  const aiModels = ["random", "blocker"];
+  const aiModels = ["random", "blocker", "unbeatable"];
 
   // Provide tsx
   if (isLoading) return <div>Loading game... </div>;
