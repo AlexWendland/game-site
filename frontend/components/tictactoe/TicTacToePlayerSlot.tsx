@@ -14,7 +14,7 @@ type PlayerSlotProps = {
   isCurrentUser: boolean;
   isOccupiedByHuman: boolean;
   isOccupiedByAI: boolean;
-  aiModels: string[];
+  aiModels: Record<string, string>;
   movePlayer: () => void;
   removePlayer: () => void;
   addAIPlayer: (model: string) => void;
@@ -61,9 +61,12 @@ export function TicTacToePlayerSlot({
                 <Button size="sm">Add AI</Button>
               </DropdownTrigger>
               <DropdownMenu aria-label="Static Actions">
-                {aiModels.map((model) => (
-                  <DropdownItem key={model} onPress={() => addAIPlayer(model)}>
-                    {model}
+                {Object.entries(aiModels).map(([model_key, model_name]) => (
+                  <DropdownItem
+                    key={model_key}
+                    onPress={() => addAIPlayer(model_key)}
+                  >
+                    {model_name}
                   </DropdownItem>
                 ))}
               </DropdownMenu>

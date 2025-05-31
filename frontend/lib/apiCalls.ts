@@ -48,12 +48,12 @@ interface GameMetadata {
 
 export async function getGameMetadata(gameID: string): Promise<GameMetadata> {
   const response = await fetch(apiUrl(`/game/${gameID}`));
-  const data = await response.json();
 
   if (!response.ok) {
     throw new Error(`Error fetching game metadata: ${response.statusText}`);
   }
 
+  const data = await response.json();
   if (
     !data ||
     typeof data !== "object" ||
@@ -66,4 +66,33 @@ export async function getGameMetadata(gameID: string): Promise<GameMetadata> {
   }
 
   return data as GameMetadata;
+}
+
+interface GameModelResponse {
+  message_type: string;
+  parameters: {
+    models: Record<string, string>;
+  };
+}
+
+export async function getGameModels(
+  gameType: string,
+): Promise<Record<string, string>> {
+  const response = await fetch(apiUrl(`/game/models/${gameType}`));
+  if (!response.ok) {
+    throw new Error(`Error fetching game AI models: ${response.statusText}`);
+  }
+  const data = await response.json();
+
+  if (
+    !data ||
+    typeof data !== "object" ||
+    data.message_type !== "model" ||
+    typeof data.parameters !== "object" ||
+    typeof data.parameters.models !== "object"
+  ) {
+    console.error("Invalid game model response format:", data);
+    throw new Error("Invalid game model response format");
+  }
+  return data.parameters.models;
 }

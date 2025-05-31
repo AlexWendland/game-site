@@ -80,7 +80,7 @@ class GameManager:
         session = SessionManager(game.get_max_players())
         manager = cls(game_id=game_id, game=game, session=session)
         ai_manager = AIManager(
-            game_models=game.get_game_ai(),
+            game_models=type(game).get_game_ai(),
             add_ai=manager._connect_ai,
             act_as_ai=manager._action_message,
             remove_ai=manager._disconnect,

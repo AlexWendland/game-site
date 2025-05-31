@@ -26,6 +26,10 @@ class GameAI(ABC):
     @abstractmethod
     def get_ai_type(cls) -> str: ...
 
+    @classmethod
+    @abstractmethod
+    def get_ai_user_name(cls) -> str: ...
+
     @property
     def position(self) -> int | None:
         return self._position

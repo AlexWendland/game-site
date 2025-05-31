@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from games_backend import models
 from games_backend.app_logger import logger
+from games_backend.game_base import GameBase
 from games_backend.games.tictactoe import TicTacToeGame
 from games_backend.games.ultimate import UltimateGame
 from games_backend.manager.book_manager import BookManager
@@ -55,6 +56,11 @@ def get_book_manager() -> BookManager:
     return app.state.book_manager
 
 
+GAME_MAPPING: dict[models.GameType, type[GameBase]] = {
+    models.GameType.TICTACTOE: TicTacToeGame,
+    models.GameType.ULTIMATE: UltimateGame,
+}
+
 # -------------------------------------
 # REST API
 # -------------------------------------
@@ -87,6 +93,13 @@ async def new_ultimate_game(
     book_manager.add_game(new_game_id, game_manager)
     logger.info(f"New game of Ultimate Tic Tac Toe created: {new_game_id}")
     return models.SimpleResponse(parameters=models.SimpleResponseParameters(message=new_game_id))
+
+
+@app.get("/game/models/{game_type}")
+async def get_game_models(game_type: models.GameType) -> models.ModelResponse:
+    return models.ModelResponse(
+        parameters=models.ModelResponseParameters(models=GAME_MAPPING[game_type].get_game_ai_named())
+    )
 
 
 @app.get("/game/{game_name}")
