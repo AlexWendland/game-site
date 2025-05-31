@@ -23,6 +23,7 @@ import { addToast } from "@heroui/react";
 import { usePathname } from "next/navigation";
 import { useGameContext } from "@/context/GameContext";
 import { getUserName } from "@/context/UserContext";
+import { getGameModels } from "@/lib/apiCalls";
 
 type TicTacToeBoardContextType = {
   history: BoardValue[];
@@ -45,7 +46,7 @@ type TicTacToePlayerContextType = {
   players: Record<number, string | null>;
   aiPlayers: Record<number, string>;
   currentUserPosition: number | null;
-  aiModels: string[];
+  aiModels: Record<string, string>;
   updateCurrentUserPosition: (newPosition: number | null) => Promise<void>;
   removeAIPlayer: (position: number) => Promise<void>;
   addAIPlayer: (position: number, model: string) => Promise<void>;
@@ -142,6 +143,7 @@ export function TicTacToeProvider({
     1: null,
     2: null,
   });
+  const [aiModels, setAIModels] = useState<Record<string, string>>({});
   const [aiPlayers, setAIPlayers] = useState<Record<number, string>>({});
   const [winner, setWinner] = useState<number | null>(null);
   const [winningLine, setWinningLine] = useState<number[]>([]);
@@ -163,11 +165,9 @@ export function TicTacToeProvider({
     const connectWebSocket = async () => {
       try {
         const webSocket = await getGameWebsocket(gameID);
-
         if (username) {
           setPlayerNameWebsocket(username, webSocket);
         }
-
         setIsLoading(false);
 
         if (!isMounted) return; // handle fast unmount
@@ -245,6 +245,19 @@ export function TicTacToeProvider({
     };
   }, [gameID, username]);
 
+  // Get AI models
+  useEffect(() => {
+    const fetchAIModels = async () => {
+      try {
+        const models = await getGameModels("tictactoe");
+        setAIModels(models);
+      } catch (error) {
+        console.error("Failed to fetch AI models:", error);
+      }
+    };
+    fetchAIModels();
+  }, []);
+
   // Set game details in context.
   const {
     gameCode,
@@ -313,8 +326,6 @@ export function TicTacToeProvider({
   const addAIPlayer = async (position: number, model: string) => {
     addAIPlayerOverWebsocket(gameWebSocket.current, position, model);
   };
-
-  const aiModels = ["random", "blocker"];
 
   // Provide tsx
   if (isLoading) return <div>Loading game... </div>;

@@ -14,6 +14,7 @@ class ResponseType(enum.Enum):
     GAME_STATE = "game_state"
     SESSION_STATE = "session_state"
     AI_PLAYERS = "ai_players"
+    MODEL = "model"
 
 
 class ResponseParameters(pydantic.BaseModel):
@@ -94,6 +95,15 @@ class GameMetadata(pydantic.BaseModel):
     game_type: GameType
     max_players: int
     parameters: GameParameters
+
+
+class ModelResponseParameters(ResponseParameters):
+    models: dict[str, str]
+
+
+class ModelResponse(Response):
+    message_type: ResponseType = pydantic.Field(default=ResponseType.MODEL, init=False)
+    parameters: ModelResponseParameters
 
 
 # -------------------------------------

@@ -1,5 +1,6 @@
 import random
 from abc import ABC, abstractmethod
+from functools import lru_cache
 from typing import Any, override
 
 import pydantic
@@ -113,10 +114,12 @@ class TicTacToeGame(game_base.GameBase):
         return 2
 
     @override
-    def get_game_ai(self) -> dict[str, type[GameAI]]:
+    @classmethod
+    def get_game_ai(cls) -> dict[str, type[GameAI]]:
         return {
             TicTacToeRandomAI.get_ai_type(): TicTacToeRandomAI,
             TicTacToeBlockAI.get_ai_type(): TicTacToeBlockAI,
+            TicTacToeMiniMaxAI.get_ai_type(): TicTacToeMiniMaxAI,
         }
 
     @override
@@ -196,6 +199,11 @@ class TicTacToeRandomAI(TicTacToeAI):
     def get_ai_type(cls) -> str:
         return "random"
 
+    @override
+    @classmethod
+    def get_ai_user_name(cls) -> str:
+        return "Easy"
+
 
 class TicTacToeBlockAI(TicTacToeAI):
     @override
@@ -210,3 +218,95 @@ class TicTacToeBlockAI(TicTacToeAI):
     @classmethod
     def get_ai_type(cls) -> str:
         return "blocker"
+
+    @override
+    @classmethod
+    def get_ai_user_name(cls) -> str:
+        return "Medium"
+
+
+class TicTacToeMiniMaxAI(TicTacToeAI):
+    @override
+    def make_move(self) -> int:
+        if len(self.available_moves) == 9:
+            # Play in the center or the corners
+            return random.choice([0, 2, 4, 6, 8])
+
+        return random.choice(get_minimax_moves(self._board, self.current_player))
+
+    @override
+    @classmethod
+    def get_ai_type(cls) -> str:
+        return "unbeatable"
+
+    @override
+    @classmethod
+    def get_ai_user_name(cls) -> str:
+        return "Hard"
+
+
+def get_minimax_moves(board: list[int | None], player_to_play: int) -> list[int]:
+    """
+    Minimax algorithm to find the best moves for the player.
+    """
+    board_hash = hash_board(board)
+    best_score = float("-inf")
+    best_moves = []
+    for move in range(9):
+        if board[move] is None:
+            score = (-1 if player_to_play == 1 else 1) * get_minimax_score(
+                board_hash + ((3**move) * hash_square(player_to_play)), (player_to_play + 1) % 2
+            )
+            if score > best_score:
+                best_score = score
+                best_moves = [move]
+            elif score == best_score:
+                best_moves.append(move)
+    return best_moves
+
+
+@lru_cache(maxsize=None)
+def get_minimax_score(board_hash: int, player_to_play: int) -> int:
+    board = unhash_board(board_hash)
+
+    if winning_line := check_tic_tac_toe_winner(board):
+        return 1 if board[winning_line[0]] == 0 else -1
+
+    if all(state is not None for state in board):
+        return 0
+
+    comparison = max if player_to_play == 0 else min
+    return comparison(
+        get_minimax_score(board_hash + ((3**move) * hash_square(player_to_play)), (player_to_play + 1) % 2)
+        for move in range(9)
+        if board[move] is None
+    )
+
+
+# Hash board to use lru cache effectively
+
+
+def hash_square(square: int | None) -> int:
+    return 0 if square is None else square + 1
+
+
+def unhash_square(square_hash: int) -> int | None:
+    return None if square_hash == 0 else square_hash - 1
+
+
+def hash_board(board: list[int | None]) -> int:
+    return sum(hash_square(square) * (3**i) for i, square in enumerate(board))
+
+
+def unhash_board(board_hash: int) -> list[int | None]:
+    board: list[int | None] = [None] * 9
+    for i in range(9):
+        board[i] = unhash_square(board_hash % 3)
+        board_hash //= 3
+    return board
+
+
+if __name__ == "__main__":
+    board = [None, None, None, None, 0, None, None, None, None]
+    get_minimax_score(hash_board(board), 1)
+    pass

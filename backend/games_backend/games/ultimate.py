@@ -138,7 +138,8 @@ class UltimateGame(game_base.GameBase):
         return 2
 
     @override
-    def get_game_ai(self) -> dict[str, type[game_base.GameAI]]:
+    @classmethod
+    def get_game_ai(cls) -> dict[str, type[game_base.GameAI]]:
         """
         Mapping from model names to their classes.
         """
@@ -245,6 +246,12 @@ class UltimateRandomAI(UltimateAI):
     def get_ai_type(cls) -> str:
         return "random"
 
+    @override
+    @classmethod
+    def get_ai_user_name(cls) -> str:
+        return "Easy"
+
+    @override
     def make_move(self) -> int:
         available_moves = self.available_moves
         if not available_moves:
@@ -262,6 +269,12 @@ class UltimateTacticianAI(UltimateAI):
     def get_ai_type(cls) -> str:
         return "tactician"
 
+    @override
+    @classmethod
+    def get_ai_user_name(cls) -> str:
+        return "Medium"
+
+    @override
     def make_move(self) -> int:
         available_moves = self.available_moves
         if not available_moves:

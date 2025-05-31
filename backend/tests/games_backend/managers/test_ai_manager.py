@@ -19,6 +19,11 @@ class MockGameAI(GameAI):
         return "MockAI"
 
     @override
+    @classmethod
+    def get_ai_user_name(cls) -> str:
+        return "Easy"
+
+    @override
     def update_game_state(self, game_state: models.GameStateResponse) -> None | models.WebSocketRequest:
         pass
 
@@ -32,6 +37,11 @@ class AnotherMockGameAI(GameAI):
     @classmethod
     def get_ai_type(cls) -> str:
         return "AnotherAI"
+
+    @override
+    @classmethod
+    def get_ai_user_name(cls) -> str:
+        return "Medium"
 
     @override
     def update_game_state(self, game_state: models.GameStateResponse) -> None | models.WebSocketRequest:
