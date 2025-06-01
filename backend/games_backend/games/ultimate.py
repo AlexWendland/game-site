@@ -100,8 +100,13 @@ class UltimateGame(game_base.GameBase):
         self._check_winner()
         self._move_number += 1
         sector_to_play = move % 9
-        self._sector_to_play.append(sector_to_play if self._current_sectors[sector_to_play] is None else None)
+        self._sector_to_play.append(sector_to_play if self._is_sector_playable(sector_to_play) else None)
         return None
+
+    def _is_sector_playable(self, sector: int) -> bool:
+        return self._current_sectors[sector] is None and any(
+            square is None for square in self._current_board[sector * 9 : (sector + 1) * 9]
+        )
 
     def _check_sector_winner(self, move: int) -> None:
         sector = move // 9
