@@ -10,9 +10,11 @@ import {
   ReactNode,
 } from "react";
 import {
+  addAIPlayerOverWebsocket,
   getGameWebsocket,
   leavePlayerPosition,
   parseWebSocketMessage,
+  removeAIPlayerOverWebsocket,
   setPlayerNameWebsocket,
   setPlayerPosition,
 } from "@/lib/websocketFunctions";
@@ -21,11 +23,16 @@ import { usePathname } from "next/navigation";
 import { useGameContext } from "@/context/GameContext";
 import { getUserName } from "@/context/UserContext";
 import { BoardValue } from "@/types/gameTypes";
+import { getGameModels } from "@/lib/apiCalls";
 
 type UltimatePlayerContextType = {
   players: Record<number, string | null>;
+  aiPlayers: Record<number, string>;
   currentUserPosition: number | null;
+  aiModels: Record<string, string>;
   updateCurrentUserPosition: (newPosition: number | null) => Promise<void>;
+  removeAIPlayer: (position: number) => Promise<void>;
+  addAIPlayer: (position: number, model: string) => Promise<void>;
 };
 
 type UltimateHistoryContextType = {
@@ -176,6 +183,8 @@ export function UltimateProvider({
   const [isLoading, setIsLoading] = useState(true);
   // Websocket
   const gameWebSocket = useRef<WebSocket | null>(null);
+  const [aiModels, setAIModels] = useState<Record<string, string>>({});
+  const [aiPlayers, setAIPlayers] = useState<Record<number, string>>({});
 
   const username = getUserName();
 
@@ -203,6 +212,10 @@ export function UltimateProvider({
               case "session_state":
                 setCurrentUserPosition(parsedMessage.parameters.user_position);
                 setPlayers(parsedMessage.parameters.player_positions);
+                break;
+
+              case "ai_players":
+                setAIPlayers(parsedMessage.parameters.ai_players);
                 break;
 
               case "error":
@@ -286,6 +299,18 @@ export function UltimateProvider({
     };
   }, [gameID]);
 
+  useEffect(() => {
+    const fetchAIModels = async () => {
+      try {
+        const models = await getGameModels("ultimate");
+        setAIModels(models);
+      } catch (error) {
+        console.error("Failed to fetch AI models:", error);
+      }
+    };
+    fetchAIModels();
+  }, []);
+
   // Define meta parameters
 
   const currentMove = useMemo(
@@ -330,6 +355,14 @@ export function UltimateProvider({
     makeMoveOverWebsocket(gameWebSocket.current, position);
   };
 
+  const removeAIPlayer = async (position: number) => {
+    removeAIPlayerOverWebsocket(gameWebSocket.current, position);
+  };
+
+  const addAIPlayer = async (position: number, model: string) => {
+    addAIPlayerOverWebsocket(gameWebSocket.current, position, model);
+  };
+
   // Provide tsx
   if (isLoading) return <div>Loading game... </div>;
 
@@ -337,8 +370,12 @@ export function UltimateProvider({
     <UltimatePlayerContext.Provider
       value={{
         players,
+        aiPlayers,
         currentUserPosition,
+        aiModels,
         updateCurrentUserPosition,
+        addAIPlayer,
+        removeAIPlayer,
       }}
     >
       <UltimateHistoryContext.Provider
