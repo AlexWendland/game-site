@@ -63,6 +63,27 @@ def test_reject_move_in_won_sector(game):
     assert "already won" in response.parameters.error_message
 
 
+def test_won_sectors_lead_to_playing_anywhere(game):
+    # Force sector 0 to be won
+    for i in [0, 1, 2]:
+        game._current_board[i] = 0
+    game._current_sectors[0] = 0
+    game._sector_to_play = [None]
+    response = game.handle_function_call(0, "make_move", {"position": 9})
+    assert response is None
+    assert game._sector_to_play[-1] is None
+
+
+def test_drawn_sectors_lead_to_playing_anywhere(game):
+    # Force sector 0 to be drawn
+    for i in range(9):
+        game._current_board[i] = i % 2
+    game._sector_to_play = [None]
+    response = game.handle_function_call(0, "make_move", {"position": 9})
+    assert response is None
+    assert game._sector_to_play[-1] is None
+
+
 def test_ai_random_makes_valid_move():
     ai = UltimateRandomAI(position=0, name="bot")
     game_state = _create_game_state_with_empty_board()
