@@ -1,6 +1,6 @@
 import random
 from abc import ABC, abstractmethod
-from typing import Any, override
+from typing import Any, Self, override
 
 import pydantic
 
@@ -56,6 +56,19 @@ class UltimateGameLogic:
     def winning_line(self) -> list[int]:
         return self._winning_line
 
+    @property
+    def is_over(self) -> bool:
+        return self._winner is not None or len(self.get_available_moves()) == 0
+
+    @classmethod
+    def create_from_moves(cls, moves: list[int | None]) -> Self:
+        if len(moves) != 81:
+            raise ValueError("Moves must be a list of 81 elements.")
+        instance = cls()
+        for i in range(max([val for val in moves + [-1] if val is not None]) + 1):
+            instance.make_move(i % 2, moves.index(i))
+        return instance
+
     def make_move(self, player_position: int, move: int) -> None:
         logger.info(f"Player {player_position} wants to move to position {move}")
         if self._move_number % 2 != player_position:
@@ -90,12 +103,45 @@ class UltimateGameLogic:
         ]
         self._update_winner()
 
+    @property
+    def board_hash(self) -> str:
+        return (
+            "".join(str(square % 2) if square is not None else "-" for square in self._moves)
+            + "|"
+            + str(self._sector_to_play[-1])
+        )
+
     def get_available_moves(self) -> list[int]:
         if self._sector_to_play[-1] is not None:
             start = self._sector_to_play[-1] * 9
             end = start + 9
             return [i for i in range(start, end) if self._moves[i] is None]
         return [i for i, square in enumerate(self._moves) if square is None and self._is_sector_playable(i // 9)]
+
+    def print_board(self) -> None:
+        print("+" + "-" * 23 + "+")
+        for i in range(9):
+            row = "|"
+            for j in range(9):
+                if j % 3 == 0 and j != 0:
+                    row += " |"
+                square_index = (i // 3) * 27 + (i % 3) * 3 + (j // 3) * 9 + (j % 3)
+                if self._moves[square_index] is None:
+                    row += " -"
+                elif self._moves[square_index] % 2 == 0:
+                    row += " X"
+                else:
+                    row += " O"
+            row += " |"
+            print(row)
+            if i % 3 == 2:
+                print("+" + "-" * 23 + "+")
+        print("High-level board:", self._get_high_level_board())
+        print("Current player:", self._move_number % 2)
+        print("Winner:", self._winner)
+        print("Winning line:", self._winning_line)
+        print("Moves:", self._moves)
+        print("Sector to play:", self._sector_to_play[-1])
 
     def _is_sector_playable(self, sector: int) -> bool:
         return self._winning_sector_move[sector] is None and any(
@@ -111,6 +157,9 @@ class UltimateGameLogic:
         self._winning_line = check_tic_tac_toe_winner(self._get_high_level_board())
         if self._winning_line:
             self._winner = self._move_number % 2
+        else:
+            self._winner = None
+            self._winning_line = []
 
     def _get_sector_board(self, sector: int) -> list[int | None]:
         if sector < 0 or sector >= 9:
@@ -184,6 +233,8 @@ class UltimateGame(game_base.GameBase):
         return {
             UltimateRandomAI.get_ai_type(): UltimateRandomAI,
             UltimateTacticianAI.get_ai_type(): UltimateTacticianAI,
+            # Currently not computationally tractable - need to be smarter!
+            # UltimateMiniMaxAI.get_ai_type(): UltimateMiniMaxAI,
         }
 
     @override
@@ -350,3 +401,69 @@ class UltimateTacticianAI(UltimateAI):
             return random.choice(opponent_winning_moves)
 
         return random.choice(available_moves)
+
+
+class UltimateMiniMaxAI(UltimateAI):
+    @override
+    @classmethod
+    def get_ai_type(cls) -> str:
+        return "minimax"
+
+    @override
+    @classmethod
+    def get_ai_user_name(cls) -> str:
+        return "Hard"
+
+    @override
+    def make_move(self) -> int:
+        game_logic = UltimateGameLogic.create_from_moves(self._moves)
+        moves = get_minimax_moves(game_logic, self.current_player)
+        return random.choice(moves)
+
+
+MINIMAX_SCORE_CACHE: dict[str, int] = {}
+
+
+def get_minimax_moves(game_logic: UltimateGameLogic, player_to_play: int) -> list[int]:
+    if game_logic.is_over:
+        return []
+
+    best_score = -2
+    best_moves = []
+
+    for move in game_logic.get_available_moves():
+        game_logic.make_move(player_to_play, move)
+        score = (-1 if player_to_play == 1 else 1) * get_minimax_score(game_logic, (player_to_play + 1) % 2)
+        if score > best_score:
+            best_score = score
+            best_moves = [move]
+        elif score == best_score:
+            best_moves.append(move)
+        game_logic.undo_last_move()
+
+    return best_moves
+
+
+def get_minimax_score(game_logic: UltimateGameLogic, player_to_play: int) -> int:
+    if game_logic.board_hash in MINIMAX_SCORE_CACHE:
+        return MINIMAX_SCORE_CACHE[game_logic.board_hash]
+
+    if game_logic.is_over:
+        if game_logic.winner is None:
+            MINIMAX_SCORE_CACHE[game_logic.board_hash] = 0
+            return 0
+        score = 1 if game_logic.winner == 0 else -1
+        MINIMAX_SCORE_CACHE[game_logic.board_hash] = score
+        return score
+
+    best_score = -2 if player_to_play == 0 else 2  # Scores are only between -1 and 1
+    comparison = max if player_to_play == 0 else min
+
+    for move in game_logic.get_available_moves():
+        game_logic.make_move(player_to_play, move)
+        score = get_minimax_score(game_logic, (player_to_play + 1) % 2)
+        game_logic.undo_last_move()
+        best_score = comparison(best_score, score)
+
+    MINIMAX_SCORE_CACHE[game_logic.board_hash] = best_score
+    return best_score
