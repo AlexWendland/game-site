@@ -27,16 +27,105 @@ class MakeMoveParameters(pydantic.BaseModel):
     position: int
 
 
-class UltimateGame(game_base.GameBase):
+class UltimateGameLogic:
     def __init__(self) -> None:
         self._moves: list[int | None] = [None] * 81
-        self._current_board: list[int | None] = [None] * 81
         self._sector_to_play: list[int | None] = [None]
-        self._sectors_owned: list[int | None] = [None] * 9
-        self._current_sectors: list[int | None] = [None] * 9
-        self._move_number = 0
-        self._winner = None
+        self._winning_sector_move: list[int | None] = [None] * 9
+        self._move_number: int = 0
+        self._winner: int | None = None
         self._winning_line: list[int] = []
+
+    @property
+    def moves(self) -> list[int | None]:
+        return self._moves
+
+    @property
+    def sector_to_play(self) -> list[int | None]:
+        return self._sector_to_play
+
+    @property
+    def winning_sector_move(self) -> list[int | None]:
+        return self._winning_sector_move
+
+    @property
+    def winner(self) -> int | None:
+        return self._winner
+
+    @property
+    def winning_line(self) -> list[int]:
+        return self._winning_line
+
+    def make_move(self, player_position: int, move: int) -> None:
+        logger.info(f"Player {player_position} wants to move to position {move}")
+        if self._move_number % 2 != player_position:
+            logger.info(f"Player {player_position} is not the current player.")
+            raise ValueError(f"Player {player_position} is not the current player.")
+        if self._moves[move] is not None:
+            logger.info(f"Position {move} is already taken.")
+            raise ValueError(f"Position {move} is already taken.")
+        if self._sector_to_play[-1] is not None and self._sector_to_play[-1] != move // 9:
+            logger.info(f"Position {move} is not in sector {self._sector_to_play[-1]} - the current sector to play in.")
+            raise ValueError(
+                f"Position {move} is not in sector {self._sector_to_play[-1]} - the current sector to play in."
+            )
+        if self._winning_sector_move[move // 9] is not None:
+            logger.info(f"Position {move} is in a sector that was already won.")
+            raise ValueError(f"Position {move} is in a sector that was already won.")
+        logger.info(f"Player {player_position} moves to position {move}")
+        self._moves[move] = self._move_number
+        self._check_sector_winner(move)
+        self._update_winner()
+        self._move_number += 1
+        sector_to_play = move % 9
+        self._sector_to_play.append(sector_to_play if self._is_sector_playable(sector_to_play) else None)
+        return None
+
+    def undo_last_move(self) -> None:
+        self._move_number -= 1
+        self._moves = [None if square is None or square >= self._move_number else square for square in self._moves]
+        _ = self._sector_to_play.pop()
+        self._winning_sector_move = [
+            None if square is None or square >= self._move_number else square for square in self._winning_sector_move
+        ]
+        self._update_winner()
+
+    def get_available_moves(self) -> list[int]:
+        if self._sector_to_play[-1] is not None:
+            start = self._sector_to_play[-1] * 9
+            end = start + 9
+            return [i for i in range(start, end) if self._moves[i] is None]
+        return [i for i, square in enumerate(self._moves) if square is None and self._is_sector_playable(i // 9)]
+
+    def _is_sector_playable(self, sector: int) -> bool:
+        return self._winning_sector_move[sector] is None and any(
+            square is None for square in self._get_sector_board(sector)
+        )
+
+    def _check_sector_winner(self, move: int) -> None:
+        sector = move // 9
+        if check_tic_tac_toe_winner(self._get_sector_board(sector)):
+            self._winning_sector_move[sector] = self._move_number
+
+    def _update_winner(self) -> None:
+        self._winning_line = check_tic_tac_toe_winner(self._get_high_level_board())
+        if self._winning_line:
+            self._winner = self._move_number % 2
+
+    def _get_sector_board(self, sector: int) -> list[int | None]:
+        if sector < 0 or sector >= 9:
+            raise ValueError(f"Invalid sector {sector}. Must be between 0 and 8.")
+        start = sector * 9
+        end = start + 9
+        return [None if square is None else square % 2 for square in self._moves[start:end]]
+
+    def _get_high_level_board(self) -> list[int | None]:
+        return [None if square is None else square % 2 for square in self._winning_sector_move]
+
+
+class UltimateGame(game_base.GameBase):
+    def __init__(self) -> None:
+        self._logic: UltimateGameLogic = UltimateGameLogic()
 
     @override
     def handle_function_call(
@@ -58,67 +147,11 @@ class UltimateGame(game_base.GameBase):
                 parameters=models.ErrorResponseParameters(error_message=f"Invalid parameters: {e}")
             )
         move = parsed_move_parameters.position
-        return self._make_move(player_position, move)
-
-    def _make_move(self, player_position: int, move: int) -> models.ErrorResponse | None:
-        """
-        Make a move for the player.
-        """
-        logger.info(f"Player {player_position} wants to move to position {move}")
-        if self._move_number % 2 != player_position:
-            logger.info(f"Player {player_position} is not the current player.")
-            return models.ErrorResponse(
-                parameters=models.ErrorResponseParameters(
-                    error_message=f"Player {player_position} is not the current player."
-                )
-            )
-        if self._current_board[move] is not None:
-            logger.info(f"Position {move} is already taken.")
-            return models.ErrorResponse(
-                parameters=models.ErrorResponseParameters(error_message=f"Position {move} is already taken.")
-            )
-        if self._sector_to_play[-1] is not None and self._sector_to_play[-1] != move // 9:
-            logger.info(f"Position {move} is not in sector {self._sector_to_play[-1]} - the current sector to play in.")
-            return models.ErrorResponse(
-                parameters=models.ErrorResponseParameters(
-                    error_message=(
-                        f"Move {move} is not in sector {self._sector_to_play[-1]} - the current sector to" + " play in."
-                    )
-                )
-            )
-        if self._current_sectors[move // 9] is not None:
-            logger.info(f"Position {move} is in a sector that was already won.")
-            return models.ErrorResponse(
-                parameters=models.ErrorResponseParameters(
-                    error_message=f"Position {move} is in a sector that was already won."
-                )
-            )
-        logger.info(f"Player {player_position} moves to position {move}")
-        self._moves[move] = self._move_number
-        self._current_board[move] = self._move_number % 2
-        self._check_sector_winner(move)
-        self._check_winner()
-        self._move_number += 1
-        sector_to_play = move % 9
-        self._sector_to_play.append(sector_to_play if self._is_sector_playable(sector_to_play) else None)
-        return None
-
-    def _is_sector_playable(self, sector: int) -> bool:
-        return self._current_sectors[sector] is None and any(
-            square is None for square in self._current_board[sector * 9 : (sector + 1) * 9]
-        )
-
-    def _check_sector_winner(self, move: int) -> None:
-        sector = move // 9
-        sector_board = self._current_board[sector * 9 : (sector + 1) * 9]
-        if check_tic_tac_toe_winner(sector_board):
-            self._sectors_owned[sector] = self._move_number
-            self._current_sectors[sector] = self._move_number % 2
-
-    def _check_winner(self) -> None:
-        self._winning_line = check_tic_tac_toe_winner(self._current_sectors)
-        if self._winning_line:
-            self._winner = self._move_number % 2
+        try:
+            self._logic.make_move(player_position, move)
+        except ValueError as e:
+            logger.info(f"Player {player_position} made an invalid move: {e}")
+            return models.ErrorResponse(parameters=models.ErrorResponseParameters(error_message=f"Invalid move: {e}"))
 
     @override
     def get_game_state_response(self, position: int | None) -> UltimateGameStateResponse:
@@ -127,11 +160,11 @@ class UltimateGame(game_base.GameBase):
         """
         return UltimateGameStateResponse(
             parameters=UltimateGameStateParameters(
-                moves=self._moves,
-                sector_to_play=self._sector_to_play,
-                sectors_owned=self._sectors_owned,
-                winner=self._winner,
-                winning_line=self._winning_line,
+                moves=self._logic.moves,
+                sector_to_play=self._logic.sector_to_play,
+                sectors_owned=self._logic.winning_sector_move,
+                winner=self._logic.winner,
+                winning_line=self._logic.winning_line,
             )
         )
 
