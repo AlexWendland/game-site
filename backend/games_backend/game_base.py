@@ -30,19 +30,17 @@ class GameBase(abc.ABC):
         Get the maximum number of players for this game.
         """
 
-    @classmethod
     @abc.abstractmethod
     def get_game_ai(cls) -> dict[str, type[GameAI]]:
         """
         Mapping from model names to their classes.
         """
 
-    @classmethod
-    def get_game_ai_named(cls) -> dict[str, str]:
+    def get_game_ai_named(self) -> dict[str, str]:
         """
         Mapping from model keys to their user friendly names.
         """
-        ai_models = cls.get_game_ai()
+        ai_models = self.get_game_ai()
         return {model.get_ai_type(): model.get_ai_user_name() for model in ai_models.values()}
 
     @abc.abstractmethod

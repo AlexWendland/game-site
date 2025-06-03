@@ -47,7 +47,7 @@ interface GameMetadata {
 }
 
 export async function getGameMetadata(gameID: string): Promise<GameMetadata> {
-  const response = await fetch(apiUrl(`/game/${gameID}`));
+  const response = await fetch(apiUrl(`/game/${gameID}/metadata`));
 
   if (!response.ok) {
     throw new Error(`Error fetching game metadata: ${response.statusText}`);
@@ -76,9 +76,9 @@ interface GameModelResponse {
 }
 
 export async function getGameModels(
-  gameType: string,
+  gameName: string,
 ): Promise<Record<string, string>> {
-  const response = await fetch(apiUrl(`/game/models/${gameType}`));
+  const response = await fetch(apiUrl(`/game/${gameName}/models`));
   if (!response.ok) {
     throw new Error(`Error fetching game AI models: ${response.statusText}`);
   }

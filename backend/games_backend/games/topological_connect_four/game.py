@@ -1,101 +1,173 @@
-from functools import partial
+import copy
+import random
+from abc import ABC, abstractmethod
+from typing import Any, override
 
-from games_backend.games.topological_connect_four.board import NOT_A_POSITION, TopologicalBoard
+import pydantic
+
+from games_backend import game_base, models
+from games_backend.ai_base import GameAI
+from games_backend.app_logger import logger
 from games_backend.games.topological_connect_four.exceptions import GameException
-from games_backend.games.topological_connect_four.gravity import ValidationFunction
-from games_backend.games.topological_connect_four.models import Player
+from games_backend.games.topological_connect_four.geometry import GEOMETRY_MAP
+from games_backend.games.topological_connect_four.gravity import GRAVITY_MAP
+from games_backend.games.topological_connect_four.logic import TopologicalLogic
 
 
-def longest_line(board: TopologicalBoard, column: int, row: int, column_delta: int, row_delta: int) -> int:
-    """
-    Helper function to work out the longest line for the player in the initial position.
-
-    This tracks the normalised positions check for looping back on itself. We only allow
-    one position on the board to count for 1 in the line length.
-    """
-    current_player = board.get_position(column, row)
-    if current_player == NOT_A_POSITION or current_player == Player.NO_PLAYER:
-        raise GameException(f"No player at ({column}, {row}) or not a position")
-    positions = [board.normalise_coordinates(column, row)]
-    current_column, current_row = column, row
-    while True:
-        current_column += column_delta
-        current_row += row_delta
-        if board.get_position(current_column, current_row) != current_player:
-            break
-        # We need to check the position is correct before normalising coordinates.
-        current_column, current_row = board.normalise_coordinates(current_column, current_row)
-        if (current_column, current_row) in positions:
-            break
-        positions.append((current_column, current_row))
-    current_column, current_row = column, row
-    while True:
-        current_column -= column_delta
-        current_row -= row_delta
-        if board.get_position(current_column, current_row) != current_player:
-            break
-        # We need to check the position is correct before normalising coordinates.
-        current_column, current_row = board.normalise_coordinates(current_column, current_row)
-        if (current_column, current_row) in positions:
-            break
-        positions.append((current_column, current_row))
-    return len(positions)
+class TopologicalGameStateParameters(models.GameStateResponseParameters):
+    moves: list[list[int | None]]
+    winner: int | None
+    winning_line: list[tuple[int, int]]
+    available_moves: list[tuple[int, int]]
 
 
-def has_position_won(board: TopologicalBoard, column: int, row: int, win_length: int = 4):
-    return any(
-        [
-            longest_line(board, column, row, 1, 0) >= win_length,
-            longest_line(board, column, row, 0, 1) >= win_length,
-            longest_line(board, column, row, 1, 1) >= win_length,
-            longest_line(board, column, row, 1, -1) >= win_length,
-        ]
+class TopologicalGameStateResponse(models.GameStateResponse):
+    message_type: models.ResponseType = pydantic.Field(default=models.ResponseType.GAME_STATE, init=False)
+    parameters: TopologicalGameStateParameters
+
+
+class MakeMoveParameters(pydantic.BaseModel):
+    row: int
+    column: int
+
+
+class TopologicalGame(game_base.GameBase):
+    def __init__(
+        self, max_players: int, gravity: models.GravitySetting, geometry: models.Geometry, board_size: int = 8
+    ) -> None:
+        self._max_players: int = max_players
+        self._gravity: models.GravitySetting = gravity
+        self._geometry: models.Geometry = geometry
+        self._board_size: int = board_size
+
+        self._logic: TopologicalLogic = TopologicalLogic(
+            number_of_players=max_players,
+            board_size=board_size,
+            geometry=GEOMETRY_MAP[geometry],
+            gravity=GRAVITY_MAP[gravity],
+        )
+
+    @override
+    def handle_function_call(
+        self, player_position: int, function_name: str, function_parameters: dict[str, Any]
+    ) -> models.ErrorResponse | None:
+        """
+        Get the model to pass the game parameters.
+        """
+        if function_name != "make_move":
+            logger.info(f"Player {player_position} requested unknown function {function_name}.")
+            return models.ErrorResponse(
+                parameters=models.ErrorResponseParameters(error_message=f"Function {function_name} not supported.")
+            )
+        try:
+            parsed_move_parameters = MakeMoveParameters(**function_parameters)
+        except pydantic.ValidationError as game_exception:
+            logger.info(f"Player {player_position} provided invalid parameters: {game_exception}")
+            return models.ErrorResponse(
+                parameters=models.ErrorResponseParameters(error_message=f"Invalid parameters: {game_exception}")
+            )
+        try:
+            return self._logic.make_move(player_position, parsed_move_parameters.row, parsed_move_parameters.column)
+        except GameException as game_exception:
+            logger.info(f"Player {player_position} made an invalid move: {game_exception}")
+            return models.ErrorResponse(
+                parameters=models.ErrorResponseParameters(error_message=f"Invalid move: {game_exception}")
+            )
+
+    @override
+    def get_game_state_response(self, position: int | None) -> TopologicalGameStateResponse:
+        """
+        Get the model to pass the game parameters.
+        """
+        return TopologicalGameStateResponse(
+            parameters=TopologicalGameStateParameters(
+                moves=self._logic.moves,
+                winner=self._logic.winner,
+                winning_line=self._logic.winning_line,
+                available_moves=self._logic.get_available_moves(),
+            )
+        )
+
+    @override
+    def get_max_players(self) -> int:
+        return self._max_players
+
+    @override
+    def get_game_ai(self) -> dict[str, type[GameAI]]:
+        return {
+            TopologicalRandomAI.get_ai_type(): prefill_game_ai(TopologicalRandomAI, game_logic=self._logic),
+        }
+
+    @override
+    def get_metadata(self) -> models.GameMetadata:
+        return models.GameMetadata(
+            game_type=models.GameType.TOPOLOGICAL,
+            max_players=self._max_players,
+            parameters=models.TopologicalGameParameters(
+                board_size=self._board_size,
+                gravity=self._gravity,
+                geometry=self._geometry,
+            ),
+        )
+
+
+def prefill_game_ai(cls, game_logic: TopologicalLogic):
+    class_name = f"{cls.__name__}WithPrefill"
+
+    def __init__(self, position: int, name: str):
+        super(new_cls, self).__init__(position=position, name=name, game_logic=game_logic)
+
+    new_cls = type(
+        class_name,
+        (cls,),
+        {
+            "__init__": __init__,
+            "__module__": cls.__module__,
+            "__doc__": cls.__doc__,
+        },
     )
+    return new_cls
 
 
-class TopologicalLogic:
-    def __init__(self, board: TopologicalBoard, gravity: ValidationFunction, number_of_players: int):
-        if number_of_players < 2:
-            raise ValueError(f"You can not have a game with {number_of_players} you need at least 2")
-        self._number_of_players = number_of_players
-        # TODO: Would be good to add a copy function here.
-        self._board = board
-        self._next_player = Player.ONE
-        self._finished = False
-        self.valid_move = partial(gravity, self._board)
-        self.has_position_won = partial(has_position_won, self._board)
+class TopologicalAI(GameAI, ABC):
+    def __init__(self, position: int, name: str, game_logic: TopologicalLogic) -> None:
+        self._logic: TopologicalLogic = copy.deepcopy(game_logic)
+        super().__init__(position, name)
 
-    def _progress_next_player(self):
-        # Player numbers are 1 indexed but modulus is 0 indexed.
-        next_player_number = self._next_player.value % self._number_of_players
-        self._next_player = Player.from_value(next_player_number + 1)
+    @override
+    def update_game_state(self, game_state: TopologicalGameStateResponse) -> None | models.WebSocketRequest:
+        self._logic.reset_game_state(game_state.parameters.moves)
+        if self._logic.game_over or self._logic.current_player != self.position:
+            return None
+        row, column = self.make_move()
+        return models.WebSocketRequest(
+            request_type=models.WebSocketRequestType.GAME,
+            function_name="make_move",
+            parameters={"row": row, "column": column},
+        )
 
-    def make_move(self, player: Player, column: int, row: int):
-        if self._finished:
-            raise GameException("The game has finished no legal move")
-        if player != self._next_player:
-            raise GameException(f"It is not player {player} go, it is currently player {self._next_player}'s go.")
-        if not self.valid_move(column, row):
-            raise GameException(f"Move ({column}, {row}) is not valid.")
-        self._board.set_position_safe(column, row, player)
-        if self.has_position_won(column, row):
-            self._finished = True
-        else:
-            self._progress_next_player()
+    @abstractmethod
+    def make_move(self) -> tuple[int, int]: ...
 
-    def get_available_moves(self) -> list[tuple[int, int]]:
-        moves = []
-        for column in range(self._board.get_size()):
-            for row in range(self._board.get_size()):
-                if self.valid_move(column, row):
-                    moves.append((column, row))
-        return moves
 
-    def __str__(self):
-        representation = str(self._board) + "\n ---\n"
-        if self._finished:
-            representation += f"Player {self._next_player.value} has won!\n"
-        else:
-            representation += f"Next player to move is {self._next_player.value}.\n"
-        representation += " ---"
-        return representation
+class TopologicalRandomAI(TopologicalAI):
+    """
+    Completely random AI.
+    """
+
+    @override
+    @classmethod
+    def get_ai_type(cls) -> str:
+        return "random"
+
+    @override
+    @classmethod
+    def get_ai_user_name(cls) -> str:
+        return "Easy"
+
+    @override
+    def make_move(self) -> tuple[int, int]:
+        available_moves = self._logic.get_available_moves()
+        if not available_moves:
+            raise ValueError("No available moves left.")
+        return random.choice(available_moves)

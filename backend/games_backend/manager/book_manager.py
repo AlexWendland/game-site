@@ -47,6 +47,10 @@ class BookManager:
         game = await self.get_game(game_id)
         return game.get_metadata()
 
+    async def get_game_models(self, game_id: str) -> dict[str, str]:
+        game = await self.get_game(game_id)
+        return game.get_game_models()
+
     async def audit_games(self):
         logger.info("Auditing games.")
         inactive_games = [

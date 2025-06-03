@@ -72,6 +72,9 @@ class GameManager:
     def get_metadata(self) -> models.GameMetadata:
         return self._game.get_metadata()
 
+    def get_game_models(self) -> dict[str, str]:
+        return self._game.get_game_ai_named()
+
     def get_game(self) -> game_base.GameBase:
         return self._game
 
@@ -80,7 +83,7 @@ class GameManager:
         session = SessionManager(game.get_max_players())
         manager = cls(game_id=game_id, game=game, session=session)
         ai_manager = AIManager(
-            game_models=type(game).get_game_ai(),
+            game_models=game.get_game_ai(),
             add_ai=manager._connect_ai,
             act_as_ai=manager._action_message,
             remove_ai=manager._disconnect,

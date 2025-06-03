@@ -302,14 +302,14 @@ export function UltimateProvider({
   useEffect(() => {
     const fetchAIModels = async () => {
       try {
-        const models = await getGameModels("ultimate");
+        const models = await getGameModels(gameID);
         setAIModels(models);
       } catch (error) {
         console.error("Failed to fetch AI models:", error);
       }
     };
     fetchAIModels();
-  }, []);
+  }, [gameID]);
 
   // Define meta parameters
 
