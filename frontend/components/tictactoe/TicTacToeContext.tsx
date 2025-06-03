@@ -249,14 +249,14 @@ export function TicTacToeProvider({
   useEffect(() => {
     const fetchAIModels = async () => {
       try {
-        const models = await getGameModels("tictactoe");
+        const models = await getGameModels(gameID);
         setAIModels(models);
       } catch (error) {
         console.error("Failed to fetch AI models:", error);
       }
     };
     fetchAIModels();
-  }, []);
+  }, [gameID]);
 
   // Set game details in context.
   const {

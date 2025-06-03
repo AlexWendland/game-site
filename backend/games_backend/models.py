@@ -82,6 +82,24 @@ class GameParameters(pydantic.BaseModel):
     """
 
 
+class GravitySetting(enum.Enum):
+    NONE = 1
+    BOTTOM = 2
+    EDGE = 3
+
+
+class Geometry(enum.Enum):
+    NO_GEOMETRY = 1
+    TORUS = 2
+    BAND = 3
+
+
+class TopologicalGameParameters(GameParameters):
+    board_size: int = pydantic.Field(default=8, ge=4, le=8)
+    gravity: GravitySetting = pydantic.Field(default=GravitySetting.BOTTOM)
+    geometry: Geometry = pydantic.Field(default=Geometry.NO_GEOMETRY)
+
+
 class GameType(enum.Enum):
     """
     When adding a new game type, try to make it match the path name in the frontend.
@@ -89,6 +107,7 @@ class GameType(enum.Enum):
 
     TICTACTOE = "tictactoe"
     ULTIMATE = "ultimate"
+    TOPOLOGICAL = "topological"
 
 
 class GameMetadata(pydantic.BaseModel):

@@ -95,14 +95,21 @@ async def new_ultimate_game(
     return models.SimpleResponse(parameters=models.SimpleResponseParameters(message=new_game_id))
 
 
-@app.get("/game/models/{game_type}")
-async def get_game_models(game_type: models.GameType) -> models.ModelResponse:
-    return models.ModelResponse(
-        parameters=models.ModelResponseParameters(models=GAME_MAPPING[game_type].get_game_ai_named())
-    )
+@app.get("/game/{game_name}/models")
+async def get_game_models(
+    game_name: Annotated[str, Depends(validated_game_name)],
+    book_manager: Annotated[BookManager, Depends(get_book_manager)],
+) -> models.ModelResponse:
+    try:
+        game_models = await book_manager.get_game_models(game_name)
+    except ValueError:
+        logger.info(f"Game {game_name} not found.")
+        raise HTTPException(status_code=404, detail=f"Game {game_name} not found")
+    logger.info(f"Game models for {game_name} obtained.")
+    return models.ModelResponse(parameters=models.ModelResponseParameters(models=game_models))
 
 
-@app.get("/game/{game_name}")
+@app.get("/game/{game_name}/metadata")
 async def get_game_metadata(
     game_name: Annotated[str, Depends(validated_game_name)],
     book_manager: Annotated[BookManager, Depends(get_book_manager)],

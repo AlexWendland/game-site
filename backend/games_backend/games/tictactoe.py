@@ -114,8 +114,7 @@ class TicTacToeGame(game_base.GameBase):
         return 2
 
     @override
-    @classmethod
-    def get_game_ai(cls) -> dict[str, type[GameAI]]:
+    def get_game_ai(self) -> dict[str, type[GameAI]]:
         return {
             TicTacToeRandomAI.get_ai_type(): TicTacToeRandomAI,
             TicTacToeBlockAI.get_ai_type(): TicTacToeBlockAI,

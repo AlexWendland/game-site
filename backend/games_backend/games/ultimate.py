@@ -225,8 +225,7 @@ class UltimateGame(game_base.GameBase):
         return 2
 
     @override
-    @classmethod
-    def get_game_ai(cls) -> dict[str, type[game_base.GameAI]]:
+    def get_game_ai(self) -> dict[str, type[game_base.GameAI]]:
         """
         Mapping from model names to their classes.
         """
