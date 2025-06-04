@@ -36,7 +36,11 @@ type TopologicalBoardContextType = {
   winningLine: [number, number][];
   currentViewedMove: number;
   availableMoves: [number, number][];
+  closeSquares: [number, number][];
+  hoveredSquare: [number, number] | null;
+  geometry: Geometry;
   makeMove: (row: number, column: number) => void;
+  setHoveredSquare: (square: [number, number] | null) => void;
 };
 
 type TopologicalGameContextType = {
@@ -191,15 +195,18 @@ export function TopologicalProvider({
   const [aiPlayers, setAIPlayers] = useState<Record<number, string>>({});
   const [winner, setWinner] = useState<number | null>(null);
   const [winningLine, setWinningLine] = useState<[number, number][]>([]);
+  const [geometry, setGeometry] = useState<Geometry>(Geometry.NO_GEOMETRY);
+  const [gravity, setGravity] = useState<GravitySetting>(GravitySetting.NONE);
+  const [boardSize, setBoardSize] = useState(8);
+  const [maxPlayers, setMaxPlayers] = useState(2);
   // Client state
   const [currentUserPosition, setCurrentUserPosition] = useState<number | null>(
     null,
   );
   const [currentViewedMove, setCurrentViewedMove] = useState(0);
-  const [geometry, setGeometry] = useState<Geometry>(Geometry.NO_GEOMETRY);
-  const [gravity, setGravity] = useState<GravitySetting>(GravitySetting.NONE);
-  const [boardSize, setBoardSize] = useState(8);
-  const [maxPlayers, setMaxPlayers] = useState(2);
+  const [hoveredSquare, setHoveredSquare] = useState<[number, number] | null>(
+    null,
+  );
   // Initial loading of state
   const [isLoading, setIsLoading] = useState(true);
   // Websocket
@@ -355,6 +362,33 @@ export function TopologicalProvider({
     return players[currentPlayerNumber];
   }, [currentPlayerNumber, players]);
 
+  const closeSquares = useMemo(() => {
+    if (hoveredSquare === null) return [];
+    const [row, column] = hoveredSquare;
+    const closeSquares: [number, number][] = [];
+    for (let row_offset = -1; row_offset <= 1; row_offset++) {
+      let newRow = row + row_offset;
+      if (geometry === Geometry.BAND || geometry === Geometry.TORUS) {
+        newRow = (newRow + boardSize) % boardSize;
+      }
+      for (let column_offset = -1; column_offset <= 1; column_offset++) {
+        let newColumn = column + column_offset;
+        if (geometry === Geometry.TORUS) {
+          newColumn = (newColumn + boardSize) % boardSize;
+        }
+        if (
+          newRow >= 0 &&
+          newRow < boardSize &&
+          newColumn >= 0 &&
+          newColumn < boardSize
+        ) {
+          closeSquares.push([newRow, newColumn]);
+        }
+      }
+    }
+    return closeSquares;
+  }, [hoveredSquare, geometry, boardSize]);
+
   useEffect(() => {
     if (winner !== null || availableMoves.length === 0) {
       setGameState("Game over");
@@ -401,9 +435,13 @@ export function TopologicalProvider({
         moves,
         maxPlayers,
         availableMoves,
+        closeSquares,
         winningLine,
         currentViewedMove,
+        hoveredSquare,
+        geometry,
         makeMove,
+        setHoveredSquare,
       }}
     >
       <TopologicalPlayerContext.Provider
