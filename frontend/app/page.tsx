@@ -52,7 +52,7 @@ export default function Home() {
       <div className="flex justify-center">
         <JoinGameButton />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 pt-6 justify-center justify-items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 pt-6 justify-center justify-items-center">
         {games.map((game, index) => (
           <div className="p-4" key={index}>
             <Card

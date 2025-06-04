@@ -9,8 +9,13 @@ export function TopologicalBoard() {
     winningLine,
     currentViewedMove,
     availableMoves,
+    closeSquares,
+    geometry,
+    hoveredSquare,
     makeMove,
+    setHoveredSquare,
   } = useTopologicalBoardContext();
+
   return (
     <div
       className="grid gap-2 max-w-[600px] aspect-square"
@@ -26,14 +31,30 @@ export function TopologicalBoard() {
           const isWinning = winningLine.some(
             ([r, c]) => r === rowIndex && c === columnIndex,
           );
+          const isClose = closeSquares.some(
+            ([r, c]) => r === rowIndex && c === columnIndex,
+          );
+          const isHovered =
+            hoveredSquare !== null &&
+            hoveredSquare[0] === rowIndex &&
+            hoveredSquare[1] === columnIndex;
           return (
             <TopologicalSquare
               key={`${rowIndex}-${columnIndex}`}
               player={moveNumber !== null ? moveNumber % maxPlayers : null}
               onSquareClick={() => makeMove(rowIndex, columnIndex)}
+              onMouseEnter={() => {
+                setHoveredSquare([rowIndex, columnIndex]);
+              }}
+              onMouseExit={() => {
+                setHoveredSquare(null);
+              }}
               isHighlighted={
                 (isAvailable && winningLine.length === 0) || isWinning
               }
+              isClose={isClose}
+              isHovered={isHovered}
+              isShadowed={false}
               disabled={winningLine.length > 0 || !isAvailable}
               isInCurrentView={
                 moveNumber !== null ? moveNumber < currentViewedMove : false
