@@ -3,7 +3,6 @@
 import { JoinGameButton } from "@/components/JoinGameButton";
 import {
   makeNewTicTacToeGameAPI,
-  makeNewTopologicalGameAPI,
   makeNewUltimateGameAPI,
 } from "@/lib/apiCalls";
 import { useRouter } from "next/navigation";
@@ -24,8 +23,7 @@ export default function Home() {
   };
 
   const startNewTopological = async () => {
-    const gameID: string = await makeNewTopologicalGameAPI();
-    router.push(`/topological/${gameID}`);
+    router.push(`/topological`);
   };
 
   const games = [

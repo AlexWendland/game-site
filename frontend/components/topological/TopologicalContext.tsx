@@ -301,7 +301,6 @@ export function TopologicalProvider({
         const metadata = (await getGameMetadata(
           gameID,
         )) as TopologicalGameMetadata;
-        console.log("Game metadata:", metadata);
         setGeometry(metadata.parameters.geometry);
         setGravity(metadata.parameters.gravity);
         setBoardSize(metadata.parameters.board_size);

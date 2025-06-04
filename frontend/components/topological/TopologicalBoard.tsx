@@ -13,7 +13,8 @@ export function TopologicalBoard() {
   } = useTopologicalBoardContext();
   return (
     <div
-      className={`grid grid-cols-${boardSize} gap-2 max-w-[600px] aspect-square`}
+      className="grid gap-2 max-w-[600px] aspect-square"
+      style={{ gridTemplateColumns: `repeat(${boardSize}, minmax(0, 1fr))` }}
     >
       {moves.toReversed().map((row, rowIndexInverted) =>
         row.map((moveNumber, columnIndex) => {

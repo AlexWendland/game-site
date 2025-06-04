@@ -13,7 +13,6 @@ export default async function Page({
   }
   try {
     const gameMetadata = await getGameMetadata(gameID);
-    console.log("gameMetadata", gameMetadata);
     if (gameMetadata) {
       redirect(`/${gameMetadata.game_type}/${gameID}`);
     }
