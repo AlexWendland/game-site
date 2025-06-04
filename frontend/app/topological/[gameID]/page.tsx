@@ -4,9 +4,13 @@ import { getGameMetadata } from "@/lib/apiCalls";
 import { TopologicalProvider } from "@/components/topological/TopologicalContext";
 import { TopologicalGame } from "@/components/topological/TopologicalGame";
 
-export default async function Page({ params }: { params: { gameID: string } }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ gameID: string }>;
+}) {
   // Game page parameters
-  const { gameID } = params;
+  const { gameID } = await params;
 
   // Validate page
   if (!validateGameID(gameID)) {
