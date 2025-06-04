@@ -110,7 +110,7 @@ async def new_topological_game(
     )
     game_manager = GameManager.from_game_and_id(new_game_id, game)
     book_manager.add_game(new_game_id, game_manager)
-    logger.info(f"New game of Topological Connect Four created: {new_game_id}")
+    logger.info(f"New game of Topological Connect Four created: {new_game_id}\nWith parameters:\n{new_game_parameters}")
     return models.SimpleResponse(parameters=models.SimpleResponseParameters(message=new_game_id))
 
 

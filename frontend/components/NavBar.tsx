@@ -82,6 +82,10 @@ export function NavBar() {
     router.push(`/ultimate/${gameID}`);
   };
 
+  const startNewTopologicalGame = async () => {
+    router.push(`/topological`);
+  };
+
   return (
     <Navbar className="bg-gray-200" shouldHideOnScroll>
       <NavbarBrand>
@@ -141,6 +145,20 @@ export function NavBar() {
               }
             >
               Ultimate Tic Tac Toe
+            </DropdownItem>
+            <DropdownItem
+              key="Topological Connect Four"
+              description="Connect four on a doughnut."
+              onPress={startNewTopologicalGame}
+              startContent={
+                <img
+                  className="w-16"
+                  src="/topological.svg"
+                  alt="Topological Connect Four Board"
+                />
+              }
+            >
+              Topological Connect Four
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>

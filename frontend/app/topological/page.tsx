@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import TopologicalCreateGame from "@/components/topological/TopologicalCreateGame";
 
-export default function Home() {
-  redirect("/");
+export default async function Home() {
+  return <TopologicalCreateGame />;
 }

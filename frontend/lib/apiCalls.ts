@@ -1,4 +1,4 @@
-import { SimpleResponse } from "@/types/apiTypes";
+import { Geometry, GravitySetting, SimpleResponse } from "@/types/apiTypes";
 
 // Hack for now, as environment variables are not working in renderGameManager
 const BASE_URL =
@@ -40,15 +40,20 @@ export async function makeNewUltimateGameAPI(): Promise<string> {
   throw new Error("Unexpected response format");
 }
 
-export async function makeNewTopologicalGameAPI(): Promise<string> {
+export async function makeNewTopologicalGameAPI(
+  numberOfPlayers: number,
+  boardSize: number,
+  gravity: GravitySetting,
+  geometry: Geometry,
+): Promise<string> {
   const response = await fetch(apiUrl(`/new_game/topological`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      number_of_players: 4,
-      board_size: 8,
-      gravity: "bottom",
-      geometry: "no_geometry",
+      number_of_players: numberOfPlayers,
+      board_size: boardSize,
+      gravity: gravity,
+      geometry: geometry,
     }),
   });
   if (!response.ok) {

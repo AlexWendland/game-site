@@ -13,15 +13,15 @@ export interface GameState {
 }
 
 export enum GravitySetting {
-  NONE = 1,
-  BOTTOM = 2,
-  EDGE = 3,
+  NONE = "none",
+  BOTTOM = "bottom",
+  EDGE = "edge",
 }
 
 export enum Geometry {
-  NO_GEOMETRY = 1,
-  TORUS = 2,
-  BAND = 3,
+  NO_GEOMETRY = "no_geometry",
+  TORUS = "torus",
+  BAND = "band",
 }
 
 export interface TopologicalGameParameters {
