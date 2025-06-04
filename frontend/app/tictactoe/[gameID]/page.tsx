@@ -4,9 +4,13 @@ import { TicTacToeProvider } from "@/components/tictactoe/TicTacToeContext";
 import { validateGameID } from "@/lib/gameFunctions";
 import { getGameMetadata } from "@/lib/apiCalls";
 
-export default async function Page({ params }: { params: { gameID: string } }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ gameID: string }>;
+}) {
   // Game page parameters
-  const { gameID } = params;
+  const { gameID } = await params;
 
   // Validate page
   if (!validateGameID(gameID)) {
