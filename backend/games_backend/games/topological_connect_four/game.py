@@ -1,4 +1,3 @@
-import copy
 import random
 from abc import ABC, abstractmethod
 from typing import Any, override
@@ -116,7 +115,7 @@ def prefill_game_ai(cls, game_logic: TopologicalLogic):
     class_name = f"{cls.__name__}WithPrefill"
 
     def __init__(self, position: int, name: str):
-        super(new_cls, self).__init__(position=position, name=name, game_logic=copy.deepcopy(game_logic))
+        super(new_cls, self).__init__(position=position, name=name, game_logic=game_logic.clone())
 
     new_cls = type(
         class_name,
@@ -132,11 +131,14 @@ def prefill_game_ai(cls, game_logic: TopologicalLogic):
 
 class TopologicalAI(GameAI, ABC):
     def __init__(self, position: int, name: str, game_logic: TopologicalLogic) -> None:
-        self._logic: TopologicalLogic = game_logic
+        self._logic: TopologicalLogic = game_logic.clone()
         super().__init__(position, name)
 
     @override
     def update_game_state(self, game_state: TopologicalGameStateResponse) -> None | models.WebSocketRequest:
+        # Defend against making two moves.
+        if self._logic.current_move > game_state.parameters.current_move:
+            return None
         self._logic.reset_game_state(game_state.parameters.moves)
         if self._logic.game_over or self._logic.current_player != self.position:
             return None
