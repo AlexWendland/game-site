@@ -122,9 +122,8 @@ class TicTacToeGame(game_base.GameBase):
         }
 
     @override
-    def get_metadata(self) -> models.GameMetadata:
-        return models.GameMetadata(
-            game_type=models.GameType.TICTACTOE,
+    def get_metadata(self) -> models.TicTacToeGameMetadata:
+        return models.TicTacToeGameMetadata(
             max_players=2,
             parameters=models.GameParameters(),
         )

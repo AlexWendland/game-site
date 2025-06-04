@@ -21,7 +21,7 @@ type PlayerSlotProps = {
   removeAIPlayer: () => void;
 };
 
-export function UltimatePlayerSlot({
+export function TopologicalPlayerSlot({
   playerName,
   icon,
   isCurrentUser,
@@ -41,7 +41,7 @@ export function UltimatePlayerSlot({
       )}
     >
       <span className="flex items-center space-x-2 text-gray-700">
-        <span>{icon}</span>
+        <span className="w-10 h-full aspect-square object-contain">{icon}</span>
         <span>{playerName}</span>
       </span>
       <div className="flex space-x-2">

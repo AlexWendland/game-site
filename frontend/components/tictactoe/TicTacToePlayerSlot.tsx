@@ -36,7 +36,7 @@ export function TicTacToePlayerSlot({
   return (
     <div
       className={clsx(
-        "boarder rounded-lg flex items-center justify-between w-full px-4 py-2 text-left",
+        "rounded-lg flex items-center justify-between w-full px-4 py-2 text-left",
         isCurrentUser && "border-blue-500 bg-blue-50",
       )}
     >

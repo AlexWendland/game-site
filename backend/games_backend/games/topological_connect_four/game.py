@@ -19,6 +19,7 @@ class TopologicalGameStateParameters(models.GameStateResponseParameters):
     winner: int | None
     winning_line: list[tuple[int, int]]
     available_moves: list[tuple[int, int]]
+    current_move: int
 
 
 class TopologicalGameStateResponse(models.GameStateResponse):
@@ -85,6 +86,7 @@ class TopologicalGame(game_base.GameBase):
                 winner=self._logic.winner,
                 winning_line=self._logic.winning_line,
                 available_moves=self._logic.get_available_moves(),
+                current_move=self._logic.current_move,
             )
         )
 
@@ -99,9 +101,8 @@ class TopologicalGame(game_base.GameBase):
         }
 
     @override
-    def get_metadata(self) -> models.GameMetadata:
-        return models.GameMetadata(
-            game_type=models.GameType.TOPOLOGICAL,
+    def get_metadata(self) -> models.TopologicalGameMetadata:
+        return models.TopologicalGameMetadata(
             max_players=self._max_players,
             parameters=models.TopologicalGameParameters(
                 board_size=self._board_size,
@@ -115,7 +116,7 @@ def prefill_game_ai(cls, game_logic: TopologicalLogic):
     class_name = f"{cls.__name__}WithPrefill"
 
     def __init__(self, position: int, name: str):
-        super(new_cls, self).__init__(position=position, name=name, game_logic=game_logic)
+        super(new_cls, self).__init__(position=position, name=name, game_logic=copy.deepcopy(game_logic))
 
     new_cls = type(
         class_name,
@@ -131,7 +132,7 @@ def prefill_game_ai(cls, game_logic: TopologicalLogic):
 
 class TopologicalAI(GameAI, ABC):
     def __init__(self, position: int, name: str, game_logic: TopologicalLogic) -> None:
-        self._logic: TopologicalLogic = copy.deepcopy(game_logic)
+        self._logic: TopologicalLogic = game_logic
         super().__init__(position, name)
 
     @override

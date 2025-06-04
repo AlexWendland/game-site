@@ -154,6 +154,9 @@ class GameManager:
         game_position = self._session.get_client_position(client_id)
         game_state = self._game.get_game_state_response(game_position)
         await self._message_client_locked(client_id, game_state)
+        ai_state = self._ai_manager.get_ai_players()
+        message = models.AIStateResponse(parameters=models.AIStateResponseParameters(ai_players=ai_state))
+        await self._message_client_locked(client_id, message)
 
     async def _broadcast_session_state(self):
         to_disconnect: list[str] = []

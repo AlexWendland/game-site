@@ -3,6 +3,7 @@
 import { JoinGameButton } from "@/components/JoinGameButton";
 import {
   makeNewTicTacToeGameAPI,
+  makeNewTopologicalGameAPI,
   makeNewUltimateGameAPI,
 } from "@/lib/apiCalls";
 import { useRouter } from "next/navigation";
@@ -22,6 +23,11 @@ export default function Home() {
     router.push(`/ultimate/${gameID}`);
   };
 
+  const startNewTopological = async () => {
+    const gameID: string = await makeNewTopologicalGameAPI();
+    router.push(`/topological/${gameID}`);
+  };
+
   const games = [
     {
       name: "Tic Tac Toe",
@@ -35,6 +41,12 @@ export default function Home() {
       onClick: startNewUltimateGame,
       image: "/ultimate.png",
     },
+    {
+      name: "Topological Connect Four",
+      description: "Connect four for real children!",
+      onClick: startNewTopological,
+      image: "/topological.svg",
+    },
   ];
 
   return (
@@ -42,7 +54,7 @@ export default function Home() {
       <div className="flex justify-center">
         <JoinGameButton />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 pt-6 justify-center justify-items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-3 pt-6 justify-center justify-items-center">
         {games.map((game, index) => (
           <div className="p-4" key={index}>
             <Card
