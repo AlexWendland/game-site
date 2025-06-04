@@ -61,7 +61,7 @@ class TopologicalLogic:
             self.make_move(self.current_player, row, column)
 
     def _get_move_sequence(self, moves: list[list[int | None]]) -> list[tuple[int, int]]:
-        last_move_number = max(max(value or -1 for value in row) for row in moves)
+        last_move_number = max(max(value if value is not None else -1 for value in row) for row in moves)
         if last_move_number < 0:
             return []
         move_locations: dict[int, tuple[int, int]] = {}
