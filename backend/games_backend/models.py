@@ -1,5 +1,5 @@
 import enum
-from typing import Any
+from typing import Annotated, Any, Literal
 
 import pydantic
 
@@ -83,21 +83,21 @@ class GameParameters(pydantic.BaseModel):
 
 
 class GravitySetting(enum.Enum):
-    NONE = 1
-    BOTTOM = 2
-    EDGE = 3
+    NONE = "none"
+    BOTTOM = "bottom"
+    EDGE = "edge"
 
 
 class Geometry(enum.Enum):
-    NO_GEOMETRY = 1
-    TORUS = 2
-    BAND = 3
+    NO_GEOMETRY = "no_geometry"
+    TORUS = "torus"
+    BAND = "band"
 
 
 class TopologicalGameParameters(GameParameters):
     board_size: int = pydantic.Field(default=8, ge=4, le=8)
-    gravity: GravitySetting = pydantic.Field(default=GravitySetting.BOTTOM)
-    geometry: Geometry = pydantic.Field(default=Geometry.NO_GEOMETRY)
+    gravity: GravitySetting
+    geometry: Geometry
 
 
 class GameType(enum.Enum):
@@ -111,9 +111,33 @@ class GameType(enum.Enum):
 
 
 class GameMetadata(pydantic.BaseModel):
-    game_type: GameType
+    # game_type: Literal[GameType]
+    max_players: int
+    # parameters: GameParameters
+    # Add custom parameters here.
+
+
+class TicTacToeGameMetadata(GameMetadata):
+    game_type: Literal[GameType.TICTACTOE] = GameType.TICTACTOE
     max_players: int
     parameters: GameParameters
+
+
+class UltimateGameMetadata(GameMetadata):
+    game_type: Literal[GameType.ULTIMATE] = GameType.ULTIMATE
+    max_players: int
+    parameters: GameParameters
+
+
+class TopologicalGameMetadata(GameMetadata):
+    game_type: Literal[GameType.TOPOLOGICAL] = GameType.TOPOLOGICAL
+    max_players: int
+    parameters: TopologicalGameParameters
+
+
+GameMetadataUnion = Annotated[
+    TicTacToeGameMetadata | UltimateGameMetadata | TopologicalGameMetadata, pydantic.Field(discriminator="game_type")
+]
 
 
 class ModelResponseParameters(ResponseParameters):
@@ -140,3 +164,10 @@ class WebSocketRequest(pydantic.BaseModel):
     request_type: WebSocketRequestType
     function_name: str
     parameters: dict[str, Any]
+
+
+class TopologicalNewGameRequest(pydantic.BaseModel):
+    number_of_players: int = pydantic.Field(default=2, ge=2, le=8)
+    board_size: int = pydantic.Field(default=8, ge=4, le=8)
+    gravity: GravitySetting
+    geometry: Geometry

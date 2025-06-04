@@ -237,9 +237,8 @@ class UltimateGame(game_base.GameBase):
         }
 
     @override
-    def get_metadata(self) -> models.GameMetadata:
-        return models.GameMetadata(
-            game_type=models.GameType.ULTIMATE,
+    def get_metadata(self) -> models.UltimateGameMetadata:
+        return models.UltimateGameMetadata(
             max_players=2,
             parameters=models.GameParameters(),
         )

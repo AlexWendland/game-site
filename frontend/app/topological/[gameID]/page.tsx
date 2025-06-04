@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { TicTacToeGame } from "@/components/tictactoe/TicTacToeGame";
-import { TicTacToeProvider } from "@/components/tictactoe/TicTacToeContext";
 import { validateGameID } from "@/lib/gameFunctions";
 import { getGameMetadata } from "@/lib/apiCalls";
+import { TopologicalProvider } from "@/components/topological/TopologicalContext";
+import { TopologicalGame } from "@/components/topological/TopologicalGame";
 
 export default async function Page({ params }: { params: { gameID: string } }) {
   // Game page parameters
@@ -14,7 +14,7 @@ export default async function Page({ params }: { params: { gameID: string } }) {
   }
   try {
     const metadata = await getGameMetadata(gameID);
-    if (metadata.game_type !== "tictactoe") {
+    if (metadata.game_type !== "topological") {
       notFound();
     }
   } catch (error) {
@@ -23,8 +23,8 @@ export default async function Page({ params }: { params: { gameID: string } }) {
   }
 
   return (
-    <TicTacToeProvider gameID={gameID}>
-      <TicTacToeGame />
-    </TicTacToeProvider>
+    <TopologicalProvider gameID={gameID}>
+      <TopologicalGame />
+    </TopologicalProvider>
   );
 }

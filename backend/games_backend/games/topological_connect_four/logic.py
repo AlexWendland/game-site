@@ -101,6 +101,10 @@ class TopologicalLogic:
     def current_player(self) -> int:
         return self._move_number % self._number_of_players
 
+    @property
+    def current_move(self) -> int:
+        return self._move_number
+
     def get_player_in_position(self, row: int, column: int) -> int | None:
         coordinates = self._normalise_coordinates(row, column)
         if coordinates is None:

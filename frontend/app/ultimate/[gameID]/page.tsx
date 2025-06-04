@@ -4,13 +4,9 @@ import { getGameMetadata } from "@/lib/apiCalls";
 import { UltimateProvider } from "@/components/ultimate/UltimateContext";
 import { UltimateGame } from "@/components/ultimate/UltimateGame";
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ gameID: string }>;
-}) {
+export default async function Page({ params }: { params: { gameID: string } }) {
   // Game page parameters
-  const { gameID } = await params;
+  const { gameID } = params;
 
   // Validate page
   if (!validateGameID(gameID)) {
