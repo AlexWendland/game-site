@@ -19,9 +19,19 @@ class TopologicalLogic:
         self._move_number: int = 0
         self._winner: int | None = None
         self._winning_line: list[tuple[int, int]] = []
+        self._original_geometry_function: GeometryFunction = geometry
+        self._original_gravity_function: GravityFunction = gravity
 
         self._normalise_coordinates: Callable[[int, int], tuple[int, int] | None] = partial(geometry, self._board_size)
-        self._valid_move: Callable[[int, int], bool] = partial(gravity, self._moves)
+        self._valid_move: GravityFunction = gravity
+
+    def clone(self) -> "TopologicalLogic":
+        return self.__class__(
+            geometry=self._original_geometry_function,
+            gravity=self._original_gravity_function,
+            number_of_players=self._number_of_players,
+            board_size=self._board_size,
+        )
 
     def make_move(self, player: int, row: int, column: int):
         if self.game_over:
@@ -36,7 +46,7 @@ class TopologicalLogic:
         row, column = coordinates
         if self._moves[row][column] is not None:
             raise GameException(f"Move ({row=}, {column=}) is already taken.")
-        if not self._valid_move(row, column):
+        if not self._valid_move(self._moves, row, column):
             raise GameException(f"Move ({row=}, {column=}) is not valid for this boards gravity.")
         self._moves[row][column] = self._move_number
         self._check_winner(row, column)
@@ -93,7 +103,7 @@ class TopologicalLogic:
         moves: list[tuple[int, int]] = []
         for column in range(self._board_size):
             for row in range(self._board_size):
-                if self._valid_move(row, column):
+                if self._valid_move(self._moves, row, column):
                     moves.append((row, column))
         return moves
 

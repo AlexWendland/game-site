@@ -96,6 +96,27 @@ def test_random_ais_game_is_copied(game: TopologicalGame):
     assert ai._logic.get_player_in_position(0, 0) is None
 
 
+def test_game_ai_do_not_share_logic(game: TopologicalGame):
+    first_ai = game.get_game_ai()["random"](name="Test AI 1", position=0)
+    second_ai = game.get_game_ai()["random"](name="Test AI 2", position=1)
+    response = game.handle_function_call(
+        player_position=0,
+        function_name="make_move",
+        function_parameters={"row": 0, "column": 0},
+    )
+    assert response is None
+    assert game._logic.get_player_in_position(0, 0) == 0
+    assert first_ai._logic.get_player_in_position(0, 0) is None
+    assert second_ai._logic.get_player_in_position(0, 0) is None
+
+    first_ai_move = first_ai.update_game_state(game.get_game_state_response(0))
+
+    assert first_ai_move is None
+    assert game._logic.get_player_in_position(0, 0) == 0
+    assert first_ai._logic.get_player_in_position(0, 0) == 0
+    assert second_ai._logic.get_player_in_position(0, 0) is None
+
+
 def test_random_ais_game_can_make_move(game: TopologicalGame):
     first_ai = game.get_game_ai()["random"](name="Test AI 1", position=0)
     second_ai = game.get_game_ai()["random"](name="Test AI 2", position=1)
@@ -123,6 +144,50 @@ def test_random_ais_game_can_make_move(game: TopologicalGame):
     assert response is None
 
     # Move 3
+    first_ai_move = first_ai.update_game_state(game.get_game_state_response(0))
+    second_ai_move = second_ai.update_game_state(game.get_game_state_response(1))
+    assert first_ai_move is not None
+    assert second_ai_move is None
+
+    response = game.handle_function_call(
+        player_position=0, function_name=first_ai_move.function_name, function_parameters=first_ai_move.parameters
+    )
+    assert response is None
+
+    # Move 4
+    first_ai_move = first_ai.update_game_state(game.get_game_state_response(0))
+    second_ai_move = second_ai.update_game_state(game.get_game_state_response(1))
+    assert first_ai_move is None
+    assert second_ai_move is not None
+
+    response = game.handle_function_call(
+        player_position=1, function_name=second_ai_move.function_name, function_parameters=second_ai_move.parameters
+    )
+    assert response is None
+
+    # Move 5
+    first_ai_move = first_ai.update_game_state(game.get_game_state_response(0))
+    second_ai_move = second_ai.update_game_state(game.get_game_state_response(1))
+    assert first_ai_move is not None
+    assert second_ai_move is None
+
+    response = game.handle_function_call(
+        player_position=0, function_name=first_ai_move.function_name, function_parameters=first_ai_move.parameters
+    )
+    assert response is None
+
+    # Move 6
+    first_ai_move = first_ai.update_game_state(game.get_game_state_response(0))
+    second_ai_move = second_ai.update_game_state(game.get_game_state_response(1))
+    assert first_ai_move is None
+    assert second_ai_move is not None
+
+    response = game.handle_function_call(
+        player_position=1, function_name=second_ai_move.function_name, function_parameters=second_ai_move.parameters
+    )
+    assert response is None
+
+    # Move 7
     first_ai_move = first_ai.update_game_state(game.get_game_state_response(0))
     second_ai_move = second_ai.update_game_state(game.get_game_state_response(1))
     assert first_ai_move is not None
