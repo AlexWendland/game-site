@@ -75,10 +75,10 @@ export default function TopologicalCreateGame() {
             Sphere: This one will leave you spinning
           </Radio>
           <Radio
-            value="invert"
+            value="rp2"
             description="Extra rule, a winning line needs to use 4 distinct squares."
           >
-            Invert: This is so horrible - no one has named it
+            Real projective plane in 2 dimensions: ... or whatever
           </Radio>
         </RadioGroup>
         <RadioGroup label="Gravity" defaultValue="edge" name="gravity">
