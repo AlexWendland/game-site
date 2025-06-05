@@ -22,6 +22,10 @@ export enum Geometry {
   NO_GEOMETRY = "no_geometry",
   TORUS = "torus",
   BAND = "band",
+  MOBIUS = "mobius",
+  KLEIN = "klein",
+  INVERT = "invert",
+  SPHERE = "sphere",
 }
 
 export interface TopologicalGameParameters {

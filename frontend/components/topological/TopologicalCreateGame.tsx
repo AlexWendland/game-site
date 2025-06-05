@@ -61,9 +61,25 @@ export default function TopologicalCreateGame() {
             No geometry
           </Radio>
           <Radio value="torus" description="Best first time choice!">
-            Play on a doughnut!
+            Torus: Play on a doughnut!
           </Radio>
-          <Radio value="band">The board loops left to right</Radio>
+          <Radio value="band">Band: The board loops left to right</Radio>
+          <Radio value="mobius">
+            Möbius strip: Play on a band with a twist!
+          </Radio>
+          <Radio value="klein">Klein Bottle: Can you think in 4D?</Radio>
+          <Radio
+            value="sphere"
+            description="Extra rule, a 4 line needs to use 4 distinct squares."
+          >
+            Sphere: This one will leave you spinning
+          </Radio>
+          <Radio
+            value="invert"
+            description="Extra rule, a 4 line needs to use 4 distinct squares."
+          >
+            Invert: This is so horrible - no one has named it
+          </Radio>
         </RadioGroup>
         <RadioGroup label="Gravity" defaultValue="edge" name="gravity">
           <Radio value="bottom" description="Classic connect four">
