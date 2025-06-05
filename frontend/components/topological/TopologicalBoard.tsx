@@ -28,11 +28,11 @@ function ArrowButton({
 
   const arrowGrid = {
     up: {
-      gridColumn: `2 / span ${boardSize}`,
+      gridColumn: `1 / span ${boardSize + 2}`,
       gridRow: "1",
     },
     down: {
-      gridColumn: `2 / span ${boardSize}`,
+      gridColumn: `1 / span ${boardSize + 2}`,
       gridRow: `${boardSize + 2}`,
     },
     left: {
@@ -46,21 +46,25 @@ function ArrowButton({
   };
 
   return (
-    <button
+    <div
       className={`flex items-center justify-center ${hidden ? "invisible" : ""}`}
       style={arrowGrid[direction]}
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={direction}
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        className="w-8 sm:w-16 text-gray-700"
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={direction}
       >
-        <path d={arrowSvgs[direction]} fill="currentColor" />
-      </svg>
-    </button>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          className="w-8 sm:w-16 text-gray-700"
+        >
+          <path d={arrowSvgs[direction]} fill="currentColor" />
+        </svg>
+      </button>
+    </div>
   );
 }
 
