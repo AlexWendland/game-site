@@ -1,5 +1,6 @@
 import { TopologicalSquare } from "@/components/topological/TopologicalSquare";
 import { useTopologicalBoardContext } from "@/components/topological/TopologicalContext";
+import { useIsMobile } from "@/context/BrowserContext";
 
 export function TopologicalBoard() {
   const {
@@ -15,6 +16,8 @@ export function TopologicalBoard() {
     makeMove,
     setHoveredSquare,
   } = useTopologicalBoardContext();
+
+  const isMobile = useIsMobile();
 
   return (
     <div
@@ -44,10 +47,10 @@ export function TopologicalBoard() {
               player={moveNumber !== null ? moveNumber % maxPlayers : null}
               onSquareClick={() => makeMove(rowIndex, columnIndex)}
               onMouseEnter={() => {
-                setHoveredSquare([rowIndex, columnIndex]);
+                if (!isMobile) setHoveredSquare([rowIndex, columnIndex]);
               }}
               onMouseExit={() => {
-                setHoveredSquare(null);
+                if (!isMobile) setHoveredSquare(null);
               }}
               isHighlighted={
                 (isAvailable && winningLine.length === 0) || isWinning
