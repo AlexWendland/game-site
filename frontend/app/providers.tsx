@@ -6,6 +6,7 @@ import * as React from "react";
 import { ToastProvider } from "@heroui/toast";
 import { UserProvider } from "@/context/UserContext";
 import { GameProvider } from "@/context/GameContext";
+import { BrowserProvider } from "@/context/BrowserContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -13,9 +14,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <HeroUIProvider navigate={router.push}>
       <ToastProvider />
-      <UserProvider>
-        <GameProvider>{children}</GameProvider>
-      </UserProvider>
+      <BrowserProvider>
+        <UserProvider>
+          <GameProvider>{children}</GameProvider>
+        </UserProvider>
+      </BrowserProvider>
     </HeroUIProvider>
   );
 }
