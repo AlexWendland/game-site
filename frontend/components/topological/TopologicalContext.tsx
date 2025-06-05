@@ -41,6 +41,7 @@ type TopologicalBoardContextType = {
   geometry: Geometry;
   makeMove: (row: number, column: number) => void;
   setHoveredSquare: (square: [number, number] | null) => void;
+  normaliseCoordinate: (row: number, column: number) => [number, number] | null;
 };
 
 type TopologicalGameContextType = {
@@ -332,6 +333,37 @@ export function TopologicalProvider({
     fetchAIModels();
   }, [gameID]);
 
+  const normaliseCoordinate = (
+    row: number,
+    column: number,
+  ): [number, number] | null => {
+    if (geometry === Geometry.NO_GEOMETRY) {
+      if (row < 0 || row >= boardSize || column < 0 || column >= boardSize) {
+        return null;
+      }
+      return [row, column];
+    }
+    if (geometry === Geometry.BAND) {
+      if (row < 0 || row >= boardSize) {
+        return null;
+      }
+      while (column < 0) {
+        column += boardSize;
+      }
+      return [row, column % boardSize];
+    }
+    if (geometry === Geometry.TORUS) {
+      while (row < 0) {
+        row += boardSize;
+      }
+      while (column < 0) {
+        column += boardSize;
+      }
+      return [row % boardSize, column % boardSize];
+    }
+    return null;
+  };
+
   // Set game details in context.
   const {
     gameCode,
@@ -368,21 +400,11 @@ export function TopologicalProvider({
     const closeSquares: [number, number][] = [];
     for (let row_offset = -1; row_offset <= 1; row_offset++) {
       let newRow = row + row_offset;
-      if (geometry === Geometry.BAND || geometry === Geometry.TORUS) {
-        newRow = (newRow + boardSize) % boardSize;
-      }
       for (let column_offset = -1; column_offset <= 1; column_offset++) {
         let newColumn = column + column_offset;
-        if (geometry === Geometry.TORUS) {
-          newColumn = (newColumn + boardSize) % boardSize;
-        }
-        if (
-          newRow >= 0 &&
-          newRow < boardSize &&
-          newColumn >= 0 &&
-          newColumn < boardSize
-        ) {
-          closeSquares.push([newRow, newColumn]);
+        const normalisedCoordinates = normaliseCoordinate(newRow, newColumn);
+        if (normalisedCoordinates !== null) {
+          closeSquares.push(normalisedCoordinates);
         }
       }
     }
@@ -442,6 +464,7 @@ export function TopologicalProvider({
         geometry,
         makeMove,
         setHoveredSquare,
+        normaliseCoordinate,
       }}
     >
       <TopologicalPlayerContext.Provider
