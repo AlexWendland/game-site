@@ -92,6 +92,10 @@ class Geometry(enum.Enum):
     NO_GEOMETRY = "no_geometry"
     TORUS = "torus"
     BAND = "band"
+    KLEIN = "klein"
+    MOBIUS = "mobius"
+    SPHERE = "sphere"
+    INVERT_INVERT = "invert"
 
 
 class TopologicalGameParameters(GameParameters):

@@ -88,11 +88,11 @@ export function TopologicalBoard() {
 
   const isMobile = useIsMobile();
 
-  // Arrow visibility
   const showHorizontal = geometry !== Geometry.NO_GEOMETRY;
-  const showVertical = geometry === Geometry.TORUS;
-
-  // Arrow grid positions
+  const showVertical =
+    geometry !== Geometry.NO_GEOMETRY &&
+    geometry !== Geometry.BAND &&
+    geometry !== Geometry.MOBIUS;
 
   function createBoardSquare(
     row: number,

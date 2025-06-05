@@ -361,6 +361,94 @@ export function TopologicalProvider({
       }
       return [row % boardSize, column % boardSize];
     }
+    if (geometry === Geometry.MOBIUS) {
+      if (row < 0 || row >= boardSize) {
+        return null;
+      }
+      let flipCount = 0;
+      while (column < 0) {
+        flipCount++;
+        column += boardSize;
+      }
+      while (column >= boardSize) {
+        flipCount++;
+        column -= boardSize;
+      }
+      if (flipCount % 2 === 1) {
+        row = boardSize - 1 - row;
+      }
+      return [row, column];
+    }
+    if (geometry === Geometry.KLEIN) {
+      while (row < 0) {
+        row += boardSize;
+      }
+      row = row % boardSize;
+      let flipCount = 0;
+      while (column < 0) {
+        flipCount++;
+        column += boardSize;
+      }
+      while (column >= boardSize) {
+        flipCount++;
+        column -= boardSize;
+      }
+      if (flipCount % 2 === 1) {
+        row = boardSize - 1 - row;
+      }
+      return [row, column];
+    }
+    if (geometry === Geometry.INVERT) {
+      let rowFlipCount = 0;
+      while (row < 0) {
+        rowFlipCount++;
+        row += boardSize;
+      }
+      while (row >= boardSize) {
+        rowFlipCount++;
+        row -= boardSize;
+      }
+      let columnFlipCount = 0;
+      while (column < 0) {
+        columnFlipCount++;
+        column += boardSize;
+      }
+      while (column >= boardSize) {
+        columnFlipCount++;
+        column -= boardSize;
+      }
+      if (rowFlipCount % 2 === 1) {
+        column = boardSize - 1 - column;
+      }
+      if (columnFlipCount % 2 === 1) {
+        row = boardSize - 1 - row;
+      }
+      return [row, column];
+    }
+    if (geometry === Geometry.SPHERE) {
+      while (
+        !(0 <= row && row < boardSize && 0 <= column && column < boardSize)
+      ) {
+        if (row >= boardSize) {
+          const temp = row;
+          row = column;
+          column = 2 * boardSize - temp - 1;
+        } else if (row < 0) {
+          const temp = row;
+          row = column;
+          column = -temp - 1;
+        } else if (column >= boardSize) {
+          const temp = column;
+          column = row;
+          row = 2 * boardSize - temp - 1;
+        } else if (column < 0) {
+          const temp = column;
+          column = row;
+          row = -temp - 1;
+        }
+      }
+      return [row, column];
+    }
     return null;
   };
 
