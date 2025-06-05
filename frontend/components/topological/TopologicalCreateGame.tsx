@@ -70,13 +70,13 @@ export default function TopologicalCreateGame() {
           <Radio value="klein">Klein Bottle: Can you think in 4D?</Radio>
           <Radio
             value="sphere"
-            description="Extra rule, a 4 line needs to use 4 distinct squares."
+            description="Extra rule, a winning line needs to use 4 distinct squares."
           >
             Sphere: This one will leave you spinning
           </Radio>
           <Radio
             value="invert"
-            description="Extra rule, a 4 line needs to use 4 distinct squares."
+            description="Extra rule, a winning line needs to use 4 distinct squares."
           >
             Invert: This is so horrible - no one has named it
           </Radio>
