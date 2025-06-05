@@ -1,7 +1,7 @@
 from typing import Callable
 
 from games_backend import models
-from games_backend.games.topological_connect_four.exceptions import GameException
+from games_backend.games.exceptions import GameException
 
 GravityFunction = Callable[[list[list[int | None]], int, int], bool]
 

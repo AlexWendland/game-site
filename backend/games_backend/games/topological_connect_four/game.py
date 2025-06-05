@@ -7,7 +7,7 @@ import pydantic
 from games_backend import game_base, models
 from games_backend.ai_base import GameAI
 from games_backend.app_logger import logger
-from games_backend.games.topological_connect_four.exceptions import GameException
+from games_backend.games.exceptions import GameException
 from games_backend.games.topological_connect_four.geometry import GEOMETRY_MAP
 from games_backend.games.topological_connect_four.gravity import GRAVITY_MAP
 from games_backend.games.topological_connect_four.logic import TopologicalLogic

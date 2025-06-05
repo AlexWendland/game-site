@@ -1,7 +1,7 @@
 from functools import partial
 from typing import Callable, final
 
-from games_backend.games.topological_connect_four.exceptions import GameException
+from games_backend.games.exceptions import GameException
 from games_backend.games.topological_connect_four.geometry import GeometryFunction
 from games_backend.games.topological_connect_four.gravity import GravityFunction
 
