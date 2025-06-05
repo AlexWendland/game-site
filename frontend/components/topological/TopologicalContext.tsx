@@ -398,7 +398,7 @@ export function TopologicalProvider({
       }
       return [row, column];
     }
-    if (geometry === Geometry.INVERT) {
+    if (geometry === Geometry.RP2) {
       let rowFlipCount = 0;
       while (row < 0) {
         rowFlipCount++;

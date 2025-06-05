@@ -95,7 +95,7 @@ class Geometry(enum.Enum):
     KLEIN = "klein"
     MOBIUS = "mobius"
     SPHERE = "sphere"
-    INVERT_INVERT = "invert"
+    RP2 = "rp2"
 
 
 class TopologicalGameParameters(GameParameters):

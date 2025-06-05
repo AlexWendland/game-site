@@ -46,7 +46,7 @@ def klein_geometry(max_size: int, row: int, column: int) -> tuple[int, int]:
     return row, column
 
 
-def invert_geometry(max_size: int, row: int, column: int) -> tuple[int, int]:
+def rp2_geometry(max_size: int, row: int, column: int) -> tuple[int, int]:
     row_flip_count = column // max_size
     column_flip_count = row // max_size
     row = row % max_size
@@ -77,6 +77,6 @@ GEOMETRY_MAP: dict[models.Geometry, GeometryFunction] = {
     models.Geometry.BAND: band_geometry,
     models.Geometry.MOBIUS: mobius_geometry,
     models.Geometry.KLEIN: klein_geometry,
-    models.Geometry.INVERT_INVERT: invert_geometry,
+    models.Geometry.RP2: rp2_geometry,
     models.Geometry.SPHERE: sphere_geometry,
 }

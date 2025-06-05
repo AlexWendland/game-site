@@ -2,10 +2,10 @@ import pytest
 
 from games_backend.games.topological_connect_four.geometry import (
     band_geometry,
-    invert_geometry,
     klein_geometry,
     mobius_geometry,
     no_geometry,
+    rp2_geometry,
     sphere_geometry,
     toric_geometry,
 )
@@ -109,8 +109,8 @@ def test_klein_get_coordinates(row: int, column: int, expected: tuple[int, int])
         (-2, 7, (1, 2)),
     ],
 )
-def test_invert_get_coordinates(row: int, column: int, expected: tuple[int, int]):
-    assert invert_geometry(5, row, column) == expected
+def test_rp2_get_coordinates(row: int, column: int, expected: tuple[int, int]):
+    assert rp2_geometry(5, row, column) == expected
 
 
 @pytest.mark.parametrize(

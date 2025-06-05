@@ -24,7 +24,7 @@ export enum Geometry {
   BAND = "band",
   MOBIUS = "mobius",
   KLEIN = "klein",
-  INVERT = "invert",
+  RP2 = "rp2",
   SPHERE = "sphere",
 }
 
