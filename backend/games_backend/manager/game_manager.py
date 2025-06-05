@@ -69,7 +69,7 @@ class GameManager:
         logger.info(f"Client {client_id} closed connection.")
         await self._disconnect(client_id)
 
-    def get_metadata(self) -> models.GameMetadata:
+    def get_metadata(self) -> models.GameMetadataUnion:
         return self._game.get_metadata()
 
     def get_game_models(self) -> dict[str, str]:

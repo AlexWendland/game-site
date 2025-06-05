@@ -44,7 +44,7 @@ class GameBase(abc.ABC):
         return {model.get_ai_type(): model.get_ai_user_name() for model in ai_models.values()}
 
     @abc.abstractmethod
-    def get_metadata(self) -> models.GameMetadata:
+    def get_metadata(self) -> models.GameMetadataUnion:
         """
-        Get the maximum number of players for this game.
+        Get the metadata for this game to help users connect.
         """

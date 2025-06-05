@@ -43,7 +43,7 @@ class BookManager:
     async def get_free_game_id(self) -> str:
         return non_matching_game_name(await self.get_all_game_ids())
 
-    async def get_game_metadata(self, game_id: str) -> models.GameMetadata:
+    async def get_game_metadata(self, game_id: str) -> models.GameMetadataUnion:
         game = await self.get_game(game_id)
         return game.get_metadata()
 

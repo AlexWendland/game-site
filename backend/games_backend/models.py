@@ -104,6 +104,10 @@ class TopologicalGameParameters(GameParameters):
     geometry: Geometry
 
 
+class WizardGameParameters(GameParameters):
+    can_see_old_rounds: bool = pydantic.Field(default=False, description="Whether the player can see old rounds.")
+
+
 class GameType(enum.Enum):
     """
     When adding a new game type, try to make it match the path name in the frontend.
@@ -112,6 +116,7 @@ class GameType(enum.Enum):
     TICTACTOE = "tictactoe"
     ULTIMATE = "ultimate"
     TOPOLOGICAL = "topological"
+    WIZARD = "wizard"
 
 
 class GameMetadata(pydantic.BaseModel):
@@ -139,8 +144,15 @@ class TopologicalGameMetadata(GameMetadata):
     parameters: TopologicalGameParameters
 
 
+class WizardGameMetadata(GameMetadata):
+    game_type: Literal[GameType.WIZARD] = GameType.WIZARD
+    max_players: int = pydantic.Field(default=4, ge=3, le=6)
+    parameters: WizardGameParameters
+
+
 GameMetadataUnion = Annotated[
-    TicTacToeGameMetadata | UltimateGameMetadata | TopologicalGameMetadata, pydantic.Field(discriminator="game_type")
+    TicTacToeGameMetadata | UltimateGameMetadata | TopologicalGameMetadata | WizardGameMetadata,
+    pydantic.Field(discriminator="game_type"),
 ]
 
 
@@ -175,3 +187,8 @@ class TopologicalNewGameRequest(pydantic.BaseModel):
     board_size: int = pydantic.Field(default=8, ge=4, le=8)
     gravity: GravitySetting
     geometry: Geometry
+
+
+class WizardNewGameRequest(pydantic.BaseModel):
+    number_of_players: int = pydantic.Field(ge=3, le=6)
+    show_old_rounds: bool = pydantic.Field(default=False)

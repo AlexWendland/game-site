@@ -13,6 +13,7 @@ from games_backend.game_base import GameBase
 from games_backend.games.tictactoe import TicTacToeGame
 from games_backend.games.topological_connect_four.game import TopologicalGame
 from games_backend.games.ultimate import UltimateGame
+from games_backend.games.wizard.game import WizardGame
 from games_backend.manager.book_manager import BookManager
 from games_backend.manager.db_manager import InMemoryDBManager
 from games_backend.manager.game_manager import GameManager
@@ -111,6 +112,22 @@ async def new_topological_game(
     game_manager = GameManager.from_game_and_id(new_game_id, game)
     book_manager.add_game(new_game_id, game_manager)
     logger.info(f"New game of Topological Connect Four created: {new_game_id}\nWith parameters:\n{new_game_parameters}")
+    return models.SimpleResponse(parameters=models.SimpleResponseParameters(message=new_game_id))
+
+
+@app.post("/new_game/wizard")
+async def new_wizard_game(
+    book_manager: Annotated[BookManager, Depends(get_book_manager)],
+    new_game_parameters: models.WizardNewGameRequest,
+) -> models.SimpleResponse:
+    new_game_id = await book_manager.get_free_game_id()
+    game = WizardGame(
+        number_of_players=new_game_parameters.number_of_players,
+        can_see_old_rounds=new_game_parameters.show_old_rounds,
+    )
+    game_manager = GameManager.from_game_and_id(new_game_id, game)
+    book_manager.add_game(new_game_id, game_manager)
+    logger.info(f"New game of Wizard created: {new_game_id}\nWith parameters:\n{new_game_parameters}")
     return models.SimpleResponse(parameters=models.SimpleResponseParameters(message=new_game_id))
 
 
