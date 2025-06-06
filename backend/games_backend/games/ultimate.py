@@ -262,7 +262,7 @@ class UltimateAI(GameAI, ABC):
 
     @property
     def game_over(self) -> bool:
-        return self._winner is not None
+        return self._winner is not None or len(self.available_moves) == 0
 
     @property
     def opponent(self) -> int:
@@ -297,7 +297,7 @@ class UltimateAI(GameAI, ABC):
             start = self._sector_to_play * 9
             end = start + 9
             return [i for i in range(start, end) if self._moves[i] is None]
-        return [i for i, state in enumerate(self._moves) if state is None]
+        return [i for i, state in enumerate(self._moves) if state is None and self._sectors_owned[i // 9] is None]
 
     def get_winning_moves_in_sector(self, sector: int, player: int) -> list[int]:
         start = sector * 9

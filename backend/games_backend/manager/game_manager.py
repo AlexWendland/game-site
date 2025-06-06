@@ -216,6 +216,8 @@ class GameManager:
                     await self._message_client_locked(client_id, response)
                 else:
                     await self._broadcast_session_state()
+                    await self._broadcast_game_state()
+                    await self._broadcast_ai_state()
             case models.WebSocketRequestType.GAME:
                 if parsed_message.function_name == "get_game_state":
                     response = None
@@ -232,7 +234,9 @@ class GameManager:
                 if response:
                     await self._message_client_locked(client_id, response)
                 else:
+                    await self._broadcast_session_state()
                     await self._broadcast_game_state()
+                    await self._broadcast_ai_state()
             case models.WebSocketRequestType.AI:
                 response = await self._ai_manager.handle_function_call(
                     requester_client_id=client_id,
@@ -242,6 +246,8 @@ class GameManager:
                 if response:
                     await self._message_client_locked(client_id, response)
                 else:
+                    await self._broadcast_session_state()
+                    await self._broadcast_game_state()
                     await self._broadcast_ai_state()
 
         async with self._action_lock:
