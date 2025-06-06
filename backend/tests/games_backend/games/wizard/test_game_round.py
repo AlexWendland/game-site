@@ -11,9 +11,9 @@ from games_backend.games.wizard.logic import GameRound, _is_wizard
 def test_random_game_round():
     round = GameRound(number_of_players=3, round_number=3, player_starting_tricks=0, first_bidding_player=0)
 
-    round.set_player_bid(0, 1, set_suit=1 if _is_wizard(round.get_trump_card()) else -1)
-    round.set_player_bid(1, 1, -1)
-    round.set_player_bid(2, 1, -1)
+    round.set_player_bid(0, 1, set_suit=1 if _is_wizard(round.get_trump_card()) else 5)
+    round.set_player_bid(1, 1)
+    round.set_player_bid(2, 1)
 
     # 3 players, 3 rounds
     for _ in range(9):
@@ -35,9 +35,9 @@ def test_can_not_play_card_when_bidding():
 def test_can_not_bid_when_playing():
     round = GameRound(number_of_players=3, round_number=3, player_starting_tricks=0, first_bidding_player=0)
 
-    round.set_player_bid(0, 1, set_suit=1 if _is_wizard(round.get_trump_card()) else -1)
-    round.set_player_bid(1, 1, -1)
-    round.set_player_bid(2, 1, -1)
+    round.set_player_bid(0, 1, set_suit=1 if _is_wizard(round.get_trump_card()) else 5)
+    round.set_player_bid(1, 1)
+    round.set_player_bid(2, 1)
 
     with pytest.raises(GameException, match="Cannot bid at this time."):
         round.set_player_bid(0, 1)
@@ -58,7 +58,7 @@ def test_nara_means_no_trump_suit():
         mock_choice.return_value = 55  # Nara
         round = GameRound(number_of_players=3, round_number=3, player_starting_tricks=0, first_bidding_player=0)
 
-    round.set_player_bid(0, 1, -1)
+    round.set_player_bid(0, 1)
 
 
 def test_rigged_game():
@@ -67,9 +67,9 @@ def test_rigged_game():
         mock_choice.return_value = 3
         round = GameRound(number_of_players=3, round_number=3, player_starting_tricks=0, first_bidding_player=0)
 
-    round.set_player_bid(0, 3, -1)
-    round.set_player_bid(1, 1, -1)
-    round.set_player_bid(2, 0, -1)
+    round.set_player_bid(0, 3)
+    round.set_player_bid(1, 1)
+    round.set_player_bid(2, 0)
 
     for round_number in range(3):
         for player in range(3):
@@ -93,9 +93,9 @@ def test_order_of_play_is_given_by_winner():
         mock_choice.return_value = trump
         round = GameRound(number_of_players=3, round_number=3, player_starting_tricks=0, first_bidding_player=0)
 
-    round.set_player_bid(0, 1, -1)
-    round.set_player_bid(1, 1, -1)
-    round.set_player_bid(2, 1, -1)
+    round.set_player_bid(0, 1)
+    round.set_player_bid(1, 1)
+    round.set_player_bid(2, 1)
 
     for round_number in range(3):
         for player_index in range(3):

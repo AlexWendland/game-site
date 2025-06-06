@@ -25,7 +25,7 @@ class WizardLogic:
             first_bidding_player=self._starting_player,
         )
 
-    def set_player_bid(self, player_number: int, bid: int, set_suit: int = -1):
+    def set_player_bid(self, player_number: int, bid: int, set_suit: int = 5):
         self._validate_player_number(player_number)
         self._current_round.set_player_bid(player_number, bid, set_suit)
         if self._current_round.phase == RoundPhase.TRICK and self._current_round_number == 1:
@@ -64,13 +64,20 @@ class WizardLogic:
                 visible_cards = {player_number: self._current_round.get_player_cards(player_number)}
                 playable_cards = self._current_round.get_playable_cards(player_number)
 
+        trick_records: dict[int, TrickRecord] = self._current_round.get_tricks()
+
+        if not show_old_rounds and len(trick_records) > 0:
+            # Let players see the last round.
+            last_key = max(trick_records.keys())
+            trick_records = {last_key: trick_records[last_key]}
+
         return WizardGameStateParameters(
             score_sheet=self._score_sheet.score_sheet,
             visible_cards=visible_cards,
             playable_cards=playable_cards,
             round_bids=self._current_round.get_bids(),
             trick_count=self._current_round.get_trick_count(),
-            trick_records=self._current_round.get_tricks() if show_old_rounds else {},
+            trick_records=trick_records,
             current_player=self._current_round.current_player,
             current_trick=self._current_round.get_current_trick(),
             round_state=self._current_round.phase,
@@ -188,7 +195,7 @@ class GameRound:
         last_round = len(self._trick_records) - 1
         return self._trick_records[last_round].winner
 
-    def set_player_bid(self, player_number: int, bid: int, set_suit: int = -1):
+    def set_player_bid(self, player_number: int, bid: int, set_suit: int = 5):
         if self._phase != RoundPhase.BIDDING:
             raise GameException("Cannot bid at this time.")
         self._bidding_round.set_player_bid(player_number, bid, set_suit)
@@ -332,7 +339,7 @@ class BiddingRound:
     def is_last_player_to_bid(self) -> bool:
         return len(self._bids) == self._number_of_players - 1
 
-    def set_player_bid(self, player_number: int, bid: int, set_suit: int = -1):
+    def set_player_bid(self, player_number: int, bid: int, set_suit: int = 5):
         if self.is_bidding_over:
             raise GameException("Bidding phase is already complete.")
         if player_number != self._current_player:
@@ -342,13 +349,11 @@ class BiddingRound:
 
         # Suit setting logic
         if self._player_can_set_suit:
-            if set_suit == -1:
-                raise GameException("Player must set a new suit at this bid.")
-            if set_suit < 0 or set_suit > 3:
-                raise GameException("Invalid suit. Must be between 0 and 3.")
+            if set_suit < -1 or set_suit > 3:
+                raise GameException("Invalid suit. Must be between 0 and 3 or -1 for no suit.")
             self._trump_suit = set_suit
             self._player_can_set_suit = False
-        elif set_suit != -1:
+        elif set_suit != 5:
             raise GameException("Player cannot set suit at this time.")
 
         # Bids can't add up to the round number after round 3.

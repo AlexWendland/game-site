@@ -18,7 +18,7 @@ class PlayCardParameters(pydantic.BaseModel):
 
 class MakeBidParameters(pydantic.BaseModel):
     bid: pydantic.NonNegativeInt
-    set_suit: int = -1
+    set_suit: int = 5
 
 
 class WizardGame(game_base.GameBase):
