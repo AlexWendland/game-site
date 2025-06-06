@@ -1,3 +1,6 @@
+import copy
+import random
+from abc import ABC, abstractmethod
 from typing import Any, override
 
 import pydantic
@@ -8,6 +11,7 @@ from games_backend.app_logger import logger
 from games_backend.games.exceptions import GameException
 from games_backend.games.wizard.logic import WizardLogic
 from games_backend.games.wizard.models import (
+    WizardGameStateParameters,
     WizardGameStateResponse,
 )
 
@@ -89,7 +93,9 @@ class WizardGame(game_base.GameBase):
 
     @override
     def get_game_ai(self) -> dict[str, type[GameAI]]:
-        return {}
+        return {
+            WizardRandomAI.get_ai_type(): WizardRandomAI,
+        }
 
     @override
     def get_metadata(self) -> models.WizardGameMetadata:
@@ -99,3 +105,60 @@ class WizardGame(game_base.GameBase):
                 can_see_old_rounds=self._can_see_old_rounds,
             ),
         )
+
+
+class WizardAI(GameAI, ABC):
+    def __init__(self, position: int, name: str):
+        self._state: WizardGameStateParameters | None = None
+        super().__init__(position, name)
+
+    @override
+    def update_game_state(self, game_state: WizardGameStateResponse) -> None | models.WebSocketRequest:
+        self._state = copy.deepcopy(game_state.parameters)
+        if len(self._state.valid_bids) > 0 and self._state.current_player == self.position:
+            bid, suit = self.make_bid()
+            parameters = {"bid": bid}
+            if suit is not None:
+                parameters["set_suit"] = suit
+            return models.WebSocketRequest(
+                request_type=models.WebSocketRequestType.GAME, function_name="make_bid", parameters=parameters
+            )
+        if len(self._state.playable_cards) > 0 and self._state.current_player == self.position:
+            card = self.choose_card()
+            return models.WebSocketRequest(
+                request_type=models.WebSocketRequestType.GAME, function_name="play_card", parameters={"card": card}
+            )
+
+    @abstractmethod
+    def choose_card(self) -> int: ...
+
+    @abstractmethod
+    def make_bid(self) -> tuple[int, int | None]: ...
+
+
+class WizardRandomAI(WizardAI):
+    @override
+    def make_bid(self) -> tuple[int, int | None]:
+        if self._state is None:
+            raise GameException("Game state not initialized.")
+        bid = random.choice(self._state.valid_bids)
+        suit: None | int = None
+        if self._state.trump_to_be_set:
+            suit = random.choice([-1, 0, 1, 2, 3])
+        return bid, suit
+
+    @override
+    def choose_card(self) -> int:
+        if self._state is None:
+            raise GameException("Game state not initialized.")
+        return random.choice(self._state.playable_cards)
+
+    @override
+    @classmethod
+    def get_ai_type(cls) -> str:
+        return "random"
+
+    @override
+    @classmethod
+    def get_ai_user_name(cls) -> str:
+        return "Easy"

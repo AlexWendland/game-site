@@ -26,6 +26,10 @@ export default function Home() {
     router.push(`/topological`);
   };
 
+  const startNewWizard = async () => {
+    router.push(`/wizard`);
+  };
+
   const games = [
     {
       name: "Tic Tac Toe",
@@ -44,6 +48,12 @@ export default function Home() {
       description: "Connect four for real children!",
       onClick: startNewTopological,
       image: "/topological.svg",
+    },
+    {
+      name: "Wizard",
+      description: "A classic card game",
+      onClick: startNewWizard,
+      image: "/wizard.svg",
     },
   ];
 

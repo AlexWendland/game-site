@@ -86,6 +86,10 @@ export function NavBar() {
     router.push(`/topological`);
   };
 
+  const startNewWizardGame = async () => {
+    router.push(`/wizard`);
+  };
+
   return (
     <Navbar className="bg-gray-200" shouldHideOnScroll>
       <NavbarBrand>
@@ -159,6 +163,20 @@ export function NavBar() {
               }
             >
               Topological Connect Four
+            </DropdownItem>
+            <DropdownItem
+              key="Wizard"
+              description="Classic trick based card game."
+              onPress={startNewWizardGame}
+              startContent={
+                <img
+                  className="w-16"
+                  src="/wizard.svg"
+                  alt="Wizard card game"
+                />
+              }
+            >
+              Wizard
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
