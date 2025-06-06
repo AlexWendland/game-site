@@ -85,7 +85,6 @@ def test_invalid_bid_amount(invalid_bid: int, round_num: int):
 @pytest.mark.parametrize(
     "invalid_suit, message",
     [
-        (-1, "Player must set a new suit at this bid."),
         (-2, "Invalid suit. Must be between 0 and 3."),
         (4, "Invalid suit. Must be between 0 and 3."),
     ],
@@ -100,7 +99,7 @@ def test_player_trying_to_set_invalid_suit(
         bidding_round.set_player_bid(player_number=1, bid=2, set_suit=invalid_suit)
 
 
-@pytest.mark.parametrize("valid_suit", [0, 1, 2, 3])
+@pytest.mark.parametrize("valid_suit", [-1, 0, 1, 2, 3])
 def test_player_sets_suit_successfully(bidding_round_3p_r5_p1_need_set: BiddingRound, valid_suit: int):
     bidding_round = bidding_round_3p_r5_p1_need_set
     bidding_round.set_player_bid(player_number=1, bid=1, set_suit=valid_suit)
