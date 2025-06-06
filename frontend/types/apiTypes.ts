@@ -34,14 +34,25 @@ export interface TopologicalGameParameters {
   geometry: Geometry;
 }
 
+export interface WizardGameParameters {
+  can_see_old_rounds: boolean;
+}
+
 export enum GameType {
   TICTACTOE = "tictactoe",
   ULTIMATE = "ultimate",
   TOPOLOGICAL = "topological",
+  WIZARD = "wizard",
 }
 
 export interface TopologicalGameMetadata {
   game_type: GameType;
   max_players: number;
   parameters: TopologicalGameParameters;
+}
+
+export interface WizardGameMetadata {
+  game_type: GameType;
+  max_players: number;
+  parameters: WizardGameParameters;
 }

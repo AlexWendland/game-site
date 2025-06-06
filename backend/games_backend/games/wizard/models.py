@@ -52,6 +52,8 @@ class WizardGameStateParameters(models.GameStateResponseParameters):
     current_player: int
     current_trick: dict[int, int | None]
     max_round_number: int
+    current_trick_number: int
+    current_leading_player: int
 
 
 class WizardGameStateResponse(models.GameStateResponse):

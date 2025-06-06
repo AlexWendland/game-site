@@ -66,6 +66,28 @@ export async function makeNewTopologicalGameAPI(
   throw new Error("Unexpected response format");
 }
 
+export async function makeNewWizardGameAPI(
+  numberOfPlayers: number,
+  showOldHands: boolean,
+): Promise<string> {
+  const response = await fetch(apiUrl(`/new_game/wizard`), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      number_of_players: numberOfPlayers,
+      show_old_rounds: showOldHands,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error creating Topological game: ${response.statusText}`);
+  }
+  const data: SimpleResponse = await response.json();
+  if (data.parameters.message) {
+    return data.parameters.message;
+  }
+  throw new Error("Unexpected response format");
+}
+
 interface GameMetadata {
   game_type: string;
   max_players: number;

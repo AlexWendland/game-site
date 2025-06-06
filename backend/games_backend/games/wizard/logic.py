@@ -89,6 +89,8 @@ class WizardLogic:
             trump_suit=self._current_round.get_trump_suit(),
             trump_to_be_set=self._current_round.trump_to_be_set,
             valid_bids=valid_bids,
+            current_trick_number=self._current_round.get_current_trick_number(),
+            current_leading_player=self._current_round.get_current_leading_player(),
         )
 
     def _finalise_round(self):
@@ -260,6 +262,18 @@ class GameRound:
             return []
         return self._bidding_round.get_valid_bids(player_number)
 
+    def get_current_trick_number(self) -> int:
+        if self._phase != RoundPhase.TRICK or self._current_trick is None:
+            return 1
+        return len(self._trick_records) + 1
+
+    def get_current_leading_player(self) -> int:
+        if self._phase == RoundPhase.BIDDING:
+            return self._bidding_round.leading_player
+        if self._phase == RoundPhase.TRICK and self._current_trick is not None:
+            return self._current_trick.leading_player
+        return -1
+
     @property
     def current_player(self) -> int:
         if self._phase == RoundPhase.BIDDING:
@@ -306,6 +320,10 @@ class BiddingRound:
     @property
     def current_bidding_total(self) -> int:
         return sum(self._bids.values())
+
+    @property
+    def leading_player(self) -> int:
+        return self._starting_player
 
     def get_bids(self) -> dict[int, int]:
         return copy.copy(self._bids)
@@ -384,6 +402,10 @@ class Trick:
     @property
     def current_player(self) -> int:
         return self._current_player
+
+    @property
+    def leading_player(self) -> int:
+        return self._leading_player
 
     @property
     def cards_played(self) -> dict[int, int | None]:
