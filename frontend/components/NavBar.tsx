@@ -60,16 +60,8 @@ export function NavBar() {
   const icons = {
     chevron: <ChevronDown fill="currentColor" size={16} />,
   };
-  const { username, setUsername, clearUsername } = useUserContext();
-  const {
-    gameCode,
-    setGameCode,
-    gameLink,
-    setGameLink,
-    gameState,
-    setGameState,
-    clearGame,
-  } = useGameContext();
+  const { username, clearUsername } = useUserContext();
+  const { gameCode, gameState } = useGameContext();
   const router = useRouter();
 
   const startNewTicTacToe = async () => {
@@ -166,7 +158,7 @@ export function NavBar() {
             </DropdownItem>
             <DropdownItem
               key="Wizard"
-              description="Classic trick based card game."
+              description="Magic trick based card game!"
               onPress={startNewWizardGame}
               startContent={
                 <img

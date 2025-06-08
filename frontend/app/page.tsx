@@ -39,7 +39,7 @@ export default function Home() {
     },
     {
       name: "Ultimate Tic Tac Toe",
-      description: "A more complex version of Tic Tac Toe",
+      description: "Next level Tic Tac Toe",
       onClick: startNewUltimateGame,
       image: "/ultimate.png",
     },
@@ -51,7 +51,7 @@ export default function Home() {
     },
     {
       name: "Wizard",
-      description: "A classic card game",
+      description: "Magic trick based card game!",
       onClick: startNewWizard,
       image: "/wizard.svg",
     },
