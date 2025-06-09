@@ -5,7 +5,7 @@ import { WizardPlayerBoard } from "@/components/wizard/WizardPlayerBoard";
 import { useWizardGameContext } from "@/components/wizard/WizardContext";
 import { WizardBidSelection } from "./WizardBidSelection";
 import { WizardCardSelection } from "./WizardCardSelection";
-import { Pagination } from "@heroui/react";
+import { Pagination } from "@/components/common/pagination";
 
 export function WizardGame() {
   const {
@@ -26,10 +26,9 @@ export function WizardGame() {
         <WizardBidSelection />
         <WizardCardSelection />
         <Pagination
-          showControls
-          initialPage={currentMinTrick}
-          page={currentViewedTrick}
-          total={currentTrickNumber}
+          min={currentMinTrick}
+          current={currentViewedTrick}
+          max={currentTrickNumber}
           onChange={(page) => {
             setCurrentViewedTrick(page);
           }}
