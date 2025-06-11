@@ -28,14 +28,14 @@ export default function RootLayout({
       <head />
       <body
         className={clsx(
-          "m-0 p-0 min-h-screen bg-gray-100 font-sans antialiased",
+          "m-0 p-0 min-h-screen bg-gray-50 dark:bg-gray-900 font-sans antialiased",
           fontSans.variable,
         )}
       >
         <Providers>
           <NavBar />
-          <div className="relative flex flex-col">
-            <main className="container mx-auto max-w-8xl pt-8 flex-grow">
+          <div className="relative flex flex-col pt-12">
+            <main className="container mx-auto max-w-9xl pt-8 flex-grow">
               {children}
             </main>
           </div>
