@@ -6,7 +6,6 @@ import {
   useEffect,
   useState,
   useRef,
-  useMemo,
   ReactNode,
 } from "react";
 import {
@@ -18,7 +17,7 @@ import {
   addAIPlayerOverWebsocket,
   removeAIPlayerOverWebsocket,
 } from "@/lib/websocketFunctions";
-import { addToast } from "@heroui/react";
+import { useToast } from "@/context/ToastContext";
 import { usePathname } from "next/navigation";
 import { useGameContext } from "@/context/GameContext";
 import { getUserName } from "@/context/UserContext";
@@ -325,6 +324,8 @@ export function WizardProvider({
   // Websocket
   const gameWebSocket = useRef<WebSocket | null>(null);
 
+  const { addToast } = useToast();
+
   const username = getUserName();
 
   useEffect(() => {
@@ -357,9 +358,8 @@ export function WizardProvider({
 
               case "error":
                 addToast({
-                  title: "Error",
-                  description: parsedMessage.parameters.error_message,
-                  color: "danger",
+                  type: "error",
+                  message: parsedMessage.parameters.error_message,
                 });
                 break;
 

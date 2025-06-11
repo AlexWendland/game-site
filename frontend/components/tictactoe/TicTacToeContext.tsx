@@ -19,7 +19,7 @@ import {
   addAIPlayerOverWebsocket,
   removeAIPlayerOverWebsocket,
 } from "@/lib/websocketFunctions";
-import { addToast } from "@heroui/react";
+import { useToast } from "@/context/ToastContext";
 import { usePathname } from "next/navigation";
 import { useGameContext } from "@/context/GameContext";
 import { getUserName } from "@/context/UserContext";
@@ -156,6 +156,7 @@ export function TicTacToeProvider({
   const [isLoading, setIsLoading] = useState(true);
   // Websocket
   const gameWebSocket = useRef<WebSocket | null>(null);
+  const { addToast } = useToast();
 
   const username = getUserName();
 
@@ -189,9 +190,8 @@ export function TicTacToeProvider({
 
               case "error":
                 addToast({
-                  title: "Error",
-                  description: parsedMessage.parameters.error_message,
-                  color: "danger",
+                  message: parsedMessage.parameters.error_message,
+                  type: "error",
                 });
                 break;
 
