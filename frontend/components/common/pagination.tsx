@@ -15,7 +15,7 @@ function generatePageNumbers(
   min: number,
   max: number,
   current: number,
-): (number | string)[] {
+): (number | typeof LOWER_ELLIPSIS | typeof UPPER_ELLIPSIS)[] {
   // All pages can fit on one slider
   if (max - min + 1 <= PAGE_SIZE) {
     return Array.from({ length: max - min + 1 }, (_, i) => min + i);
