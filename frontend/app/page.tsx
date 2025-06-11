@@ -61,7 +61,6 @@ export default function Home() {
         <JoinGameButton />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 pt-6 justify-center justify-items-center gap-6 px-4">
-        {" "}
         {games.map((game, index) => (
           <div
             key={index}

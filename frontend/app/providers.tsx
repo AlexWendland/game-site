@@ -2,21 +2,27 @@
 
 import { HeroUIProvider } from "@heroui/system";
 import { useRouter } from "next/navigation";
-import * as React from "react";
-import { ToastProvider } from "@heroui/toast";
+import { useRef } from "react";
 import { UserProvider } from "@/context/UserContext";
 import { GameProvider } from "@/context/GameContext";
 import { BrowserProvider } from "@/context/BrowserContext";
+import ToastContainer, { ToastContainerRef } from "@/components/ToastContainer";
+import { ToastContext } from "@/context/ToastContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const toastRef = useRef<ToastContainerRef>(null);
 
   return (
     <HeroUIProvider navigate={router.push}>
-      <ToastProvider />
       <BrowserProvider>
         <UserProvider>
-          <GameProvider>{children}</GameProvider>
+          <GameProvider>
+            <ToastContext.Provider value={toastRef}>
+              {children}
+              <ToastContainer ref={toastRef} />
+            </ToastContext.Provider>
+          </GameProvider>
         </UserProvider>
       </BrowserProvider>
     </HeroUIProvider>

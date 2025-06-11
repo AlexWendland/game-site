@@ -18,7 +18,7 @@ import {
   setPlayerNameWebsocket,
   setPlayerPosition,
 } from "@/lib/websocketFunctions";
-import { addToast } from "@heroui/react";
+import { useToast } from "@/context/ToastContext";
 import { usePathname } from "next/navigation";
 import { useGameContext } from "@/context/GameContext";
 import { getUserName } from "@/context/UserContext";
@@ -186,6 +186,8 @@ export function UltimateProvider({
   const [aiModels, setAIModels] = useState<Record<string, string>>({});
   const [aiPlayers, setAIPlayers] = useState<Record<number, string>>({});
 
+  const { addToast } = useToast();
+
   const username = getUserName();
 
   useEffect(() => {
@@ -220,9 +222,8 @@ export function UltimateProvider({
 
               case "error":
                 addToast({
-                  title: "Error",
-                  description: parsedMessage.parameters.error_message,
-                  color: "danger",
+                  type: "error",
+                  message: parsedMessage.parameters.error_message,
                 });
                 break;
 
