@@ -1,4 +1,3 @@
-import { Button, Form, Input } from "@heroui/react";
 import { FormEvent, useState } from "react";
 import { validateGameID } from "@/lib/gameFunctions";
 import { getGameMetadata } from "@/lib/apiCalls";
@@ -12,6 +11,10 @@ export function JoinGameButton() {
   const onSubmit = async (formInput: FormEvent<HTMLFormElement>) => {
     formInput.preventDefault();
 
+    // Reset errors and set loading state
+    setErrors({});
+    setIsLoading(true);
+
     // Get form data
     const formData = new FormData(formInput.currentTarget);
     const gameID =
@@ -20,11 +23,9 @@ export function JoinGameButton() {
 
     if (!validateGameID(gameID)) {
       setErrors({ GameID: "Game IDs need to be a 5 letter string." });
+      setIsLoading(false); // Stop loading on validation error
       return;
     }
-
-    setIsLoading(true);
-    setErrors({});
 
     try {
       const gameMetadata = await getGameMetadata(gameID);
@@ -35,30 +36,58 @@ export function JoinGameButton() {
         setErrors({ GameID: "Invalid game ID" });
       }
     } catch (err) {
-      console.log(err);
-      setErrors({ GameID: "Invalid game ID" });
+      console.error(err); // Use console.error for errors
+      setErrors({ GameID: "An error occurred. Please try again." }); // More generic error message for user
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Form
-      className="w-full max-w-xs"
-      validationErrors={errors}
+    <form
+      className="w-full max-w-xs space-y-4 rounded-lg bg-white p-6"
       onSubmit={onSubmit}
     >
-      <Input
-        isRequired
-        isDisabled={isLoading}
-        label="GameID"
-        labelPlacement="outside"
-        name="GameID"
-        placeholder="Enter the 5 character GameID"
-      />
-      <Button color="primary" isLoading={isLoading} type="submit">
-        Join a game!
-      </Button>
-    </Form>
+      <div className="relative">
+        <label
+          htmlFor="GameID"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+        >
+          GameID
+        </label>
+        <input
+          type="text"
+          id="GameID"
+          name="GameID"
+          placeholder="Enter the 5 character GameID"
+          required
+          disabled={isLoading}
+          className={`mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-200 focus:ring-blue-200 focus:opacity-50 sm:text-sm
+            ${
+              errors.GameID
+                ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                : "border-blue-200"
+            }
+          `}
+        />
+        {errors.GameID && (
+          <p className="mt-2 text-sm text-red-600">{errors.GameID}</p>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        className={`rounded-full px-4 py-2 text-white transition duration-200 ease-in-out
+          ${
+            isLoading
+              ? "bg-orange-300"
+              : "bg-orange-300 hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-gray-700"
+          }
+        `}
+      >
+        {isLoading ? "Joining..." : "Join a game!"}
+      </button>
+    </form>
   );
 }
