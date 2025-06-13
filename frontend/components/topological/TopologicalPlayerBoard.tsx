@@ -1,5 +1,5 @@
 import { useTopologicalPlayerContext } from "@/components/topological/TopologicalContext";
-import { TopologicalPlayerSlot } from "./TopologicalPlayerSlot";
+import { PlayerSlot } from "@/components/common/PlayerSlot";
 import { getPlayerIcon } from "./PlayerIconMap";
 
 export function TopologicalPlayerBoard() {
@@ -23,7 +23,7 @@ export function TopologicalPlayerBoard() {
           const isAI = id in aiPlayers;
           const isOccupied = players[id] !== null;
           return (
-            <TopologicalPlayerSlot
+            <PlayerSlot
               key={id}
               playerName={players[id]}
               icon={getPlayerIcon(id)}

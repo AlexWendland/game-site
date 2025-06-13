@@ -2,7 +2,7 @@
 
 import { TicTacToeBoard } from "@/components/tictactoe/TicTacToeBoard";
 import { TicTacToePlayerBoard } from "@/components/tictactoe/TicTacToePlayerBoard";
-import { Pagination } from "@heroui/react";
+import { Pagination } from "@/components/common/Pagination";
 import { useTicTacToeGameContext } from "@/components/tictactoe/TicTacToeContext";
 
 export function TicTacToeGame() {
@@ -30,15 +30,12 @@ export function TicTacToeGame() {
         <div className="hidden md:block"></div>
         <TicTacToeBoard />
         <Pagination
-          variant="bordered"
-          className="flex justify-center"
-          page={currentViewedMove + 1}
-          total={currentMove + 1}
-          color="secondary"
+          current={currentViewedMove + 1}
+          min={1}
+          max={currentMove + 1}
           onChange={(page) => {
             setCurrentViewedMove(page - 1);
           }}
-          showControls
         />
       </div>
     </div>

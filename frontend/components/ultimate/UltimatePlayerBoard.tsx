@@ -1,5 +1,5 @@
 import { useUltimatePlayerContext } from "./UltimateContext";
-import { UltimatePlayerSlot } from "./UltimatePlayerSlot";
+import { PlayerSlot } from "@/components/common/PlayerSlot";
 
 export function UltimatePlayerBoard() {
   const {
@@ -27,7 +27,7 @@ export function UltimatePlayerBoard() {
           const isAI = player.id in aiPlayers;
           const isOccupied = players[player.id] !== null;
           return (
-            <UltimatePlayerSlot
+            <PlayerSlot
               key={player.id}
               playerName={players[player.id]}
               icon={player.icon}
