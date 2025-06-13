@@ -2,8 +2,14 @@ import { TicTacToeSquare } from "@/components/tictactoe/TicTacToeSquare";
 import { useTicTacToeBoardContext } from "@/components/tictactoe/TicTacToeContext";
 
 export function TicTacToeBoard() {
-  const { history, currentMove, winningLine, currentViewedMove, makeMove } =
-    useTicTacToeBoardContext();
+  const {
+    history,
+    currentMove,
+    winningLine,
+    currentViewedMove,
+    isCurrentUsersGo,
+    makeMove,
+  } = useTicTacToeBoardContext();
 
   return (
     <div className="grid grid-cols-3 gap-2 max-w-[600px] max-h-[600px] aspect-square">
@@ -15,6 +21,7 @@ export function TicTacToeBoard() {
           onSquareClick={() => makeMove(i)}
           isHighlighted={winningLine.includes(i)}
           isInCurrentView={val == history[currentViewedMove][i]}
+          isCurrentUsersGo={isCurrentUsersGo}
         />
       ))}
     </div>

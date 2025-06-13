@@ -2,7 +2,7 @@
 
 import { UltimateBoard } from "@/components/ultimate/UltimateBoard";
 import { UltimatePlayerBoard } from "@/components/ultimate/UltimatePlayerBoard";
-import { Pagination } from "@heroui/react";
+import { Pagination } from "@/components/common/Pagination";
 import { useUltimateHistoryContext } from "./UltimateContext";
 
 export function UltimateGame() {
@@ -29,17 +29,16 @@ export function UltimateGame() {
       <UltimatePlayerBoard />
       <UltimateBoard />
       <br />
-      <Pagination
-        variant="bordered"
-        className="flex justify-center"
-        page={currentViewedMove + 1}
-        total={currentMove + 1}
-        color="secondary"
-        onChange={(page) => {
-          setCurrentViewedMove(page - 1);
-        }}
-        showControls
-      />
+      <div className="flex justify-center">
+        <Pagination
+          current={currentViewedMove + 1}
+          max={currentMove + 1}
+          min={1}
+          onChange={(page) => {
+            setCurrentViewedMove(page - 1);
+          }}
+        />
+      </div>
     </div>
   );
 }

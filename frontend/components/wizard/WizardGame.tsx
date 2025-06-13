@@ -5,7 +5,7 @@ import { WizardPlayerBoard } from "@/components/wizard/WizardPlayerBoard";
 import { useWizardGameContext } from "@/components/wizard/WizardContext";
 import { WizardBidSelection } from "./WizardBidSelection";
 import { WizardCardSelection } from "./WizardCardSelection";
-import { Pagination } from "@/components/common/pagination";
+import { Pagination } from "@/components/common/Pagination";
 
 export function WizardGame() {
   const {

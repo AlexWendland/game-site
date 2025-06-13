@@ -30,6 +30,7 @@ type TicTacToeBoardContextType = {
   currentMove: number;
   winningLine: number[];
   currentViewedMove: number;
+  isCurrentUsersGo: boolean;
   makeMove: (position: number) => void;
 };
 
@@ -289,6 +290,9 @@ export function TicTacToeProvider({
   const currentPlayer = useMemo(() => {
     return players[currentPlayerNumber];
   }, [currentPlayerNumber, players]);
+  const isCurrentUsersGo = useMemo(() => {
+    return currentUserPosition === currentPlayerNumber && winner === null;
+  }, [currentUserPosition, currentPlayerNumber, winner]);
 
   useEffect(() => {
     if (winner !== null || currentMove === 9) {
@@ -311,7 +315,7 @@ export function TicTacToeProvider({
   };
 
   const makeMove = async (position: number) => {
-    if (winner) return;
+    if (winner !== null) return;
     if (history[currentMove][position]) return;
     if (currentUserPosition !== currentPlayerNumber) return;
     if (currentViewedMove !== currentMove) return;
@@ -337,6 +341,7 @@ export function TicTacToeProvider({
         currentMove,
         winningLine,
         currentViewedMove,
+        isCurrentUsersGo,
         makeMove,
       }}
     >

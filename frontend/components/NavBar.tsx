@@ -191,7 +191,7 @@ export function NavBar() {
               onClick={toggleDropdown}
               aria-expanded={isDropdownOpen}
               aria-haspopup="true"
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:hover:gb-gray-600 dark:bg-gray-700 rounded-full flex items-center transition-colors duration-200"
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600  rounded-full flex items-center transition-colors duration-200"
             >
               Start a new game{" "}
               <ChevronDown fill="currentColor" size={16} className="pl-1" />

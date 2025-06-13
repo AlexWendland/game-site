@@ -70,7 +70,7 @@ export function Pagination({ min, max, current, onChange }: PaginationProps) {
           <button
             onClick={handlePrev}
             disabled={current === min}
-            className="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg enabled:hover:bg-gray-100 enabled:hover:text-gray-700 disabled:opacity-50"
+            className="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-500 border border-e-0 border-gray-500 rounded-s-lg enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 enabled:hover:text-gray-700 disabled:opacity-50"
           >
             <span className="sr-only">Previous</span>
             <svg
@@ -107,11 +107,11 @@ export function Pagination({ min, max, current, onChange }: PaginationProps) {
               <button
                 onClick={() => onChange(pageNumber)}
                 aria-current={current === pageNumber ? "page" : undefined}
-                className={`flex items-center justify-center px-4 h-10 w-10 sm:w-12 leading-tight border border-gray-300 transition-colors duration-200
+                className={`flex items-center justify-center px-4 h-10 w-10 sm:w-12 leading-tight border border-gray-500 transition-colors duration-200
                 ${
                   current === pageNumber
-                    ? "z-10 text-white bg-blue-600 border-blue-600"
-                    : "text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700"
+                    ? "z-10 text-white bg-blue-300 border-blue-300 dark:bg-blue-700 dark:border-blue-700"
+                    : "hover:bg-gray-200 dark:hover:bg-gray-700"
                 }
               `}
               >
@@ -126,7 +126,7 @@ export function Pagination({ min, max, current, onChange }: PaginationProps) {
           <button
             onClick={handleNext}
             disabled={current === max}
-            className="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg enabled:hover:bg-gray-100 enabled:hover:text-gray-700 disabled:opacity-50"
+            className="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 border border-gray-500 rounded-e-lg enabled:hover:bg-gray-100 enabled:dark:hover:bg-gray-700 disabled:opacity-50"
           >
             <span className="sr-only">Next</span>
             <svg

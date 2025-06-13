@@ -5,6 +5,7 @@ type SquareProps = {
   onSquareClick: () => void;
   isHighlighted: boolean;
   isInCurrentView: boolean;
+  isCurrentUsersGo: boolean;
 };
 
 export function TicTacToeSquare({
@@ -12,6 +13,7 @@ export function TicTacToeSquare({
   onSquareClick,
   isHighlighted,
   isInCurrentView,
+  isCurrentUsersGo,
 }: SquareProps) {
   const textColor =
     value === "X"
@@ -25,7 +27,11 @@ export function TicTacToeSquare({
     "select-none",
     "text-9xl",
     textColor,
-    isHighlighted ? "bg-yellow-200" : "bg-gray-50",
+    {
+      "bg-yellow-200 dark:bg-yellow-400": isHighlighted,
+      "hoover:bg-gray-100 hover:dark:bg-gray-700 hover:scale-105 transition-all":
+        value === null && isCurrentUsersGo,
+    },
   );
 
   return (

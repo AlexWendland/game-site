@@ -1,5 +1,5 @@
 import { useTicTacToePlayerContext } from "@/components/tictactoe/TicTacToeContext";
-import { TicTacToePlayerSlot } from "./TicTacToePlayerSlot";
+import { PlayerSlot } from "@/components/common/PlayerSlot";
 
 export function TicTacToePlayerBoard() {
   const {
@@ -26,7 +26,7 @@ export function TicTacToePlayerBoard() {
           const isAI = player.id in aiPlayers;
           const isOccupied = players[player.id] !== null;
           return (
-            <TicTacToePlayerSlot
+            <PlayerSlot
               key={player.id}
               playerName={players[player.id]}
               icon={player.icon}

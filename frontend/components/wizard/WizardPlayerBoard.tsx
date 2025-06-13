@@ -1,5 +1,5 @@
 import { useWizardPlayerContext } from "@/components/wizard/WizardContext";
-import { WizardPlayerSlot } from "@/components/wizard/WizardPlayerSlot";
+import { PlayerSlot } from "@/components/common/PlayerSlot";
 
 export function WizardPlayerBoard() {
   const {
@@ -22,7 +22,7 @@ export function WizardPlayerBoard() {
           const isAI = id in aiPlayers;
           const isOccupied = players[id] !== null;
           return (
-            <WizardPlayerSlot
+            <PlayerSlot
               key={id}
               playerName={players[id]}
               icon={id}

@@ -2,7 +2,7 @@
 
 import { TopologicalBoard } from "@/components/topological/TopologicalBoard";
 import { TopologicalPlayerBoard } from "@/components/topological/TopologicalPlayerBoard";
-import { Pagination } from "@heroui/react";
+import { Pagination } from "@/components/common/Pagination";
 import { useTopologicalGameContext } from "@/components/topological/TopologicalContext";
 
 export function TopologicalGame() {
@@ -30,17 +30,16 @@ export function TopologicalGame() {
         <TopologicalPlayerBoard />
         <div className="hidden md:block"></div>
         <TopologicalBoard />
-        <Pagination
-          variant="bordered"
-          className="flex justify-center"
-          page={currentViewedMove + 1}
-          total={currentMove + 1}
-          color="secondary"
-          onChange={(page) => {
-            setCurrentViewedMove(page - 1);
-          }}
-          showControls
-        />
+        <div className="flex justify-center">
+          <Pagination
+            current={currentViewedMove + 1}
+            max={currentMove + 1}
+            min={1}
+            onChange={(page) => {
+              setCurrentViewedMove(page - 1);
+            }}
+          />
+        </div>
       </div>
     </div>
   );
