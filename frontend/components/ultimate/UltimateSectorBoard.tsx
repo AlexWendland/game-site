@@ -9,6 +9,7 @@ export function UltimateSectorBoard({ sectorIndex }: { sectorIndex: number }) {
     currentViewedMove,
     winner,
     makeMove,
+    isCurrentUsersGo,
   } = useUltimateSectorBoardContext();
 
   const boardMoves = moves.slice(sectorIndex * 9, (sectorIndex + 1) * 9);
@@ -35,6 +36,9 @@ export function UltimateSectorBoard({ sectorIndex }: { sectorIndex: number }) {
             !lookingAtLastMove && sectorIsPlayable && !valueInView(val)
           }
           isInCurrentView={valueInView(val)}
+          isCurrentUserGo={
+            isCurrentUsersGo && currentViewedMove === currentMove
+          }
         />
       ))}
     </div>
