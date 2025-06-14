@@ -5,6 +5,7 @@ type SquareProps = {
   onSquareClick: () => void;
   isHighlighted: boolean;
   isInCurrentView: boolean;
+  isCurrentUserGo: boolean;
 };
 
 export function UltimateSquare({
@@ -12,12 +13,17 @@ export function UltimateSquare({
   onSquareClick,
   isHighlighted,
   isInCurrentView,
+  isCurrentUserGo,
 }: SquareProps) {
   const classes = clsx(
     "flex items-center justify-center",
     "aspect-square",
     "border border-gray-400",
-    isHighlighted ? "bg-yellow-100" : "bg-gray-50",
+    {
+      "bg-yellow-100 dark:bg-yellow-400": isHighlighted,
+      "hover:bg-yellow-50 hover:dark:bg-yellow-300 hover:scale-105 transition-all":
+        isHighlighted && isCurrentUserGo,
+    },
   );
 
   return (

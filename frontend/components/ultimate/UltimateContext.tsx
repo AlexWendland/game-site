@@ -57,6 +57,7 @@ type UltimateSectorBoardContextType = {
   currentMove: number;
   currentViewedMove: number;
   winner: number | null;
+  isCurrentUsersGo: boolean;
   makeMove: (position: number) => void;
 };
 
@@ -325,6 +326,9 @@ export function UltimateProvider({
   const currentPlayer = useMemo(() => {
     return players[currentPlayerNumber];
   }, [currentPlayerNumber, players]);
+  const isCurrentUsersGo = useMemo(() => {
+    return currentUserPosition === currentPlayerNumber && winner === null;
+  }, [currentUserPosition, currentPlayerNumber, winner]);
 
   useEffect(() => {
     if (winner !== null || currentMove === 81) {
@@ -404,6 +408,7 @@ export function UltimateProvider({
               currentMove,
               currentViewedMove,
               winner,
+              isCurrentUsersGo,
               makeMove,
             }}
           >
