@@ -1,6 +1,6 @@
 import { useState } from "react";
+import clsx from "clsx";
 
-import { Button } from "@heroui/react";
 import { useWizardBidSelectionContext } from "./WizardContext";
 
 export function WizardBidSelection() {
@@ -20,6 +20,11 @@ export function WizardBidSelection() {
     ["Yellow", 3],
   ];
 
+  const canSubmit = !(
+    selectedBid === null &&
+    (!selectSuit || selectedSuit === null)
+  );
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-5 justify-items-center gap-2 pb-2">
       <div className="col-start-1">
@@ -31,13 +36,13 @@ export function WizardBidSelection() {
             </div>
             <div className="flex justify-center flex-wrap">
               {suitOptions.map((suitName, suitValue) => (
-                <Button
+                <button
                   key={`suit-${suitValue}`}
-                  onPress={() => setSelectedSuit(suitValue)}
+                  onClick={() => setSelectedSuit(suitValue)}
                   color={selectedSuit === suitValue ? "success" : "default"}
                 >
                   {suitName}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
@@ -51,33 +56,42 @@ export function WizardBidSelection() {
           {Array.from({ length: roundNumber + 1 }).map((_, bidValue) => {
             const isSelectable = validBids.includes(bidValue);
             return (
-              <Button
+              <button
                 key={`bid-${bidValue}`}
-                onPress={() => setSelectedBid(bidValue)}
-                color={selectedBid === bidValue ? "success" : "default"}
-                isDisabled={!isSelectable}
+                onClick={() => setSelectedBid(bidValue)}
+                disabled={!isSelectable}
+                className={clsx("px-2 rounded-full transition-all", {
+                  "bg-gray-200 hover:bg-gray-300 hover:scale-110 dark:bg-gray-700 dark:hover:bg-gray-600":
+                    selectedBid !== bidValue && isSelectable,
+                  "bg-blue-300 hover:bg-blue-400 dark:bg-blue-500 dark:hover:bg-blue-400":
+                    selectedBid === bidValue && isSelectable,
+                  "opacity-30 bg-gray-100 dark:bg-gray-800": !isSelectable,
+                })}
               >
                 {bidValue}
-              </Button>
+              </button>
             );
           })}
         </div>
       </div>
       <div className="md:col-start-5 justify-right">
-        <Button
-          onPress={() => {
+        <button
+          onClick={() => {
             if (selectedBid !== null && validBids.includes(selectedBid)) {
               makeBid(selectedBid, selectedSuit);
               setSelectedSuit(null);
               setSelectedBid(null);
             }
           }}
-          disabled={
-            selectedBid === null && (!selectSuit || selectedSuit === null)
-          }
+          disabled={!canSubmit}
+          className={clsx("p-2 rounded-2xl transition-all", {
+            "bg-orange-300 hover:bg-orange-400 hover:scale-105 dark:bg-orange-700 dark:hover:bg-orange-600":
+              canSubmit,
+            "bg-gray-100 dark:bg-gray-800 opacity-30": !canSubmit,
+          })}
         >
           Confirm bid
-        </Button>
+        </button>
       </div>
     </div>
   );
