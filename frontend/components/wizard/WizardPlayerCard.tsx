@@ -17,25 +17,23 @@ export function WizardPlayerCard({
 }: PlayerSlotProps) {
   const tricksColor =
     bid === null
-      ? "text-gray-200"
+      ? ""
       : tricks < bid
-        ? "text-blue-200"
+        ? "text-blue-200 dark:text-blue-500"
         : tricks > bid
-          ? "text-red-200"
-          : "text-green-200";
+          ? "text-red-200 dark:text-red-500"
+          : "text-green-500";
   return (
     <>
       <div
         className={clsx(
           "sm:hidden",
-          "bg-gray-800 text-white p-2 rounded-lg shadow-md",
+          "bg-gray-200 dark:bg-gray-700 p-2 rounded-lg shadow-md",
           "w-16 mx-auto",
           "grid grid-cols-1",
           "transition-all duration-300 ease-in-out",
           {
-            "ring-4 ring-offset-2 ring-offset-gray-900 ring-yellow-200":
-              isNextPlayer,
-            "bg-gray-700": isNextPlayer,
+            "ring-2 ring-yellow-200": isNextPlayer,
           },
         )}
       >
@@ -47,7 +45,7 @@ export function WizardPlayerCard({
 
         <div className="text-center">
           <div className="flex space-x-2 mt-1 justify-center items-center">
-            <p className="text-md font-bold text-gray-200">{bid ?? "-"}</p>
+            <p className="text-md font-bold">{bid ?? "-"}</p>
             <p className="text-sm font-light text-gray-500">/</p>
             <p className={`text-md font-bold ${tricksColor}`}>{tricks}</p>
           </div>
@@ -60,14 +58,11 @@ export function WizardPlayerCard({
       <div
         className={clsx(
           "hidden sm:block",
-          "bg-gray-800 text-white p-2 rounded-lg shadow-md",
+          "bg-gray-200 dark:bg-gray-700 p-2 rounded-lg shadow-md",
           "w-full max-w-sm mx-auto",
-
           "transition-all duration-300 ease-in-out",
           {
-            "ring-4 ring-offset-2 ring-offset-gray-900 ring-yellow-200":
-              isNextPlayer,
-            "bg-gray-700": isNextPlayer,
+            "ring-2 ring-yellow-200": isNextPlayer,
           },
         )}
       >
@@ -81,7 +76,7 @@ export function WizardPlayerCard({
           {/* --- Left Section: Bid / Tricks --- */}
           <div className="text-center">
             <div className="flex space-x-2 mt-1 justify-center items-center">
-              <p className="text-4xl font-bold text-gray-200">{bid ?? "-"}</p>
+              <p className="text-4xl font-bold">{bid ?? "-"}</p>
               <p className="text-xl font-light text-gray-500">/</p>
               <p className={`text-4xl font-bold ${tricksColor}`}>{tricks}</p>
             </div>

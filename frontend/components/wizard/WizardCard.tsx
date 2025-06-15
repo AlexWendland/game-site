@@ -67,7 +67,7 @@ export function WizardCard({
       className={clsx(
         "relative", // This creates the positioning context for the child.
         "w-16 md:w-20",
-        "bg-gray-800",
+        "bg-gray-300 dark:bg-gray-700",
         "aspect-[2.5/3.5]",
         "rounded-lg",
         "shadow-lg",
@@ -89,7 +89,7 @@ export function WizardCard({
           className={clsx(
             "absolute top-1.5 right-2", // Positions the element in the top-right corner.
             "text-xs font-bold",
-            "text-gray-400",
+            "text-gray-500",
           )}
         >
           {cardAssistantText}
