@@ -2,7 +2,8 @@
 
 import { makeNewTopologicalGameAPI } from "@/lib/apiCalls";
 import { Geometry, GravitySetting } from "@/types/apiTypes";
-import { Form, Slider, RadioGroup, Radio, Button } from "@heroui/react";
+import { RadioGroup, Radio } from "@/components/common/RadioGroup";
+import { Slider } from "@/components/common/Slider";
 import { useRouter } from "next/navigation";
 
 export default function TopologicalCreateGame() {
@@ -26,34 +27,24 @@ export default function TopologicalCreateGame() {
   }
 
   return (
-    <Form
+    <form
       className="grid grid-cols-1 justify-items-center gap-4 w-full h-full p-2"
       onSubmit={handleSubmit}
     >
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-16">
         <h1 className="text-xl">Create new Topological Connect Four game!</h1>
         <Slider
-          className="max-w-md"
-          color="foreground"
           defaultValue={4}
           label="Number of players"
           maxValue={8}
           minValue={2}
-          showSteps={true}
-          size="lg"
-          step={1}
           name="players"
         />
         <Slider
-          className="max-w-md"
-          color="foreground"
           defaultValue={8}
           label="Board size"
           maxValue={8}
           minValue={4}
-          showSteps={true}
-          size="lg"
-          step={1}
           name="boardSize"
         />
         <RadioGroup label="Geometry" defaultValue="torus" name="geometry">
@@ -94,9 +85,12 @@ export default function TopologicalCreateGame() {
           <Radio value="none">Play anywhere!</Radio>
         </RadioGroup>
       </div>
-      <Button color="primary" type="submit">
+      <button
+        type="submit"
+        className="bg-orange-300 dark:bg-orange-500 p-4 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-600 hover:scale-105 transition-all"
+      >
         Create new game
-      </Button>
-    </Form>
+      </button>
+    </form>
   );
 }

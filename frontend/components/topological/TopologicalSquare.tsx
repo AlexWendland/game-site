@@ -35,7 +35,7 @@ export function TopologicalSquare({
       : isHighlighted && isClose
         ? "bg-green-200"
         : isHighlighted
-          ? "bg-yellow-200"
+          ? "bg-yellow-200 dark:bg-yellow-400"
           : isClose
             ? "bg-blue-200"
             : isShadowed
