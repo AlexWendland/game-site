@@ -176,10 +176,10 @@ export function NavBar() {
       <div className="flex items-center justify-between w-max-[800px] mx-auto">
         <div>
           <Link href="/" className="flex items-center">
-            <div className="text-brand">
+            <div className="text-orange-600">
               <Logo />
             </div>
-            <div className="hidden sm:block font-bold text-2xl text-brand pl-2">
+            <div className="hidden sm:block font-bold text-2xl text-orange-600 pl-2">
               Alex's Games
             </div>
           </Link>
