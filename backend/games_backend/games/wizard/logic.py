@@ -53,14 +53,8 @@ class WizardLogic:
         valid_bids: list[int] = []
         if player_number is not None:
             valid_bids = self._current_round.get_valid_bids(player_number)
-            if self._current_round_number == 1:
+            if self._current_round_number != 1:
                 # In round 1 you see everyone's cards except your own
-                visible_cards = {
-                    i: self._current_round.get_player_cards(i)
-                    for i in range(self._number_of_players)
-                    if i != player_number
-                }
-            else:
                 visible_cards = {player_number: self._current_round.get_player_cards(player_number)}
                 playable_cards = self._current_round.get_playable_cards(player_number)
 
@@ -71,6 +65,22 @@ class WizardLogic:
             last_key = max(trick_records.keys())
             trick_records = {last_key: trick_records[last_key]}
 
+        current_trick: dict[int, int | None] = self._current_round.get_current_trick()
+        if self._current_round_number == 1:
+            if player_number is not None:
+                # In round 1 you see everyone's cards except your own
+                current_trick = {
+                    i: self._current_round.get_player_cards(i)[0]
+                    for i in range(self._number_of_players)
+                    # Show their card after they have bid.
+                    if self._current_round.has_player_bid(player_number) or i != player_number
+                }
+        elif self._current_round.get_current_trick_number() == self._current_round_number:
+            # In the last trick show every ones cards so you know how the last round plays out.
+            for i in range(self._number_of_players):
+                if current_trick[i] is None and i != player_number:
+                    current_trick[i] = self._current_round.get_player_cards(i)[0]
+
         return WizardGameStateParameters(
             score_sheet=self._score_sheet.score_sheet,
             visible_cards=visible_cards,
@@ -79,7 +89,7 @@ class WizardLogic:
             trick_count=self._current_round.get_trick_count(),
             trick_records=trick_records,
             current_player=self._current_round.current_player,
-            current_trick=self._current_round.get_current_trick(),
+            current_trick=current_trick,
             round_state=self._current_round.phase,
             winners=self.winners,
             scores=self.current_scores,
@@ -192,6 +202,9 @@ class GameRound:
     def phase(self) -> RoundPhase:
         return self._phase
 
+    def has_player_bid(self, player_number: int) -> bool:
+        return self._bidding_round.has_player_bid(player_number)
+
     @property
     def next_starting_player(self) -> int:
         last_round = len(self._trick_records) - 1
@@ -255,7 +268,7 @@ class GameRound:
     def get_current_trick(self) -> dict[int, int | None]:
         if self._phase != RoundPhase.TRICK or self._current_trick is None:
             return {}
-        return self._current_trick.cards_played
+        return copy.copy(self._current_trick.cards_played)
 
     def get_valid_bids(self, player_number: int) -> list[int]:
         if self._phase != RoundPhase.BIDDING:
@@ -348,6 +361,9 @@ class BiddingRound:
                 valid_bids.remove(excluded_bid)
 
         return valid_bids
+
+    def has_player_bid(self, player_number: int) -> bool:
+        return player_number in self._bids
 
     @property
     def current_player(self) -> int:
