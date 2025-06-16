@@ -45,9 +45,17 @@ def test_completely_random_game(number_of_players: int):
             for player_index in range(number_of_players):
                 game_state = logic.get_game_state(player, True)
                 assert len(game_state.trick_records) == past_hands
-                assert (
-                    len([played for played in game_state.current_trick.values() if played is not None]) == player_index
-                )
+                if past_hands != round_number - 1:
+                    assert (
+                        len([played for played in game_state.current_trick.values() if played is not None])
+                        == player_index
+                    )
+                else:
+                    # Last hand, you can see everyone's cards.
+                    assert (
+                        len([played for played in game_state.current_trick.values() if played is not None])
+                        == number_of_players - 1
+                    )
                 game_state = logic.get_game_state(player, False)
                 assert len(game_state.trick_records) == min(past_hands, 1)
                 logic.play_card(player, random.choice(game_state.playable_cards))

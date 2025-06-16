@@ -499,19 +499,7 @@ export function WizardProvider({
       currentGameState.current_trick_number === currentViewedTrick ||
       currentViewedTrick < currentMinTrick
     ) {
-      let trickCards: Record<number, number | null> = {};
-      if (currentGameState.round_number === 1) {
-        for (let i = 0; i < maxPlayers; i++) {
-          if (i === currentUserPosition) {
-            trickCards[i] = null;
-          } else {
-            trickCards[i] = currentGameState.visible_cards[i]?.[0] ?? null;
-          }
-        }
-      } else {
-        trickCards = currentGameState.current_trick;
-      }
-      setViewedTrickCards(trickCards);
+      setViewedTrickCards(currentGameState.current_trick);
       setViewedTrickLeader(currentGameState.current_leading_player);
       setViewedTrickWinner(null);
       return;
