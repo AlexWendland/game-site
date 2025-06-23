@@ -35,6 +35,7 @@
     enable = true;
     npm = {
       enable = true;
+      install.enable = true;
     };
   };
 
@@ -47,6 +48,12 @@
   scripts.front-docker-up.exec = ''
     cd frontend && docker run --env-file .env.local -p 3000:3000 games-frontend
   '';
+  scripts.front-test.exec = ''
+    cd frontend && npm run test
+  '';
+  scripts.front-test-watch.exec = ''
+    cd frontend && npm run test:watch
+  '';
 
   git-hooks.hooks = {
     ruff.enable = true;
@@ -58,6 +65,14 @@
       entry = "bash -c 'devenv shell && cd backend && poetry run pytest'";
       pass_filenames = false;
       args = [ "--maxfail=1" "--disable-warnings" "--tb=short" ];
+      always_run = true;
+    };
+    jest = {
+      enable = true;
+      name = "Jest";
+      entry = "bash -c 'devenv shell && cd frontend && npm run test'";
+      pass_filenames = false;
+      args = [ "--watchAll=false" ];
       always_run = true;
     };
   };
