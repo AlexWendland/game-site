@@ -7,3 +7,6 @@ devenv.local.nix
 
 # Pre commit
 .pre-commit-config.yaml
+
+# Claude
+.claude/*

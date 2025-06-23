@@ -1,12 +1,9 @@
-import { heroui } from "@heroui/theme";
-
 /** @type {import('tailwindcss').Config} */
 const config = {
   content: [
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./context/**/*.{js,ts,jsx,tsx,mdx}",
-    "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     colors: {
@@ -80,6 +77,9 @@ const config = {
       "green-700": "#207227",
       "green-800": "#0E5814",
       "green-900": "#05400A",
+
+      black: "#0D0D0D",
+      white: "#F2F2F2",
     },
     extend: {
       fontFamily: {
@@ -88,7 +88,7 @@ const config = {
     },
   },
   darkMode: "class",
-  plugins: [heroui()],
+  plugins: [],
 };
 
 module.exports = config;
