@@ -3,9 +3,19 @@ import clsx from "clsx";
 
 import { useWizardBidSelectionContext } from "./WizardContext";
 
-export function WizardBidSelection() {
-  const { validBids, roundNumber, makeBid, selectSuit } =
-    useWizardBidSelectionContext();
+type BidSelectionPresenterProps = {
+  validBids: number[];
+  roundNumber: number;
+  selectSuit: boolean;
+  makeBid: (value: number, suit: number | null) => void;
+};
+
+export function BidSelectionPresenter({
+  validBids,
+  roundNumber,
+  selectSuit,
+  makeBid,
+}: BidSelectionPresenterProps) {
   const [selectedSuit, setSelectedSuit] = useState<number | null>(null);
   const [selectedBid, setSelectedBid] = useState<number | null>(null);
 
@@ -20,10 +30,8 @@ export function WizardBidSelection() {
     ["Yellow", 3],
   ];
 
-  const canSubmit = !(
-    selectedBid === null &&
-    (!selectSuit || selectedSuit === null)
-  );
+  const canSubmit =
+    selectedBid !== null && (!selectSuit || selectedSuit !== null);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-5 justify-items-center gap-2 pb-2">
@@ -35,11 +43,16 @@ export function WizardBidSelection() {
               Select trump suit{" "}
             </div>
             <div className="flex justify-center flex-wrap">
-              {suitOptions.map((suitName, suitValue) => (
+              {suitOptions.map(([suitName, suitValue]) => (
                 <button
                   key={`suit-${suitValue}`}
                   onClick={() => setSelectedSuit(suitValue)}
-                  color={selectedSuit === suitValue ? "success" : "default"}
+                  className={clsx("px-3 py-1 m-1 rounded-lg transition-all", {
+                    "bg-gray-200 hover:bg-gray-300 hover:scale-105 dark:bg-gray-700 dark:hover:bg-gray-600":
+                      selectedSuit !== suitValue,
+                    "bg-green-300 hover:bg-green-400 dark:bg-green-500 dark:hover:bg-green-400":
+                      selectedSuit === suitValue,
+                  })}
                 >
                   {suitName}
                 </button>
@@ -94,5 +107,18 @@ export function WizardBidSelection() {
         </button>
       </div>
     </div>
+  );
+}
+
+export function WizardBidSelection() {
+  // Using the most bare version of the Container/Presenter pattern to make this testable.
+
+  const { validBids, roundNumber, makeBid, selectSuit } =
+    useWizardBidSelectionContext();
+
+  return (
+    <BidSelectionPresenter
+      {...{ validBids, roundNumber, selectSuit, makeBid }}
+    />
   );
 }
