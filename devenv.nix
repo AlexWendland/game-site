@@ -54,6 +54,9 @@
   scripts.front-test-watch.exec = ''
     cd frontend && npm run test:watch
   '';
+  scripts.front-typecheck.exec = ''
+    cd frontend && npm run typecheck
+  '';
 
   git-hooks.hooks = {
     ruff.enable = true;
@@ -73,6 +76,13 @@
       entry = "bash -c 'devenv shell && cd frontend && npm run test'";
       pass_filenames = false;
       args = [ "--watchAll=false" ];
+      always_run = true;
+    };
+    typescript = {
+      enable = true;
+      name = "TypeScript";
+      entry = "bash -c 'devenv shell && cd frontend && npm run typecheck'";
+      pass_filenames = false;
       always_run = true;
     };
   };

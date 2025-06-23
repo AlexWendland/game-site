@@ -22,7 +22,7 @@ export function BidSelectionPresenter({
   if (validBids.length === 0) {
     return <div />;
   }
-  const suitOptions = [
+  const suitOptions: [string, number][] = [
     ["No trump", -1],
     ["Red", 0],
     ["Blue", 1],
