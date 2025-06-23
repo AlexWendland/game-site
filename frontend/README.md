@@ -10,7 +10,7 @@ $ npm install
 ```
 Then you should be safe to run
 ```
-$ up
+$ front-up
 ```
 which will start the dev server.
 

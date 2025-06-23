@@ -1,19 +1,4 @@
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  useDisclosure,
-  Table,
-  TableHeader,
-  TableBody,
-  TableColumn,
-  TableRow,
-  TableCell,
-  getKeyValue,
-} from "@heroui/react";
+import { useState, useEffect } from "react";
 import { useWizardScoreSheetContext } from "./WizardContext";
 import { RoundResult } from "@/types/gameTypes";
 
@@ -27,7 +12,21 @@ export function WizardScoreSheet() {
     maxPlayers,
     totalScore,
   } = useWizardScoreSheetContext();
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
+
+  // This turns off scrolling on background elements.
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+
+    // Clean up on unmount
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
+  }, [isOpen]);
 
   function renderRoundResult(roundResult: RoundResult) {
     const tricksColor =
@@ -45,7 +44,9 @@ export function WizardScoreSheet() {
     return (
       <div className="grid grid-cols-1 justify-items-center">
         <div>
-          <span className="text-gray-500 text-md">{roundResult.bid}</span>{" "}
+          <span className="text-gray-500 dark:text-gray-300 text-md">
+            {roundResult.bid}
+          </span>{" "}
           <span className="text-gray-500 text-sm">/</span>{" "}
           <span className={`${tricksColor} text-md`}>
             {roundResult.tricks_won}
@@ -87,10 +88,7 @@ export function WizardScoreSheet() {
 
   const rows: Record<string, any>[] = [];
 
-  // Completed rounds (0 to roundNumber - 1)
-  // Assuming scoreSheet is 0-indexed for rounds
   for (let roundIdx = 1; roundIdx < roundNumber; roundIdx++) {
-    // Iterate up to roundNumber (exclusive)
     const rowData: Record<string, any> = {
       round: roundIdx, // Display round number starting from 1
     };
@@ -103,7 +101,6 @@ export function WizardScoreSheet() {
     rows.push(rowData);
   }
 
-  // Current round (roundNumber)
   if (roundNumber <= maxRounds) {
     // Ensure current round is within game limits
     const currentRoundData: Record<string, any> = {
@@ -148,53 +145,88 @@ export function WizardScoreSheet() {
 
   return (
     <>
-      <Button onPress={onOpen}>Scores</Button>
-      <Modal
-        isDismissable={false}
-        isKeyboardDismissDisabled={true}
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        placement="top"
+      <button
+        onClick={() => setIsOpen(true)}
+        className="px-4 py-2 bg-blue-200 hover:bg-blue-300 dark:bg-blue-700 dark:hover:bg-blue-600 hover:scale-105 rounded-lg font-medium transition-all"
       >
-        <ModalContent className="bg-gray-200">
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
+        Scores
+      </button>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-4 px-4">
+          {/* Backdrop - gray out effect */}
+          <div
+            className="absolute inset-0 bg-black bg-opacity-50"
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Modal */}
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="relative top-14 bg-gray-200 dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+          >
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-300 dark:border-gray-600">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 Score Sheet
-              </ModalHeader>
-              <ModalBody>
-                <Table
-                  aria-label="Wizard Score Sheet"
-                  isStriped
-                  className="bg-gray-200"
-                >
-                  <TableHeader columns={columnHeaders}>
-                    {(columnKey) => (
-                      <TableColumn key={columnKey.key} align="center">
-                        {columnKey.value}
-                      </TableColumn>
-                    )}
-                  </TableHeader>
-                  <TableBody items={rows}>
-                    {(item) => (
-                      <TableRow key={item.round}>
-                        {(columnKey) => (
-                          <TableCell>{getKeyValue(item, columnKey)}</TableCell>
-                        )}
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="primary" onPress={onClose}>
-                  Close
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+              </h2>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-4 overflow-y-auto max-h-[60vh]">
+              <div className="overflow-x-auto">
+                <table className="w-full bg-gray-200 dark:bg-gray-800 border-collapse">
+                  <thead>
+                    <tr className="bg-gray-300 dark:bg-gray-700">
+                      {columnHeaders.map((column) => (
+                        <th
+                          key={column.key}
+                          className="border border-gray-400 dark:border-gray-600 px-4 py-2 text-center font-semibold text-gray-900 dark:text-gray-100"
+                        >
+                          {column.value}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((row, index) => (
+                      <tr
+                        key={row.round}
+                        className={
+                          index % 2 === 0
+                            ? "bg-gray-100 dark:bg-gray-800"
+                            : "bg-gray-200 dark:bg-gray-700"
+                        }
+                      >
+                        {columnHeaders.map((column) => (
+                          <td
+                            key={column.key}
+                            className="border border-gray-400 dark:border-gray-600 px-4 py-2 text-center text-gray-900 dark:text-gray-100"
+                          >
+                            {row[column.key]}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-300 dark:border-gray-600 flex justify-end">
+              <button
+                onClick={() => setIsOpen(false)}
+                aria-label="Close modal"
+                className="px-4 py-2 bg-blue-200 hover:bg-blue-300 dark:bg-blue-700 dark:hover:bg-blue-600 hover:scale-105 rounded-lg font-medium transition-all duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
