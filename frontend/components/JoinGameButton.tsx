@@ -36,8 +36,8 @@ export function JoinGameButton() {
         setErrors({ GameID: "Invalid game ID" });
       }
     } catch (err) {
-      console.error(err); // Use console.error for errors
-      setErrors({ GameID: "An error occurred. Please try again." }); // More generic error message for user
+      console.error(err);
+      setErrors({ GameID: "An error occurred. Please try again." });
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +45,7 @@ export function JoinGameButton() {
 
   return (
     <form
-      className="w-full max-w-xs space-y-4 rounded-lg bg-white p-6"
+      className="w-full max-w-xs space-y-4 rounded-lg p-6 bg-gray-100 dark:bg-gray-700"
       onSubmit={onSubmit}
     >
       <div className="relative">
@@ -62,27 +62,29 @@ export function JoinGameButton() {
           placeholder="Enter the 5 character GameID"
           required
           disabled={isLoading}
-          className={`mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-200 focus:ring-blue-200 focus:opacity-50 sm:text-sm
+          className={`mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-200 focus:ring-blue-200 focus:opacity-50 sm:text-sm bg-gray-50 dark:bg-gray-600
             ${
               errors.GameID
                 ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                : "border-blue-200"
+                : "border-blue-200 dark:border-blue-500"
             }
           `}
         />
         {errors.GameID && (
-          <p className="mt-2 text-sm text-red-600">{errors.GameID}</p>
+          <p className="mt-2 text-sm text-red-600 dark:text-red-300">
+            {errors.GameID}
+          </p>
         )}
       </div>
 
       <button
         type="submit"
         disabled={isLoading}
-        className={`rounded-full px-4 py-2 text-white transition duration-200 ease-in-out
+        className={`rounded-full px-4 py-2 transition duration-200 ease-in-out
           ${
             isLoading
               ? "bg-orange-300"
-              : "bg-orange-300 hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-gray-700"
+              : "bg-orange-300 hover:bg-orange-400 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
           }
         `}
       >
