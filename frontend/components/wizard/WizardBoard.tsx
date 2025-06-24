@@ -56,8 +56,8 @@ export function WizardBoard() {
   // ----------------------------------------------------
   // | Trump card | Trump Suit | Player 3 |        | Scores   |
   // | Player 2   |            | Card 3   |        | Player 4 |
-  // |            | Card 2     |          | Card 4 |          |
-  // | Player 1   | Card 1     |          | Card 5 | Player 5 |
+  // |            | Card 2     | NOTICES  | Card 4 |          |
+  // | Player 1   | Card 1     | NOTICES  | Card 5 | Player 5 |
   // | Player 0   |            |  Card 0  |        |          |
   // ----------------------------------------------------
   // Different player games use different slots
@@ -80,10 +80,8 @@ export function WizardBoard() {
     trickLeader,
     trumpCard,
     trumpSuit,
+    isPlayerGo,
   } = useWizardBoardContext();
-
-  console.log("trickWinner", trickWinner);
-  console.log("isWinner", trickWinner === 4);
 
   function getCard(cardPosition: number): ReactNode {
     const player = mapCardPositionToPlayer(
@@ -157,6 +155,13 @@ export function WizardBoard() {
       <div className="col-start-3 row-start-2">{getCard(3)}</div>
       <div className="col-start-5 row-start-2">{getPlayerCard(4)}</div>
       <div className="col-start-2 row-start-3">{getCard(2)}</div>
+      <div className="col-start-3 row-start-3 row-span-2 flex items-center justify-center">
+        {isPlayerGo && (
+          <p className="animate-scaleBounce text-orange-500 font-extrabold text-xl sm:text-3xl md:text-4xl text-center">
+            It's your go!
+          </p>
+        )}
+      </div>
       <div className="col-start-4 row-start-3">{getCard(4)}</div>
       <div className="col-start-1 row-start-4">{getPlayerCard(1)}</div>
       <div className="col-start-2 row-start-4">{getCard(1)}</div>
