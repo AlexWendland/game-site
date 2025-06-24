@@ -76,9 +76,9 @@ export function WizardCard({
         // --- State-based Styles ---
         {
           // Highlight effect: a bright ring around the card.
-          "ring-4 ring-offset-2 ring-offset-gray-900 ring-yellow-200":
+          "ring-4 ring-offset-2 ring-offset-yellow-200 ring-yellow-200":
             isHighlighted,
-          "opacity-90": disabled && faded,
+          "opacity-60 scale-95": disabled && faded,
           "hover:scale-105 hover:shadow-xl": !disabled,
         },
       )}

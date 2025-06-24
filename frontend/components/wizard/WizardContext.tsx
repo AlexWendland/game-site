@@ -7,6 +7,7 @@ import {
   useState,
   useRef,
   ReactNode,
+  useMemo,
 } from "react";
 import {
   getGameWebsocket,
@@ -38,6 +39,7 @@ type WizardBoardContextType = {
   trickLeader: number | null;
   trumpCard: number | null;
   trumpSuit: number | null;
+  isPlayerGo: boolean;
 };
 
 type WizardGameContextType = {
@@ -63,6 +65,7 @@ type WizardCardSelectionContextType = {
   allCards: number[];
   playableCards: number[];
   trumpSuit: number;
+  isPlayerGo: boolean;
   playCard: (card: number) => void;
 };
 
@@ -513,6 +516,14 @@ export function WizardProvider({
 
   // Define meta parameters
 
+  const isPlayerGo = useMemo(() => {
+    if (currentGameState === null) return false;
+    return (
+      currentGameState.current_player === currentUserPosition &&
+      currentGameState.current_trick_number === currentViewedTrick
+    );
+  }, [currentGameState, currentUserPosition, currentViewedTrick]);
+
   useEffect(() => {
     if (currentGameState === null) {
       setGameState("Loading ...");
@@ -587,6 +598,7 @@ export function WizardProvider({
         trickLeader: viewedTrickLeader,
         trumpCard: currentGameState.trump_card,
         trumpSuit: currentGameState.trump_suit,
+        isPlayerGo,
       }}
     >
       <WizardPlayerContext.Provider
@@ -615,6 +627,7 @@ export function WizardProvider({
               allCards,
               playableCards: currentGameState.playable_cards,
               trumpSuit: currentGameState.trump_suit,
+              isPlayerGo,
               playCard,
             }}
           >

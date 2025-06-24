@@ -85,6 +85,15 @@ const config = {
       fontFamily: {
         sans: ["var(--font-sans)", "sans-serif"],
       },
+      keyframes: {
+        scaleBounce: {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.2)" },
+        },
+      },
+      animation: {
+        scaleBounce: "scaleBounce 1.5s ease-in-out infinite",
+      },
     },
   },
   darkMode: "class",
