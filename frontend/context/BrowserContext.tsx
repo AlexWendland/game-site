@@ -16,6 +16,27 @@ export const BrowserProvider = ({ children }: { children: ReactNode }) => {
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
+    // Check for testing override in URL params (only in development)
+    const isDevelopment =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname.includes("dev") ||
+      process.env.NODE_ENV === "development";
+
+    if (isDevelopment) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const forceMobile = urlParams.get("mobile");
+
+      if (forceMobile === "true") {
+        setIsMobile(true);
+        return;
+      } else if (forceMobile === "false") {
+        setIsMobile(false);
+        return;
+      }
+    }
+
+    // Default behavior: detect based on user agent
     setIsMobile(/Mobi|Android/i.test(navigator.userAgent));
   }, []);
 

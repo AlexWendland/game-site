@@ -33,7 +33,7 @@ type WizardBoardContextType = {
   playerTricks: Record<number, number>;
   playerScores: Record<number, number>;
   activePlayer: number;
-  viewingPlayer: number;
+  viewingPlayer: number | null;
   trickCards: Record<number, number | null>;
   trickWinner: number | null;
   trickLeader: number | null;
@@ -52,7 +52,6 @@ type WizardGameContextType = {
 
 type WizardPlayerContextType = {
   players: Record<number, string | null>;
-  maxPlayers: number;
   aiPlayers: Record<number, string>;
   currentUserPosition: number | null;
   aiModels: Record<string, string>;
@@ -592,7 +591,7 @@ export function WizardProvider({
         playerTricks: currentGameState.trick_count,
         playerScores: currentGameState.scores,
         activePlayer: currentGameState.current_player,
-        viewingPlayer: currentUserPosition ?? 0,
+        viewingPlayer: currentUserPosition,
         trickCards: viewedTrickCards,
         trickWinner: viewedTrickWinner,
         trickLeader: viewedTrickLeader,
@@ -604,7 +603,6 @@ export function WizardProvider({
       <WizardPlayerContext.Provider
         value={{
           players,
-          maxPlayers,
           aiPlayers,
           currentUserPosition,
           aiModels,

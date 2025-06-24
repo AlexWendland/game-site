@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { WizardCard } from "@/components/wizard/WizardCard";
 import { WizardPlayerCard } from "@/components/wizard/WizardPlayerCard";
-import { useWizardBoardContext } from "./WizardContext";
+import { useWizardBoardContext, useWizardPlayerContext } from "./WizardContext";
 import { WizardSuit } from "./WizardSuit";
 import { WizardScoreSheet } from "./WizardScoreSheet";
 
@@ -15,32 +15,33 @@ const numberOfPlayersToCardPositions: Map<number, number[]> = new Map([
 function mapCardPositionToPlayer(
   cardPosition: number,
   numberOfPlayers: number,
-  viewingPlayer: number,
+  viewingPlayer: number | null,
 ): number | null {
+  const mappedViewingPlayer = viewingPlayer ?? 0;
   if (
     !numberOfPlayersToCardPositions.get(numberOfPlayers)?.includes(cardPosition)
   ) {
     return null;
   }
   if (cardPosition === 0) {
-    return viewingPlayer;
+    return mappedViewingPlayer;
   }
   if (numberOfPlayers === 3) {
-    return (viewingPlayer + cardPosition / 2) % numberOfPlayers;
+    return (mappedViewingPlayer + cardPosition / 2) % numberOfPlayers;
   }
   if (numberOfPlayers === 4) {
     if (cardPosition === 1) {
-      return (viewingPlayer + 1) % numberOfPlayers;
+      return (mappedViewingPlayer + 1) % numberOfPlayers;
     }
-    return (viewingPlayer + (cardPosition - 1) / 2) % numberOfPlayers;
+    return (mappedViewingPlayer + 1 + (cardPosition - 1) / 2) % numberOfPlayers;
   }
   if (numberOfPlayers === 5) {
     if (cardPosition < 3) {
-      return (viewingPlayer + cardPosition) % numberOfPlayers;
+      return (mappedViewingPlayer + cardPosition) % numberOfPlayers;
     }
-    return (viewingPlayer + cardPosition - 1) % numberOfPlayers;
+    return (mappedViewingPlayer + cardPosition - 1) % numberOfPlayers;
   }
-  return (viewingPlayer + cardPosition) % numberOfPlayers;
+  return (mappedViewingPlayer + cardPosition) % numberOfPlayers;
 }
 
 const trumpSuitNames: Map<number, string> = new Map([
@@ -58,7 +59,7 @@ export function WizardBoard() {
   // | Player 2   |            | Card 3   |        | Player 4 |
   // |            | Card 2     | NOTICES  | Card 4 |          |
   // | Player 1   | Card 1     | NOTICES  | Card 5 | Player 5 |
-  // | Player 0   |            |  Card 0  |        |          |
+  // |         Player 0        |  Card 0  |        |          |
   // ----------------------------------------------------
   // Different player games use different slots
   // ( the current player is always 0)
@@ -82,6 +83,16 @@ export function WizardBoard() {
     trumpSuit,
     isPlayerGo,
   } = useWizardBoardContext();
+
+  const {
+    players,
+    aiPlayers,
+    currentUserPosition,
+    aiModels,
+    updateCurrentUserPosition,
+    removeAIPlayer,
+    addAIPlayer,
+  } = useWizardPlayerContext();
 
   function getCard(cardPosition: number): ReactNode {
     const player = mapCardPositionToPlayer(
@@ -115,6 +126,10 @@ export function WizardBoard() {
     if (player === null) {
       return <div />;
     }
+
+    const isSelected = currentUserPosition === player;
+    const isAI = player in aiPlayers;
+    const isOccupied = players[player] !== null;
     return (
       <WizardPlayerCard
         playerName={playerNames[player] ?? null}
@@ -122,6 +137,23 @@ export function WizardBoard() {
         bid={playerBids[player] ?? null}
         score={playerScores[player] ?? 0}
         tricks={playerTricks[player] ?? 0}
+        isCurrentUser={isSelected}
+        isOccupiedByHuman={isOccupied && !isAI}
+        isOccupiedByAI={isAI}
+        aiModels={aiModels}
+        playerHasJoined={viewingPlayer !== null}
+        movePlayer={() => {
+          updateCurrentUserPosition(player);
+        }}
+        removePlayer={() => {
+          updateCurrentUserPosition(null);
+        }}
+        addAIPlayer={(model: string) => {
+          addAIPlayer(player, model);
+        }}
+        removeAIPlayer={() => {
+          removeAIPlayer(player);
+        }}
       />
     );
   }
@@ -156,6 +188,11 @@ export function WizardBoard() {
       <div className="col-start-5 row-start-2">{getPlayerCard(4)}</div>
       <div className="col-start-2 row-start-3">{getCard(2)}</div>
       <div className="col-start-3 row-start-3 row-span-2 flex items-center justify-center">
+        {viewingPlayer === null && (
+          <p className="text-orange-500 font-extrabold text-xl sm:text-3xl md:text-4xl text-center">
+            Take a seat!
+          </p>
+        )}
         {isPlayerGo && (
           <p className="animate-scaleBounce text-orange-500 font-extrabold text-xl sm:text-3xl md:text-4xl text-center">
             It's your go!
@@ -167,7 +204,9 @@ export function WizardBoard() {
       <div className="col-start-2 row-start-4">{getCard(1)}</div>
       <div className="col-start-4 row-start-4">{getCard(5)}</div>
       <div className="col-start-5 row-start-4">{getPlayerCard(5)}</div>
-      <div className="col-start-1 row-start-5">{getPlayerCard(0)}</div>
+      <div className="col-start-1 col-span-2 row-start-5">
+        {getPlayerCard(0)}
+      </div>
       <div className="col-start-3 row-start-5">{getCard(0)}</div>
     </div>
   );
