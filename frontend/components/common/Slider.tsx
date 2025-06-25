@@ -40,7 +40,26 @@ export function Slider({
           step={1}
           value={value}
           onChange={(e) => setValue(Number(e.target.value))}
-          className="w-full h-2 rounded-lg appearance-none cursor-pointer slider-thumb"
+          className="w-full h-4 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer
+                     [&::-webkit-slider-thumb]:appearance-none 
+                     [&::-webkit-slider-thumb]:w-5 
+                     [&::-webkit-slider-thumb]:h-5 
+                     [&::-webkit-slider-thumb]:rounded-full 
+                     [&::-webkit-slider-thumb]:bg-blue-500 
+                     [&::-webkit-slider-thumb]:hover:bg-blue-600 
+                     [&::-webkit-slider-thumb]:active:bg-blue-700
+                     [&::-webkit-slider-thumb]:transition-all
+                     [&::-webkit-slider-thumb]:shadow-lg
+                     [&::-moz-range-thumb]:w-5 
+                     [&::-moz-range-thumb]:h-5 
+                     [&::-moz-range-thumb]:rounded-full 
+                     [&::-moz-range-thumb]:bg-blue-500 
+                     [&::-moz-range-thumb]:border-0 
+                     [&::-moz-range-thumb]:hover:bg-blue-600 
+                     [&::-moz-range-thumb]:active:bg-blue-700
+                     [&::-moz-range-thumb]:transition-colors
+                     [&::-moz-range-thumb]:shadow-lg
+                     [&::-moz-range-thumb]:cursor-pointer"
         />
         <div className="flex justify-between w-full mt-2 text-xs">
           {steps.map((stepValue) => (
