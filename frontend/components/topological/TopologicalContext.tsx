@@ -39,6 +39,7 @@ type TopologicalBoardContextType = {
   closeSquares: [number, number][];
   hoveredSquare: [number, number] | null;
   geometry: Geometry;
+  currentPlayerNumber: number | null;
   makeMove: (row: number, column: number) => void;
   setHoveredSquare: (square: [number, number] | null) => void;
   normaliseCoordinate: (row: number, column: number) => [number, number] | null;
@@ -56,6 +57,7 @@ type TopologicalGameContextType = {
 
 type TopologicalPlayerContextType = {
   players: Record<number, string | null>;
+  currentPlayerNumber: number | null;
   maxPlayers: number;
   aiPlayers: Record<number, string>;
   currentUserPosition: number | null;
@@ -550,6 +552,7 @@ export function TopologicalProvider({
         currentViewedMove,
         hoveredSquare,
         geometry,
+        currentPlayerNumber: winner !== null ? null : currentPlayerNumber,
         makeMove,
         setHoveredSquare,
         normaliseCoordinate,
@@ -558,6 +561,7 @@ export function TopologicalProvider({
       <TopologicalPlayerContext.Provider
         value={{
           players,
+          currentPlayerNumber: winner !== null ? null : currentPlayerNumber,
           maxPlayers,
           aiPlayers,
           currentUserPosition,

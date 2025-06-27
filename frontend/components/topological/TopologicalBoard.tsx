@@ -79,6 +79,7 @@ export function TopologicalBoard() {
     closeSquares,
     geometry,
     hoveredSquare,
+    currentPlayerNumber,
     makeMove,
     setHoveredSquare,
     normaliseCoordinate,
@@ -114,6 +115,7 @@ export function TopologicalBoard() {
       <TopologicalSquare
         key={`${row}-${column}`}
         player={moveNumber !== null ? moveNumber % maxPlayers : null}
+        currentPlayer={currentPlayerNumber}
         onSquareClick={() => makeMove(row, column)}
         onMouseEnter={() => {
           if (!isMobile) setHoveredSquare([row, column]);
@@ -160,7 +162,7 @@ export function TopologicalBoard() {
 
   return (
     <div
-      className="grid gap-1 sm:gap-2 max-w-[800px] aspect-square"
+      className="grid gap-1 sm:gap-2 aspect-square"
       style={{
         gridTemplateColumns: `repeat(${boardSize + 2}, minmax(0, 1fr))`,
         gridTemplateRows: `repeat(${boardSize + 2}, minmax(0, 1fr))`,

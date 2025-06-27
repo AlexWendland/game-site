@@ -3,6 +3,7 @@ import { getPlayerIcon } from "./PlayerIconMap";
 
 type SquareProps = {
   player: number | null;
+  currentPlayer: number | null;
   onSquareClick: () => void;
   onMouseEnter: () => void;
   onMouseExit: () => void;
@@ -16,6 +17,7 @@ type SquareProps = {
 
 export function TopologicalSquare({
   player,
+  currentPlayer,
   onSquareClick,
   onMouseEnter,
   onMouseExit,
@@ -62,11 +64,12 @@ export function TopologicalSquare({
       <span
         className={clsx(
           "flex items-center justify-center w-full h-full transition-opacity duration-500",
-          player !== null
-            ? isInCurrentView
-              ? "opacity-100"
-              : "opacity-50"
-            : "opacity-0",
+          {
+            "opacity-0": player === null,
+            "opacity-100": player !== null && isInCurrentView,
+            "opacity-10": player !== null && !isInCurrentView,
+            "animate-pulse": player === currentPlayer && isInCurrentView,
+          },
         )}
       >
         {getPlayerIcon(player || 0)}
