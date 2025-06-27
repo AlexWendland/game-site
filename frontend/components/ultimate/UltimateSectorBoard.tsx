@@ -9,6 +9,7 @@ export function UltimateSectorBoard({ sectorIndex }: { sectorIndex: number }) {
     currentViewedMove,
     winner,
     makeMove,
+    currentPlayerNumber,
     isCurrentUsersGo,
   } = useUltimateSectorBoardContext();
 
@@ -39,6 +40,7 @@ export function UltimateSectorBoard({ sectorIndex }: { sectorIndex: number }) {
           isCurrentUserGo={
             isCurrentUsersGo && currentViewedMove === currentMove
           }
+          currentPlayerNumber={currentPlayerNumber}
         />
       ))}
     </div>

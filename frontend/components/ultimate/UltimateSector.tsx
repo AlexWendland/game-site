@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import UltimateFlipCard from "@/components/ultimate/UltimateFlipCard";
 import { UltimateSectorBoard } from "./UltimateSectorBoard";
 import clsx from "clsx";

@@ -1,7 +1,7 @@
 "use client";
 
 import { TicTacToeBoard } from "@/components/tictactoe/TicTacToeBoard";
-import { TicTacToePlayerBoard } from "@/components/tictactoe/TicTacToePlayerBoard";
+import { TicTacToePlayerPieces } from "@/components/tictactoe/TicTacToePlayerPieces";
 import { Pagination } from "@/components/common/Pagination";
 import { useTicTacToeGameContext } from "@/components/tictactoe/TicTacToeContext";
 
@@ -24,11 +24,11 @@ export function TicTacToeGame() {
 
   return (
     <div>
-      <div className="grid grid-cols-1 justify-items-center gap-4 width-full p-2">
+      <div className="flex flex-col items-center gap-4 w-full h-full p-2">
         <div className="text-2xl font-bold">{status}</div>
-        <TicTacToePlayerBoard />
-        <div className="hidden md:block"></div>
-        <TicTacToeBoard />
+        <TicTacToePlayerPieces>
+          <TicTacToeBoard />
+        </TicTacToePlayerPieces>
         <Pagination
           current={currentViewedMove + 1}
           min={1}

@@ -6,6 +6,7 @@ type SquareProps = {
   isHighlighted: boolean;
   isInCurrentView: boolean;
   isCurrentUsersGo: boolean;
+  currentPlayerNumber?: number | null;
 };
 
 export function TicTacToeSquare({
@@ -14,6 +15,7 @@ export function TicTacToeSquare({
   isHighlighted,
   isInCurrentView,
   isCurrentUsersGo,
+  currentPlayerNumber,
 }: SquareProps) {
   const textColor =
     value === "X"
@@ -29,7 +31,7 @@ export function TicTacToeSquare({
     textColor,
     {
       "bg-yellow-200 dark:bg-yellow-400": isHighlighted,
-      "hoover:bg-gray-100 hover:dark:bg-gray-700 hover:scale-105 transition-all":
+      "hover:bg-gray-100 hover:dark:bg-gray-700 hover:scale-105 transition-all":
         value === null && isCurrentUsersGo,
     },
   );
@@ -45,14 +47,16 @@ export function TicTacToeSquare({
         There is also a filler O that is used to hold the shape of the board.
       */}
       <span
-        className={clsx(
-          "transition-opacity duration-500",
-          value
-            ? isInCurrentView
-              ? "opacity-100"
-              : "opacity-50"
-            : "opacity-0",
-        )}
+        className={clsx("transition-opacity duration-500", {
+          "opacity-0": !value,
+          "opacity-100": value && isInCurrentView,
+          "opacity-50": value && !isInCurrentView,
+          "animate-pulse":
+            value &&
+            isInCurrentView &&
+            ((value === "X" && currentPlayerNumber === 0) ||
+              (value === "O" && currentPlayerNumber === 1)),
+        })}
       >
         {value === "X" ? (
           <img src="/cross.png" className="p-1" />

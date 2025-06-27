@@ -31,6 +31,7 @@ type TicTacToeBoardContextType = {
   winningLine: number[];
   currentViewedMove: number;
   isCurrentUsersGo: boolean;
+  currentPlayerNumber: number | null;
   makeMove: (position: number) => void;
 };
 
@@ -48,6 +49,7 @@ type TicTacToePlayerContextType = {
   aiPlayers: Record<number, string>;
   currentUserPosition: number | null;
   aiModels: Record<string, string>;
+  currentPlayerNumber: number | null;
   updateCurrentUserPosition: (newPosition: number | null) => Promise<void>;
   removeAIPlayer: (position: number) => Promise<void>;
   addAIPlayer: (position: number, model: string) => Promise<void>;
@@ -342,6 +344,7 @@ export function TicTacToeProvider({
         winningLine,
         currentViewedMove,
         isCurrentUsersGo,
+        currentPlayerNumber: winner === null ? currentPlayerNumber : null,
         makeMove,
       }}
     >
@@ -351,6 +354,7 @@ export function TicTacToeProvider({
           aiPlayers,
           currentUserPosition,
           aiModels,
+          currentPlayerNumber: winner === null ? currentPlayerNumber : null,
           updateCurrentUserPosition,
           addAIPlayer,
           removeAIPlayer,

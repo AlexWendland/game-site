@@ -30,6 +30,7 @@ type UltimatePlayerContextType = {
   aiPlayers: Record<number, string>;
   currentUserPosition: number | null;
   aiModels: Record<string, string>;
+  currentPlayerNumber: number | null;
   updateCurrentUserPosition: (newPosition: number | null) => Promise<void>;
   removeAIPlayer: (position: number) => Promise<void>;
   addAIPlayer: (position: number, model: string) => Promise<void>;
@@ -58,6 +59,7 @@ type UltimateSectorBoardContextType = {
   currentViewedMove: number;
   winner: number | null;
   isCurrentUsersGo: boolean;
+  currentPlayerNumber: number | null;
   makeMove: (position: number) => void;
 };
 
@@ -378,6 +380,7 @@ export function UltimateProvider({
         aiPlayers,
         currentUserPosition,
         aiModels,
+        currentPlayerNumber: winner === null ? currentPlayerNumber : null,
         updateCurrentUserPosition,
         addAIPlayer,
         removeAIPlayer,
@@ -409,6 +412,7 @@ export function UltimateProvider({
               currentViewedMove,
               winner,
               isCurrentUsersGo,
+              currentPlayerNumber: winner === null ? currentPlayerNumber : null,
               makeMove,
             }}
           >
