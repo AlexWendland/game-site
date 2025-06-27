@@ -6,6 +6,7 @@ export function TicTacToeBoard() {
     history,
     currentMove,
     winningLine,
+    currentPlayerNumber,
     currentViewedMove,
     isCurrentUsersGo,
     makeMove,
@@ -22,6 +23,7 @@ export function TicTacToeBoard() {
           isHighlighted={winningLine.includes(i)}
           isInCurrentView={val == history[currentViewedMove][i]}
           isCurrentUsersGo={isCurrentUsersGo}
+          currentPlayerNumber={currentPlayerNumber}
         />
       ))}
     </div>

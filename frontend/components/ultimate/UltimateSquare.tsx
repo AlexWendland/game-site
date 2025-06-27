@@ -6,6 +6,7 @@ type SquareProps = {
   isHighlighted: boolean;
   isInCurrentView: boolean;
   isCurrentUserGo: boolean;
+  currentPlayerNumber?: number | null;
 };
 
 export function UltimateSquare({
@@ -14,6 +15,7 @@ export function UltimateSquare({
   isHighlighted,
   isInCurrentView,
   isCurrentUserGo,
+  currentPlayerNumber,
 }: SquareProps) {
   const classes = clsx(
     "flex items-center justify-center",
@@ -39,11 +41,14 @@ export function UltimateSquare({
       <span
         className={clsx(
           "transition-opacity duration-500",
-          value
-            ? isInCurrentView
-              ? "opacity-100"
-              : "opacity-50"
-            : "opacity-0",
+          {
+            "opacity-0": !value,
+            "opacity-100": value && isInCurrentView,
+            "opacity-50": value && !isInCurrentView,
+            "animate-pulse": value && isInCurrentView && 
+              ((value === "X" && currentPlayerNumber === 0) || 
+               (value === "O" && currentPlayerNumber === 1)),
+          }
         )}
       >
         {value === "X" ? (
