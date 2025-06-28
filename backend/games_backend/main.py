@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from games_backend import models
 from games_backend.app_logger import logger
 from games_backend.game_base import GameBase
+from games_backend.games.quantum.game import QuantumGame
 from games_backend.games.tictactoe import TicTacToeGame
 from games_backend.games.topological_connect_four.game import TopologicalGame
 from games_backend.games.ultimate import UltimateGame
@@ -128,6 +129,21 @@ async def new_wizard_game(
     game_manager = GameManager.from_game_and_id(new_game_id, game)
     book_manager.add_game(new_game_id, game_manager)
     logger.info(f"New game of Wizard created: {new_game_id}\nWith parameters:\n{new_game_parameters}")
+    return models.SimpleResponse(parameters=models.SimpleResponseParameters(message=new_game_id))
+
+
+@app.post("/new_game/quantum")
+async def new_quantum_game(
+    book_manager: Annotated[BookManager, Depends(get_book_manager)],
+    new_game_parameters: models.QuantumNewGameRequest,
+) -> models.SimpleResponse:
+    new_game_id = await book_manager.get_free_game_id()
+    game = QuantumGame(
+        number_of_players=new_game_parameters.number_of_players, max_hint_level=new_game_parameters.max_hint_level
+    )
+    game_manager = GameManager.from_game_and_id(new_game_id, game)
+    book_manager.add_game(new_game_id, game_manager)
+    logger.info(f"New game of Quantum created: {new_game_id}\nWith parameters:\n{new_game_parameters}")
     return models.SimpleResponse(parameters=models.SimpleResponseParameters(message=new_game_id))
 
 

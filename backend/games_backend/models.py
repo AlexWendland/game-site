@@ -1,5 +1,5 @@
 import enum
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, final
 
 import pydantic
 
@@ -82,6 +82,13 @@ class GameParameters(pydantic.BaseModel):
     """
 
 
+@final
+class QuantumHintLevel(enum.Enum):
+    NONE = 0
+    TRACK = 1
+    FULL = 2
+
+
 class GravitySetting(enum.Enum):
     NONE = "none"
     BOTTOM = "bottom"
@@ -117,6 +124,7 @@ class GameType(enum.Enum):
     ULTIMATE = "ultimate"
     TOPOLOGICAL = "topological"
     WIZARD = "wizard"
+    QUANTUM = "quantum"
 
 
 class GameMetadata(pydantic.BaseModel):
@@ -150,8 +158,18 @@ class WizardGameMetadata(GameMetadata):
     parameters: WizardGameParameters
 
 
+class QuantumGameParameters(GameParameters):
+    max_hint_level: QuantumHintLevel
+
+
+class QuantumGameMetadata(GameMetadata):
+    game_type: Literal[GameType.QUANTUM] = GameType.QUANTUM
+    max_players: int = pydantic.Field(default=3, ge=3, le=8)
+    parameters: QuantumGameParameters
+
+
 GameMetadataUnion = Annotated[
-    TicTacToeGameMetadata | UltimateGameMetadata | TopologicalGameMetadata | WizardGameMetadata,
+    TicTacToeGameMetadata | UltimateGameMetadata | TopologicalGameMetadata | WizardGameMetadata | QuantumGameMetadata,
     pydantic.Field(discriminator="game_type"),
 ]
 
@@ -192,3 +210,8 @@ class TopologicalNewGameRequest(pydantic.BaseModel):
 class WizardNewGameRequest(pydantic.BaseModel):
     number_of_players: int = pydantic.Field(ge=3, le=6)
     show_old_rounds: bool = pydantic.Field(default=False)
+
+
+class QuantumNewGameRequest(pydantic.BaseModel):
+    number_of_players: int = pydantic.Field(default=3, ge=3, le=6)
+    max_hint_level: QuantumHintLevel
