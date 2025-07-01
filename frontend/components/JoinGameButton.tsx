@@ -19,7 +19,6 @@ export function JoinGameButton() {
     const formData = new FormData(formInput.currentTarget);
     const gameID =
       formData.get("GameID")?.toString().trim().toUpperCase() ?? "";
-    console.log(`Provided game ID: ${gameID}`);
 
     if (!validateGameID(gameID)) {
       setErrors({ GameID: "Game IDs need to be a 5 letter string." });
@@ -29,7 +28,6 @@ export function JoinGameButton() {
 
     try {
       const gameMetadata = await getGameMetadata(gameID);
-      console.log("gameMetadata", gameMetadata);
       if (gameMetadata) {
         router.push(`/${gameMetadata.game_type}/${gameID}`);
       } else {

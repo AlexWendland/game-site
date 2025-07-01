@@ -242,6 +242,11 @@ class QuantumLogic:
                 return [True, False]
             else:
                 return [False]
+        elif self._game_state == QuantumGameState.CLAIM_WIN:
+            if hint_level.value >= QuantumHintLevel.TRACK.value:
+                # Assist front end in determining which suits
+                return suits_current_player_could_have
+            return [i for i in range(self._number_of_players)]
 
         return []
 

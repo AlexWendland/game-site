@@ -61,7 +61,7 @@ export function BidSelectionPresenter({
           </div>
         )}
       </div>
-      <div className="md:col-start-2 md:col-span-3 gird grid-cols-1 justify-items-center w-full">
+      <div className="md:col-start-2 md:col-span-3 grid grid-cols-1 justify-items-center w-full">
         <div className="text-sm text-gray-500 text-center">
           Select your bid for round {roundNumber}
         </div>

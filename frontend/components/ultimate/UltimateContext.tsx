@@ -75,12 +75,11 @@ function parseGameState(
   parameters: Record<string, any>,
 ): UltimateGameState | null {
   if (
-    (console.log("Parsing game state:", parameters),
     typeof (parameters as any).moves !== "object" ||
-      typeof (parameters as any).sector_to_play !== "object" ||
-      typeof (parameters as any).sectors_owned !== "object" ||
-      !("winner" in parameters) ||
-      typeof (parameters as any).winning_line !== "object")
+    typeof (parameters as any).sector_to_play !== "object" ||
+    typeof (parameters as any).sectors_owned !== "object" ||
+    !("winner" in parameters) ||
+    typeof (parameters as any).winning_line !== "object"
   ) {
     console.log("Invalid game state format:", parameters);
     throw new Error("Invalid structure");

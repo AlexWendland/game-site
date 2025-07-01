@@ -167,6 +167,10 @@ export function NavBar() {
     router.push(`/wizard`);
   };
 
+  const startNewQuantumGame = async () => {
+    router.push(`/quantum`);
+  };
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transform transition-transform duration-300 ${
@@ -230,6 +234,13 @@ export function NavBar() {
               >
                 <img className="w-16" src="/wizard.svg" />
                 Wizard
+              </button>
+              <button
+                className="px-4 py-2 hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center justify-between rounded-md w-full content-center h-20"
+                onClick={startNewQuantumGame}
+              >
+                <img className="w-16" src="/quantum.svg" />
+                Quantum Go Fish
               </button>
             </div>
           </div>
