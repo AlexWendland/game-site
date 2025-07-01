@@ -217,16 +217,19 @@ class QuantumHand:
     def export_hand(self, hint_level: QuantumHintLevel) -> QuantumHandState:
         if hint_level == QuantumHintLevel.NONE:
             return QuantumHandState(
+                total_cards=self.total_cards,
                 suits={UNKNOWN_SUIT: self.total_cards},
                 does_not_have_suit=set(),
             )
         if hint_level == QuantumHintLevel.TRACK:
             return QuantumHandState(
+                total_cards=self.total_cards,
                 suits=self.declared_cards,
                 does_not_have_suit=self.suits_not_available,
             )
         if hint_level == QuantumHintLevel.FULL:
             return QuantumHandState(
+                total_cards=self.total_cards,
                 suits=self.inferred_cards,
                 does_not_have_suit=self.suits_not_available,
             )
@@ -585,8 +588,11 @@ class QuantumLogic:
 
     def _get_available_moves(self, hint_level: QuantumHintLevel) -> list[bool | int]:
         current_hand = self._current_hands[self._current_player].export_hand(hint_level)
+        suits_current_player_could_have = [
+            i for i in range(self._number_of_players) if i not in current_hand.does_not_have_suit
+        ]
         if self._game_state == QuantumGameState.TARGET_PLAYER:
-            return [i for i in range(self._number_of_players) if i not in current_hand.does_not_have_suit]
+            return suits_current_player_could_have
         elif self._game_state == QuantumGameState.RESPONSE:
             # Legal responses for the targeted player
             if self._current_target_player is None or self._current_target_suit is None:
@@ -601,6 +607,11 @@ class QuantumLogic:
                 return [True, False]
             else:
                 return [False]
+        elif self._game_state == QuantumGameState.CLAIM_WIN:
+            if hint_level.value >= QuantumHintLevel.TRACK.value:
+                # Assist front end in determining which suits
+                return suits_current_player_could_have
+            return [i for i in range(self._number_of_players)]
 
         return []
 

@@ -1,4 +1,9 @@
-import { Geometry, GravitySetting, SimpleResponse } from "@/types/apiTypes";
+import {
+  Geometry,
+  GravitySetting,
+  QuantumHintLevel,
+  SimpleResponse,
+} from "@/types/apiTypes";
 
 // Hack for now, as environment variables are not working in renderGameManager
 const BASE_URL =
@@ -92,6 +97,28 @@ interface GameMetadata {
   game_type: string;
   max_players: number;
   parameters: {};
+}
+
+export async function makeNewQuantumGameAPI(
+  numberOfPlayers: number,
+  maxHintLevel: QuantumHintLevel,
+): Promise<string> {
+  const response = await fetch(apiUrl(`/new_game/quantum`), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      number_of_players: numberOfPlayers,
+      max_hint_level: maxHintLevel,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error creating Quantum game: ${response.statusText}`);
+  }
+  const data: SimpleResponse = await response.json();
+  if (data.parameters.message) {
+    return data.parameters.message;
+  }
+  throw new Error("Unexpected response format");
 }
 
 export async function getGameMetadata(gameID: string): Promise<GameMetadata> {

@@ -28,6 +28,12 @@ export enum Geometry {
   SPHERE = "sphere",
 }
 
+export enum QuantumHintLevel {
+  NONE = 0,
+  TRACK = 1,
+  FULL = 2,
+}
+
 export interface TopologicalGameParameters {
   board_size: number; // 4 <= board_size <= 8
   gravity: GravitySetting;
@@ -38,11 +44,16 @@ export interface WizardGameParameters {
   can_see_old_rounds: boolean;
 }
 
+export interface QuantumGameParameters {
+  max_hint_level: QuantumHintLevel;
+}
+
 export enum GameType {
   TICTACTOE = "tictactoe",
   ULTIMATE = "ultimate",
   TOPOLOGICAL = "topological",
   WIZARD = "wizard",
+  QUANTUM = "quantum",
 }
 
 export interface TopologicalGameMetadata {
@@ -55,4 +66,10 @@ export interface WizardGameMetadata {
   game_type: GameType;
   max_players: number;
   parameters: WizardGameParameters;
+}
+
+export interface QuantumGameMetadata {
+  game_type: GameType;
+  max_players: number;
+  parameters: QuantumGameParameters;
 }
