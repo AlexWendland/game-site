@@ -308,6 +308,7 @@ class QuantumGame(game_base.GameBase):
             game_log=self._game_log,
             suit_names=self._player_suit_names,
             hint_levels=self._player_hint_levels,
+            contradiction_count=self._contradiction_count,
             **self._logic.get_partial_state(
                 self._player_hint_levels.get(position, models.QuantumHintLevel.NONE)
                 if position is not None
@@ -390,7 +391,7 @@ class QuantumAI(GameAI, ABC):
                     "suit": target[1],
                 },
             )
-        if self._state.game_state == QuantumGameState.RESPONSE and self._state.current_player == self._position:
+        if self._state.game_state == QuantumGameState.RESPONSE and self._state.current_target_player == self._position:
             return models.WebSocketRequest(
                 request_type=models.WebSocketRequestType.GAME,
                 function_name="respond_to_target",
@@ -434,7 +435,8 @@ class QuantumRandomAI(QuantumAI):
 
     @override
     def target_player(self) -> tuple[int, int]:
-        return random.choice(range(self.number_for_players)), random.choice(self._state.available_moves)
+        valid_targets = [p for p in range(self.number_for_players) if p != self._position]
+        return random.choice(valid_targets), random.choice(self._state.available_moves)
 
     @override
     def respond_to_target(self) -> bool:

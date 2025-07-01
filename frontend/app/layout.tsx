@@ -24,11 +24,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={fontSans.className}>
+    <html lang="en" className={fontSans.className} suppressHydrationWarning>
       <head />
       <body
         className={clsx(
-          "m-0 p-0 min-h-screen bg-gray-50 dark:bg-gray-900 font-sans antialiased text-black dark:text-white",
+          "m-0 p-0 min-h-screen bg-gray-50 dark:bg-gray-900 font-sans antialiased text-black dark:text-white transition-all",
           fontSans.variable,
         )}
       >

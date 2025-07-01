@@ -30,6 +30,7 @@ class QuantumLogEntry(pydantic.BaseModel):
 
 
 class QuantumHandState(pydantic.BaseModel):
+    total_cards: int
     suits: dict[int, int]
     does_not_have_suit: set[int]
 
@@ -39,6 +40,7 @@ class QuantumGameStateParameters(models.GameStateResponseParameters):
     game_log: list[QuantumLogEntry]
     hint_levels: dict[int, models.QuantumHintLevel]
     suit_names: dict[int, str | None]
+    contradiction_count: dict[int, int]
 
     # State from logic
     history: list[dict[int, QuantumHandState]]
@@ -50,6 +52,7 @@ class QuantumGameStateParameters(models.GameStateResponseParameters):
     current_target_suit: int | None
     current_hands: dict[int, QuantumHandState]
     available_moves: list[bool | int]
+    players_are_out: list[int]
 
 
 class QuantumGameStateResponse(models.GameStateResponse):

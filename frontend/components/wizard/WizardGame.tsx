@@ -14,7 +14,6 @@ export function WizardGame() {
     currentViewedTrick,
     setCurrentViewedTrick,
   } = useWizardGameContext();
-  console.log(currentMinTrick);
   return (
     <div>
       <div className="grid grid-cols-1 justify-items-center gap-2 w-full h-full p-2">

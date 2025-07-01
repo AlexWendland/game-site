@@ -213,5 +213,5 @@ class WizardNewGameRequest(pydantic.BaseModel):
 
 
 class QuantumNewGameRequest(pydantic.BaseModel):
-    number_of_players: int = pydantic.Field(default=3, ge=3, le=6)
+    number_of_players: int = pydantic.Field(default=3, ge=3, le=8)
     max_hint_level: QuantumHintLevel

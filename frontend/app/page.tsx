@@ -28,6 +28,10 @@ export default function Home() {
     router.push(`/wizard`);
   };
 
+  const startNewQuantum = async () => {
+    router.push(`/quantum`);
+  };
+
   const games = [
     {
       name: "Tic Tac Toe",
@@ -53,6 +57,12 @@ export default function Home() {
       onClick: startNewWizard,
       image: "/wizard.svg",
     },
+    {
+      name: "Quantum Go Fish",
+      description: "A quantum twist on the classic Go Fish game!",
+      onClick: startNewQuantum,
+      image: "/quantum.svg",
+    },
   ];
 
   return (
@@ -64,10 +74,10 @@ export default function Home() {
         {games.map((game, index) => (
           <div
             key={index}
-            className="group flex flex-col overflow-hidden rounded-lg bg-white shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer w-60 h-70 bg-gray-100 dark:bg-gray-700"
+            className="group flex flex-col overflow-hidden rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer w-60 h-70 bg-gray-100 dark:bg-gray-700"
             onClick={game.onClick}
           >
-            <div className="relative flex h-2/3 items-center justify-center overflow-hidden bg-gray-50 p-1">
+            <div className="relative flex h-2/3 items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800 p-1">
               <img
                 alt={game.name}
                 src={game.image}
