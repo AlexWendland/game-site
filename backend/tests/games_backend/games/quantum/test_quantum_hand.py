@@ -1,6 +1,8 @@
 import pytest
 
-from games_backend.games.quantum.logic import UNKNOWN_SUIT, ContradictionError, QuantumHand
+from games_backend.games.quantum.constants import UNKNOWN_SUIT
+from games_backend.games.quantum.exceptions import ContradictionError
+from games_backend.games.quantum.hand import QuantumHand
 
 
 @pytest.mark.parametrize("number_of_suits", [1, 2, 3, 5, 10])

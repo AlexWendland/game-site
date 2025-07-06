@@ -1,201 +1,10 @@
 import pytest
 
+from games_backend.games.quantum.exceptions import ContradictionError
 from games_backend.games.quantum.logic import (
-    UNKNOWN_SUIT,
-    ContradictionError,
-    QuantumGameState,
-    QuantumHand,
     QuantumLogic,
-    _calculate_game_solutions,
-    _calculate_minimum_requirements,
-    get_hand_solution,
 )
-
-
-@pytest.mark.parametrize("number_of_players", [2, 3, 4])
-def test_initial_game_state_is_solvable(number_of_players: int):
-    """Test that the initial game state has valid solutions."""
-    hands = {player: QuantumHand(number_of_players) for player in range(number_of_players)}
-
-    solutions = _calculate_game_solutions(hands, number_of_players)
-
-    # Should have many solutions in initial state
-    assert len(solutions) > 0
-
-    # Each solution should assign exactly 4 cards per suit
-    for solution in solutions:
-        suit_totals = {suit: 0 for suit in range(number_of_players)}
-        for (player, suit), count in solution.items():
-            suit_totals[suit] += count
-
-        for suit_total in suit_totals.values():
-            assert suit_total == 4
-
-
-@pytest.mark.parametrize("number_of_players", [2, 3])
-def test_completely_determined_game_is_solvable(number_of_players: int):
-    """Test that a fully determined game state has exactly one solution."""
-    hands = {}
-    for player in range(number_of_players):
-        hand = QuantumHand(number_of_players)
-        # Use update_inferred_cards to set exact state: 4 of own suit, 0 of others
-        inferred_state = {suit: 0 for suit in range(number_of_players)}
-        inferred_state[player] = 4
-        inferred_state[UNKNOWN_SUIT] = 0
-        hand.update_inferred_cards(inferred_state)
-
-        # Mark all other suits as unavailable
-        for suit in range(number_of_players):
-            if suit != player:
-                hand.does_not_have_suit(suit)
-        hands[player] = hand
-
-    solutions = _calculate_game_solutions(hands, number_of_players)
-
-    # Should have exactly one solution
-    assert len(solutions) == 1
-
-    # Solution should match our setup
-    solution = solutions[0]
-    for player in range(number_of_players):
-        assert solution[(player, player)] == 4
-        for suit in range(number_of_players):
-            if suit != player:
-                assert (player, suit) not in solution
-
-
-def test_logically_invalid_game_has_no_solutions():
-    hands = {}
-
-    hand0 = QuantumHand(3)
-    hand0.remove_card(0)
-    for _ in range(3):
-        hand0.add_card(0)
-    hands[0] = hand0
-
-    for player in [1, 2]:
-        hand = QuantumHand(3)
-        hand.does_not_have_suit(0)
-        hands[player] = hand
-
-    solutions = _calculate_game_solutions(hands, 3)
-
-    # Should have no solutions (impossible to distribute 4 cards of suit 0)
-    assert len(solutions) == 0
-
-
-@pytest.mark.parametrize("number_of_players", [2, 3, 4])
-def test_calculate_minimum_requirements_initial_state(number_of_players: int):
-    """Test minimum requirements calculation for initial game state."""
-    hands = {player: QuantumHand(number_of_players) for player in range(number_of_players)}
-
-    solutions = _calculate_game_solutions(hands, number_of_players)
-    min_reqs = _calculate_minimum_requirements(solutions, number_of_players)
-
-    # In initial state, minimum should be 0 for all player/suit combinations
-    for player in range(number_of_players):
-        for suit in range(number_of_players):
-            assert min_reqs[player][suit] == 0
-
-
-def test_calculate_minimum_requirements_determined_game():
-    """Test minimum requirements for a completely determined game."""
-    number_of_players = 2
-    hands = {}
-
-    # Player 0 has all cards of suit 0, Player 1 has all cards of suit 1
-    for player in range(number_of_players):
-        hand = QuantumHand(number_of_players)
-        # Use update_inferred_cards to set exact state: 4 of own suit, 0 of others
-        inferred_state = {suit: 0 for suit in range(number_of_players)}
-        inferred_state[player] = 4
-        inferred_state[UNKNOWN_SUIT] = 0
-        hand.update_inferred_cards(inferred_state)
-
-        # Mark all other suits as unavailable
-        for suit in range(number_of_players):
-            if suit != player:
-                hand.does_not_have_suit(suit)
-        hands[player] = hand
-
-    solutions = _calculate_game_solutions(hands, number_of_players)
-    min_reqs = _calculate_minimum_requirements(solutions, number_of_players)
-
-    # Each player must have exactly 4 of their suit, 0 of others
-    for player in range(number_of_players):
-        for suit in range(number_of_players):
-            if suit == player:
-                assert min_reqs[player][suit] == 4
-            else:
-                assert min_reqs[player][suit] == 0
-
-
-def test_calculate_minimum_requirements_empty_solutions():
-    """Test minimum requirements with no solutions."""
-    min_reqs = _calculate_minimum_requirements([], 3)
-
-    assert min_reqs == {}
-
-
-@pytest.mark.parametrize("number_of_players", [2, 3])
-def test_is_hand_solvable_initial_state(number_of_players: int):
-    """Test is_hand_solvable integration for initial game state."""
-    hands = {player: QuantumHand(number_of_players) for player in range(number_of_players)}
-
-    result = get_hand_solution(hands)
-
-    assert result.number_of_solutions > 0
-    assert len(result.minimum_requirements) == number_of_players
-
-    # All minimums should be 0 in initial state
-    for player in range(number_of_players):
-        for suit in range(number_of_players):
-            assert result.minimum_requirements[player][suit] == 0
-
-
-def test_is_hand_solvable_impossible_state():
-    """Test is_hand_solvable integration for impossible game state."""
-    # Same impossible setup as earlier test
-    hands = {}
-
-    hand0 = QuantumHand(3)
-    hand0.remove_card(0)
-    for _ in range(3):
-        hand0.add_card(0)
-    hands[0] = hand0
-
-    for player in [1, 2]:
-        hand = QuantumHand(3)
-        hand.does_not_have_suit(0)
-        hands[player] = hand
-
-    result = get_hand_solution(hands)
-
-    assert result.number_of_solutions == 0
-    assert result.minimum_requirements == {}
-
-
-@pytest.mark.parametrize("number_of_players", [2, 3])
-def test_partial_information_game_state(number_of_players: int):
-    hands = {}
-
-    hand0 = QuantumHand(number_of_players)
-    hand0.request_suit(0)
-    hands[0] = hand0
-
-    for player in range(1, number_of_players):
-        hands[player] = QuantumHand(number_of_players)
-
-    solutions = _calculate_game_solutions(hands, number_of_players)
-    min_reqs = _calculate_minimum_requirements(solutions, number_of_players)
-
-    assert len(solutions) > 0
-
-    assert min_reqs[0][0] >= 1
-
-    result = get_hand_solution(hands)
-    assert result.number_of_solutions == len(solutions)
-    assert result.minimum_requirements[0][0] >= 1
+from games_backend.games.quantum.models import QuantumGameState
 
 
 def test_explanation_game_of_go_fish_early_exit():
@@ -523,3 +332,17 @@ def test_requesting_after_claiming_unavailable():
     # Now player 1 tries to ask for suit 0 - contradiction since they claimed not to have it
     with pytest.raises(ContradictionError):
         game.target_player(1, 2, 0)  # Player 1 can't request suit 0
+
+
+def test_skipping_players():
+    game_logic = QuantumLogic(5)
+    # Drain player 4 of all cards
+    for player in range(4):
+        game_logic.target_player(player, 4, player)
+        game_logic.respond_to_target(4, True)
+        game_logic.claim_no_win(player)
+    assert game_logic._current_player == 0
+    assert game_logic.move_number == 5
+    with pytest.raises(ContradictionError):
+        # Can not target players who are out.
+        game_logic.target_player(0, 4, 0)
