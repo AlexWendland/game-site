@@ -10,12 +10,13 @@ python = "^3.12"
 fastapi = {extras = ["standard"], version = "^0.115.12"}
 annotated-types = "^0.7.0"
 redis = {extras = ["async"], version = "^6.0.0"}
-python-constraint2 = "^2.3.1"
+scipy = "^1.16.0"
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
 pytest-asyncio = "^0.26.0"
+ipython = "^9.4.0"
 
 [build-system]
 requires = ["poetry-core"]
