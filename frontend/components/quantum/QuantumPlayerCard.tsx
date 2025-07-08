@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useEffect, useState, useRef } from "react";
-import { AddAI, Join, Leave, RemoveAI } from "@/components/common/PlayerSlot";
+import { AddAI, Join, Leave, RemoveAI } from "@/components/common/Icons";
 import { useIsMobile } from "@/context/BrowserContext";
 import {
   QuantumGameStateData,

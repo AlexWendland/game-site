@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { useState } from "react";
-import { AddAI, Join, Leave, RemoveAI } from "@/components/common/PlayerSlot";
+import { AddAI, Join, Leave, RemoveAI } from "@/components/common/Icons";
 import { useIsMobile } from "@/context/BrowserContext";
 import { useUltimatePlayerContext } from "@/components/ultimate/UltimateContext";
 
