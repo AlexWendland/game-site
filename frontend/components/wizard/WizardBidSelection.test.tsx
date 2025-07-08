@@ -7,19 +7,19 @@ import "@testing-library/jest-dom";
 import {
   WizardBidSelection,
   BidSelectionPresenter,
-} from "../components/wizard/WizardBidSelection";
+} from "./WizardBidSelection";
 
 // Mock function to track calls
 const mockMakeBid = jest.fn();
 
 // Mock the entire WizardContext module
-jest.mock("../components/wizard/WizardContext", () => ({
+jest.mock("./WizardContext", () => ({
   useWizardBidSelectionContext: jest.fn(),
 }));
 
 // Get the mocked function for type safety
 const mockUseWizardBidSelectionContext =
-  require("../components/wizard/WizardContext").useWizardBidSelectionContext;
+  require("./WizardContext").useWizardBidSelectionContext;
 
 // Helper function to render component with mocked context
 const renderWithContext = (contextValue: any) => {
