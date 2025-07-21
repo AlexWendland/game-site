@@ -26,12 +26,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     db_manager = InMemoryDBManager()
     app.state.book_manager = BookManager(db_manager=db_manager)
     logger.info("Book manager created.")
-    _ = asyncio.create_task(adit_book_manager(app.state.book_manager))
+    # TODO: Enable auditing of games in the future
+    # _ = asyncio.create_task(audit_book_manager(app.state.book_manager))
     yield
     await app.state.book_manager.graceful_close()
 
 
-async def adit_book_manager(book_manager: BookManager):
+async def audit_book_manager(book_manager: BookManager):
     while not book_manager.is_closed:
         await asyncio.sleep(60)
         await book_manager.audit_games()
