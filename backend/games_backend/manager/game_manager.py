@@ -40,6 +40,7 @@ class GameManager:
         return len(self._player_to_id) > 0
 
     async def close_game(self):
+        logger.info(f"Closing game {self._game_id}.")
         if self._is_closed:
             return
         async with self._player_lock:
