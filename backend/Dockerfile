@@ -27,4 +27,4 @@ COPY games_backend ./games_backend
 
 EXPOSE 8000
 
-CMD ["fastapi", "run", "games_backend/main.py", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "games_backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,3 +1,5 @@
+import asyncio
+
 from games_backend import models
 from games_backend.app_logger import logger
 from games_backend.manager.db_manager import DBManager
@@ -66,8 +68,11 @@ class BookManager:
             await self._db_manager.save_game(game_id, game_manager.get_game())
         # Save the games before trying to disconnect the client to maximise the chance we have saved all the
         # data.
-        for game_manager in self._game_cache.values():
-            await game_manager.close_game()
+        for game_id, game_manager in self._game_cache.items():
+            try:
+                await asyncio.wait_for(game_manager.close_game(), timeout=5.0)
+            except asyncio.TimeoutError:
+                logger.warning(f"Timeout while closing game {game_id}.")
         self._closed = True
 
     @property
