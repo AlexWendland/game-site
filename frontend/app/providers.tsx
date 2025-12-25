@@ -12,7 +12,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const toastRef = useRef<ToastContainerRef>(null);
 
   return (
-    <ThemeProvider defaultTheme="system" enableSystem={true}>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <BrowserProvider>
         <UserProvider>
           <GameProvider>
