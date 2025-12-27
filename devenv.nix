@@ -29,6 +29,9 @@
     cd backend && docker run -p 8000:8000 games-backend
   '';
 
+  languages.go = {
+    enable = true;
+  };
 
   languages.javascript = {
     directory = "./frontend/";
