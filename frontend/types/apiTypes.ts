@@ -73,3 +73,24 @@ export interface QuantumGameMetadata {
   max_players: number;
   parameters: QuantumGameParameters;
 }
+
+// Auth API types
+export interface AuthResponse {
+  token: string;
+  user_id: string;
+}
+
+export interface UserInfo {
+  user_id: string;
+  username: string;
+}
+
+export interface ErrorResponse {
+  error_message: string;
+}
+
+export interface PlayerInfo {
+  user_id: string;
+  display_name: string;
+  is_ai: boolean;
+}

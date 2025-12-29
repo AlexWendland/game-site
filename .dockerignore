@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+
+# Archive directory
+archive/
+
+# Development files
+devenv.nix
+.devenv/
+.direnv/
+
+# Node modules and build artifacts
+**/node_modules
+**/.next
+**/dist
+
+# Go build artifacts
+**/bin
+**/tmp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Documentation
+*.md
+!README.md
+
+# CI/CD
+.github/
+
+# Environment files
+**/.env
+**/.env.*
+!**/.env.example
+
+# Testing
+**/coverage
+**/.coverage
+
+# Logs
+*.log

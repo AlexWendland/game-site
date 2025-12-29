@@ -1,35 +1,21 @@
 "use client";
 
 import { JoinGameButton } from "@/components/JoinGameButton";
-import {
-  makeNewTicTacToeGameAPI,
-  makeNewUltimateGameAPI,
-} from "@/lib/apiCalls";
+import { makeNewTicTacToeGameAPI } from "@/lib/apiCalls";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
   const router = useRouter();
+  const { getToken } = useAuth();
 
   const startNewTicTacToeGame = async () => {
-    const gameID: string = await makeNewTicTacToeGameAPI();
-    router.push(`/tictactoe/${gameID}`);
-  };
-
-  const startNewUltimateGame = async () => {
-    const gameID: string = await makeNewUltimateGameAPI();
-    router.push(`/ultimate/${gameID}`);
-  };
-
-  const startNewTopological = async () => {
-    router.push(`/topological`);
-  };
-
-  const startNewWizard = async () => {
-    router.push(`/wizard`);
-  };
-
-  const startNewQuantum = async () => {
-    router.push(`/quantum`);
+    const token = getToken();
+    if (!token) {
+      throw new Error("Not authenticated");
+    }
+    const gameID: string = await makeNewTicTacToeGameAPI(token);
+    router.push(`/tictactoe?gameID=${gameID}`);
   };
 
   const games = [
@@ -38,30 +24,6 @@ export default function Home() {
       description: "Your classic 0 and X game!",
       onClick: startNewTicTacToeGame,
       image: "/tictactoe.png",
-    },
-    {
-      name: "Ultimate Tic Tac Toe",
-      description: "Next level Tic Tac Toe",
-      onClick: startNewUltimateGame,
-      image: "/ultimate.png",
-    },
-    {
-      name: "Topological Connect Four",
-      description: "Connect four for real children!",
-      onClick: startNewTopological,
-      image: "/topological.svg",
-    },
-    {
-      name: "Wizard",
-      description: "Magic trick based card game!",
-      onClick: startNewWizard,
-      image: "/wizard.svg",
-    },
-    {
-      name: "Quantum Go Fish",
-      description: "A quantum twist on the classic Go Fish game!",
-      onClick: startNewQuantum,
-      image: "/quantum.svg",
     },
   ];
 

@@ -2,11 +2,13 @@ import { FormEvent, useState } from "react";
 import { validateGameID } from "@/lib/gameFunctions";
 import { getGameMetadata } from "@/lib/apiCalls";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export function JoinGameButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const router = useRouter();
+  const { getToken } = useAuth();
 
   const onSubmit = async (formInput: FormEvent<HTMLFormElement>) => {
     formInput.preventDefault();
@@ -27,9 +29,16 @@ export function JoinGameButton() {
     }
 
     try {
-      const gameMetadata = await getGameMetadata(gameID);
+      const token = getToken();
+      if (!token) {
+        setErrors({ GameID: "Authentication required" });
+        setIsLoading(false);
+        return;
+      }
+
+      const gameMetadata = await getGameMetadata(gameID, token);
       if (gameMetadata) {
-        router.push(`/${gameMetadata.game_type}/${gameID}`);
+        router.push(`/${gameMetadata.game_type}?gameID=${gameID}`);
       } else {
         setErrors({ GameID: "Invalid game ID" });
       }

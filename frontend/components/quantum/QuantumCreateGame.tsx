@@ -17,7 +17,7 @@ export default function QuantumCreateGame() {
       0) as QuantumHintLevel;
 
     const gameID: string = await makeNewQuantumGameAPI(players, maxHintLevel);
-    router.push(`/quantum/${gameID}`);
+    router.push(`/quantum?gameID=${gameID}`);
   }
 
   return (

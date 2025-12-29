@@ -21,7 +21,7 @@ import {
 import { useToast } from "@/context/ToastContext";
 import { usePathname } from "next/navigation";
 import { useGameContext } from "@/context/GameContext";
-import { getUserName } from "@/context/UserContext";
+import { useAuth } from "@/context/AuthContext";
 import { BoardValue } from "@/types/gameTypes";
 import { getGameModels } from "@/lib/apiCalls";
 
@@ -190,14 +190,19 @@ export function UltimateProvider({
 
   const { addToast } = useToast();
 
-  const username = getUserName();
+  const { getUsername, getToken } = useAuth();
+  const username = getUsername();
 
   useEffect(() => {
     let isMounted = true;
 
     const connectWebSocket = async () => {
       try {
-        const webSocket = await getGameWebsocket(gameID);
+        const token = getToken();
+        if (!token) {
+          throw new Error("No authentication token available");
+        }
+        const webSocket = await getGameWebsocket(gameID, token);
 
         if (username) {
           setPlayerNameWebsocket(username, webSocket);
@@ -214,8 +219,13 @@ export function UltimateProvider({
 
             switch (parsedMessage.message_type) {
               case "session_state":
-                setCurrentUserPosition(parsedMessage.parameters.user_position);
-                setPlayers(parsedMessage.parameters.player_positions);
+                // TODO: Work out how to set user position
+                // setCurrentUserPosition(parsedMessage.parameters.user_position);
+                const playerNames: Record<number, string | null> = {};
+                Object.entries(parsedMessage.parameters.player_positions).forEach(([pos, info]) => {
+                  playerNames[parseInt(pos)] = info ? info.display_name : null;
+                });
+                setPlayers(playerNames);
                 break;
 
               case "ai_players":
@@ -305,14 +315,19 @@ export function UltimateProvider({
   useEffect(() => {
     const fetchAIModels = async () => {
       try {
-        const models = await getGameModels(gameID);
+        const token = getToken();
+        if (!token) {
+          console.error("No auth token available");
+          return;
+        }
+        const models = await getGameModels(gameID, token);
         setAIModels(models);
       } catch (error) {
         console.error("Failed to fetch AI models:", error);
       }
     };
     fetchAIModels();
-  }, [gameID]);
+  }, [gameID, getToken]);
 
   // Define meta parameters
 

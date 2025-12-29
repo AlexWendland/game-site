@@ -23,7 +23,7 @@ export default function TopologicalCreateGame() {
       gravity,
       geometry,
     );
-    router.push(`/topological/${gameID}`);
+    router.push(`/topological?gameID=${gameID}`);
   }
 
   return (

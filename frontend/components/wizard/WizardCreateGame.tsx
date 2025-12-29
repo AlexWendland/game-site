@@ -15,7 +15,7 @@ export default function WizardCreateGame() {
     const players = Number(formData.get("players"));
 
     const gameID: string = await makeNewWizardGameAPI(players, showOldHands);
-    router.push(`/wizard/${gameID}`);
+    router.push(`/wizard?gameID=${gameID}`);
   }
 
   return (
