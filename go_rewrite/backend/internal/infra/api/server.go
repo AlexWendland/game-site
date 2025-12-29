@@ -57,18 +57,17 @@ func (s *Server) Run() error {
 		return corsMiddleware(handler)
 	}
 
-	// Auth endpoints (with CORS in dev mode)
+	// Auth endpoints - /auth/*
 	authHandler := NewAuthHandler(s.authService)
-	http.HandleFunc("/auth/register", maybeWithCORS(authHandler.HandleRegister))
-	http.HandleFunc("/auth/login", maybeWithCORS(authHandler.HandleLogin))
-	http.HandleFunc("/auth/logout", maybeWithCORS(authHandler.HandleLogout))
-	http.HandleFunc("/auth/me", maybeWithCORS(authHandler.HandleMe))
+	http.HandleFunc("/auth/", maybeWithCORS(authHandler.ServeHTTP))
 
-	// WebSocket handler - matches /game/{game_id}/ws
-	wsHandler := NewWebSocketHandler(s.registry, s.authService)
-	http.HandleFunc("/game/", maybeWithCORS(func(w http.ResponseWriter, r *http.Request) {
-		wsHandler.ServeHTTP(w, r)
-	}))
+	// REST API - /api/*
+	restHandler := NewRESTHandler(s.registry, s.authService)
+	http.HandleFunc("/api/", maybeWithCORS(restHandler.ServeHTTP))
+
+	// WebSocket - /ws/*
+	wsHandler := NewWebSocketHandler(s.registry, s.authService, s.production)
+	http.HandleFunc("/ws/", maybeWithCORS(wsHandler.ServeHTTP))
 
 	// Static file server (only in production mode)
 	if s.staticPath != "" {
@@ -81,8 +80,6 @@ func (s *Server) Run() error {
 	if !s.production {
 		log.Printf("CORS enabled for: http://localhost:3000")
 	}
-	log.Printf("Auth endpoints: /auth/{register,login,logout,me}")
-	log.Printf("WebSocket endpoint: /game/{game_id}/ws")
 
 	return http.ListenAndServe(s.addr, nil)
 }

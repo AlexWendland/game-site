@@ -88,3 +88,9 @@ export interface UserInfo {
 export interface ErrorResponse {
   error_message: string;
 }
+
+export interface PlayerInfo {
+  user_id: string;
+  display_name: string;
+  is_ai: boolean;
+}

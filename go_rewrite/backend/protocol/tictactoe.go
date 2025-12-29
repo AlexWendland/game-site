@@ -10,9 +10,9 @@ type TicTacToeGameStateResponse struct {
 }
 
 type TicTacToeGameStateParameters struct {
-	History     [][]*int `json:"history"`      // Board history (9 squares, nil = empty, 0/1 = player)
-	Winner      *int     `json:"winner"`       // nil if no winner yet
-	WinningLine []int    `json:"winning_line"` // Empty if no winner
+	Board       [9]int `json:"board"`        // Move numbers (-1 = empty, 0+ = move number)
+	Winner      *int   `json:"winner"`       // nil if no winner yet
+	WinningLine []int  `json:"winning_line"` // Empty if no winner
 }
 
 // TicTacToeMakeMoveRequest is sent from client to server
@@ -25,4 +25,5 @@ type TicTacToeMakeMoveRequest struct {
 type TicTacToeMetadata struct {
 	GameType   string `json:"game_type"`
 	MaxPlayers int    `json:"max_players"`
+	Parameters any    `json:"parameters"`
 }

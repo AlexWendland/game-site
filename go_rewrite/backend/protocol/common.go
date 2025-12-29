@@ -75,6 +75,13 @@ type SimpleParameters struct {
 	Message string `json:"message"`
 }
 
+// PlayerInfo contains information about a player
+type PlayerInfo struct {
+	UserID      string `json:"user_id"` // For AI this is the AI type.
+	DisplayName string `json:"display_name"`
+	IsAI        bool   `json:"is_ai"`
+}
+
 // SessionStateResponse represents the session/lobby state
 type SessionStateResponse struct {
 	MessageType MessageType            `json:"message_type"`
@@ -82,18 +89,7 @@ type SessionStateResponse struct {
 }
 
 type SessionStateParameters struct {
-	PlayerPositions map[int]*string `json:"player_positions"` // position -> player name (nil if empty)
-	UserPosition    *int            `json:"user_position"`    // nil if spectator
-}
-
-// AIStateResponse represents AI players in the game
-type AIStateResponse struct {
-	MessageType MessageType       `json:"message_type"`
-	Parameters  AIStateParameters `json:"parameters"`
-}
-
-type AIStateParameters struct {
-	AIPlayers map[int]string `json:"ai_players"` // position -> ai_type
+	PlayerPositions map[int]*PlayerInfo `json:"player_positions"` // position -> player info (nil if empty)
 }
 
 // GameStateResponse is the base for game-specific states

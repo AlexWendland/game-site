@@ -20,6 +20,7 @@ type AuthContextType = {
   isLoading: boolean;
   logout: () => void;
   getUsername: () => string | null;
+  getToken: () => string | null;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -95,6 +96,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return user?.username || null;
   };
 
+  const getToken = () => {
+    return localStorage.getItem('auth_token');
+  };
+
   // Show loading screen while checking auth (except on login page)
   if (isLoading && pathname !== '/login') {
     return (
@@ -114,7 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, logout, getUsername }}>
+    <AuthContext.Provider value={{ user, isLoading, logout, getUsername, getToken }}>
       {children}
     </AuthContext.Provider>
   );

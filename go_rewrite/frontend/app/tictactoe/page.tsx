@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { notFound, useSearchParams } from "next/navigation";
 import { TicTacToeGame } from "@/components/tictactoe/TicTacToeGame";
@@ -6,12 +6,14 @@ import { TicTacToeProvider } from "@/components/tictactoe/TicTacToeContext";
 import { validateGameID } from "@/lib/gameFunctions";
 import { getGameMetadata } from "@/lib/apiCalls";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function TicTacToePage() {
   const searchParams = useSearchParams();
-  const gameID = searchParams.get('gameID');
+  const gameID = searchParams.get("gameID");
   const [isValidating, setIsValidating] = useState(true);
   const [isValid, setIsValid] = useState(false);
+  const { getToken } = useAuth();
 
   useEffect(() => {
     async function validate() {
@@ -22,7 +24,12 @@ export default function TicTacToePage() {
       }
 
       try {
-        const metadata = await getGameMetadata(gameID);
+        const token = getToken();
+        if (!token) {
+          console.error("No auth token available");
+          return;
+        }
+        const metadata = await getGameMetadata(gameID, token);
         if (metadata.game_type !== "tictactoe") {
           setIsValid(false);
         } else {
@@ -36,7 +43,7 @@ export default function TicTacToePage() {
     }
 
     validate();
-  }, [gameID]);
+  }, [gameID, getToken]);
 
   if (isValidating) {
     return <div>Loading...</div>;

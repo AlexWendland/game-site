@@ -1,7 +1,9 @@
 package app
 
 import (
+	"crypto/rand"
 	"fmt"
+	"log/slog"
 	"sync"
 
 	"github.com/AlexWendland/games-site/internal/domain"
@@ -37,7 +39,7 @@ func (r *Registry) Get(gameID string) (*GameSession, error) {
 // Creates a new game session with the given ID and game
 // Returns error if session already exists
 // Automatically starts the session's event loop
-func (r *Registry) Create(gameID string, game domain.Game) (*GameSession, error) {
+func (r *Registry) Create(gameID string, game domain.Game, playerMapping domain.PlayerMapping, logger *slog.Logger) (*GameSession, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -45,7 +47,7 @@ func (r *Registry) Create(gameID string, game domain.Game) (*GameSession, error)
 		return nil, fmt.Errorf("session %s already exists", gameID)
 	}
 
-	session := NewGameSession(gameID, game)
+	session := NewGameSession(gameID, game, playerMapping, logger)
 	go session.Run()
 
 	r.sessions[gameID] = session
@@ -64,4 +66,33 @@ func (r *Registry) Remove(gameID string) {
 
 	game.Shutdown()
 	delete(r.sessions, gameID)
+}
+
+// GenerateUniqueGameID generates a unique 5-letter game ID
+// Retries if the generated ID already exists
+func (r *Registry) GenerateUniqueGameID() string {
+	const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	const idLength = 5
+
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for {
+		// Generate random 5-letter code
+		bytes := make([]byte, idLength)
+		rand.Read(bytes)
+
+		gameID := make([]byte, idLength)
+		for i := 0; i < idLength; i++ {
+			gameID[i] = letters[bytes[i]%26]
+		}
+
+		id := string(gameID)
+
+		// Check if this ID is already in use
+		if _, exists := r.sessions[id]; !exists {
+			return id
+		}
+		// If exists, loop will retry with a new random ID
+	}
 }

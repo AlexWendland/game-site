@@ -328,7 +328,7 @@ export function WizardProvider({
 
   const { addToast } = useToast();
 
-  const { getUsername } = useAuth();
+  const { getUsername, getToken } = useAuth();
   const username = getUsername();
 
   useEffect(() => {
@@ -336,7 +336,11 @@ export function WizardProvider({
 
     const connectWebSocket = async () => {
       try {
-        const webSocket = await getGameWebsocket(gameID);
+        const token = getToken();
+        if (!token) {
+          throw new Error("No authentication token available");
+        }
+        const webSocket = await getGameWebsocket(gameID, token);
         if (username) {
           setPlayerNameWebsocket(username, webSocket);
         }

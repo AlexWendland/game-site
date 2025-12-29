@@ -17,10 +17,10 @@ export function TicTacToeGame() {
 
   const status =
     winner !== null
-      ? `Winner: ${players[winner] === null ? "Unassigned" : players[winner]}`
+      ? `Winner: ${players[winner] === null ? "Unassigned" : players[winner]?.display_name}`
       : currentMove == 9
         ? "Draw"
-        : `Next player: ${currentPlayer === null ? "Unassigned" : currentPlayer}`;
+        : `Next player: ${currentPlayer === null ? "Unassigned" : currentPlayer?.display_name}`;
 
   return (
     <div>

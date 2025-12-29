@@ -9,12 +9,11 @@ import {
   useMemo,
   ReactNode,
 } from "react";
-import { BoardValue, SquareValue } from "@/types/gameTypes";
+import { PlayerInfo } from "@/types/apiTypes";
 import {
   getGameWebsocket,
   leavePlayerPosition,
   parseWebSocketMessage,
-  setPlayerNameWebsocket,
   setPlayerPosition,
   addAIPlayerOverWebsocket,
   removeAIPlayerOverWebsocket,
@@ -23,9 +22,10 @@ import { useToast } from "@/context/ToastContext";
 import { usePathname } from "next/navigation";
 import { useGameContext } from "@/context/GameContext";
 import { getGameModels } from "@/lib/apiCalls";
+import { useAuth } from "@/context/AuthContext";
 
 type TicTacToeBoardContextType = {
-  history: BoardValue[];
+  board: number[];
   currentMove: number;
   winningLine: number[];
   currentViewedMove: number;
@@ -35,17 +35,16 @@ type TicTacToeBoardContextType = {
 };
 
 type TicTacToeGameContextType = {
-  players: Record<number, string | null>;
+  players: Record<number, PlayerInfo | null>;
   currentMove: number;
-  currentPlayer: string | null;
+  currentPlayer: PlayerInfo | null;
   winner: number | null;
   currentViewedMove: number;
   setCurrentViewedMove: (newMove: number) => void;
 };
 
 type TicTacToePlayerContextType = {
-  players: Record<number, string | null>;
-  aiPlayers: Record<number, string>;
+  players: Record<number, PlayerInfo | null>;
   currentUserPosition: number | null;
   aiModels: Record<string, string>;
   currentPlayerNumber: number | null;
@@ -55,8 +54,8 @@ type TicTacToePlayerContextType = {
 };
 
 type TicTacToeGameState = {
-  history: BoardValue[];
-  winner: SquareValue;
+  board: number[];
+  winner: number | null;
   winning_line: number[];
 };
 
@@ -64,9 +63,9 @@ function parseGameState(
   parameters: Record<string, any>,
 ): TicTacToeGameState | null {
   if (
-    typeof (parameters as any).history !== "object" ||
+    !Array.isArray((parameters as any).board) ||
     !("winner" in parameters) ||
-    typeof (parameters as any).winning_line !== "object"
+    !Array.isArray((parameters as any).winning_line)
   ) {
     console.log("Invalid game state format:", parameters);
     throw new Error("Invalid structure");
@@ -140,13 +139,12 @@ export function TicTacToeProvider({
   children: ReactNode;
 }) {
   // Backend state
-  const [history, setHistory] = useState<BoardValue[]>([Array(9).fill(null)]);
-  const [players, setPlayers] = useState<Record<number, string | null>>({
+  const [board, setBoard] = useState<number[]>(Array(9).fill(-1));
+  const [players, setPlayers] = useState<Record<number, PlayerInfo | null>>({
+    0: null,
     1: null,
-    2: null,
   });
   const [aiModels, setAIModels] = useState<Record<string, string>>({});
-  const [aiPlayers, setAIPlayers] = useState<Record<number, string>>({});
   const [winner, setWinner] = useState<number | null>(null);
   const [winningLine, setWinningLine] = useState<number[]>([]);
   // Client state
@@ -159,13 +157,18 @@ export function TicTacToeProvider({
   // Websocket
   const gameWebSocket = useRef<WebSocket | null>(null);
   const { addToast } = useToast();
+  const { getToken } = useAuth();
 
   useEffect(() => {
     let isMounted = true;
 
     const connectWebSocket = async () => {
       try {
-        const webSocket = await getGameWebsocket(gameID);
+        const token = getToken();
+        if (!token) {
+          throw new Error("No authentication token available");
+        }
+        const webSocket = await getGameWebsocket(gameID, token);
         setIsLoading(false);
 
         if (!isMounted) return; // handle fast unmount
@@ -177,12 +180,9 @@ export function TicTacToeProvider({
 
             switch (parsedMessage.message_type) {
               case "session_state":
-                setCurrentUserPosition(parsedMessage.parameters.user_position);
+                // TODO: Work out to set user position
+                // setCurrentUserPosition();
                 setPlayers(parsedMessage.parameters.player_positions);
-                break;
-
-              case "ai_players":
-                setAIPlayers(parsedMessage.parameters.ai_players);
                 break;
 
               case "error":
@@ -200,12 +200,20 @@ export function TicTacToeProvider({
                   );
                   return;
                 }
-                setHistory(gameState.history);
+                const previousMaxMove = Math.max(...board) + 1;
+                setBoard(gameState.board);
                 setWinningLine(gameState.winning_line);
                 setWinner(gameState.winner);
-                // TODO: Would be nice if this didn't jump if they are looking at the history.
-                // Current issue is we don't want dependencies for this effect on the game state.
-                setCurrentViewedMove(gameState.history.length - 1);
+                // Calculate current move from board (max move number + 1)
+                const maxMove = Math.max(...gameState.board);
+                const calculatedMove = maxMove + 1;
+                if (
+                  previousMaxMove !== calculatedMove &&
+                  currentViewedMove === calculatedMove - 1
+                ) {
+                  setCurrentViewedMove(calculatedMove);
+                }
+                break;
               }
               case "simple":
                 console.log(parsedMessage.parameters.message);
@@ -246,14 +254,19 @@ export function TicTacToeProvider({
   useEffect(() => {
     const fetchAIModels = async () => {
       try {
-        const models = await getGameModels(gameID);
+        const token = getToken();
+        if (!token) {
+          console.error("No auth token available");
+          return;
+        }
+        const models = await getGameModels(gameID, token);
         setAIModels(models);
       } catch (error) {
         console.error("Failed to fetch AI models:", error);
       }
     };
     fetchAIModels();
-  }, [gameID]);
+  }, [gameID, getToken]);
 
   // Set game details in context.
   const {
@@ -278,7 +291,11 @@ export function TicTacToeProvider({
 
   // Define meta parameters
 
-  const currentMove = useMemo(() => history.length - 1, [history]);
+  const currentMove = useMemo(() => {
+    // Calculate current move from board (max move number + 1)
+    const maxMove = Math.max(...board);
+    return maxMove + 1;
+  }, [board]);
 
   const currentPlayerNumber = useMemo(() => {
     return currentMove % 2;
@@ -312,7 +329,7 @@ export function TicTacToeProvider({
 
   const makeMove = async (position: number) => {
     if (winner !== null) return;
-    if (history[currentMove][position]) return;
+    if (board[position] !== -1) return; // Position already taken
     if (currentUserPosition !== currentPlayerNumber) return;
     if (currentViewedMove !== currentMove) return;
     makeMoveOverWebsocket(gameWebSocket.current, position);
@@ -332,7 +349,7 @@ export function TicTacToeProvider({
   return (
     <TicTacToeBoardContext.Provider
       value={{
-        history,
+        board,
         currentMove,
         winningLine,
         currentViewedMove,
@@ -344,7 +361,6 @@ export function TicTacToeProvider({
       <TicTacToePlayerContext.Provider
         value={{
           players,
-          aiPlayers,
           currentUserPosition,
           aiModels,
           currentPlayerNumber: winner === null ? currentPlayerNumber : null,

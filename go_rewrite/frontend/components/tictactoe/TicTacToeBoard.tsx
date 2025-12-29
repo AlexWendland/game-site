@@ -3,7 +3,7 @@ import { useTicTacToeBoardContext } from "@/components/tictactoe/TicTacToeContex
 
 export function TicTacToeBoard() {
   const {
-    history,
+    board,
     currentMove,
     winningLine,
     currentPlayerNumber,
@@ -14,18 +14,31 @@ export function TicTacToeBoard() {
 
   return (
     <div className="grid grid-cols-3 gap-2 max-w-[600px] max-h-[600px] aspect-square">
-      {/* Values in the backend are just the player positions, convert this to X / 0 */}
-      {history[currentMove].map((val, i) => (
-        <TicTacToeSquare
-          key={i}
-          value={val !== null ? (val === 0 ? "X" : "O") : null}
-          onSquareClick={() => makeMove(i)}
-          isHighlighted={winningLine.includes(i)}
-          isInCurrentView={val == history[currentViewedMove][i]}
-          isCurrentUsersGo={isCurrentUsersGo}
-          currentPlayerNumber={currentPlayerNumber}
-        />
-      ))}
+      {board.map((moveNumber, i) => {
+        // For history viewing, only show moves that have been made up to currentViewedMove
+        const isVisibleInHistory = moveNumber !== -1 && moveNumber < currentViewedMove;
+        const isInCurrentView = moveNumber !== -1 && moveNumber < currentViewedMove;
+
+        // Convert move number to player symbol
+        // Even move numbers (0, 2, 4, ...) = Player 0 (X)
+        // Odd move numbers (1, 3, 5, ...) = Player 1 (O)
+        let value: "X" | "O" | null = null;
+        if (isVisibleInHistory) {
+          value = moveNumber % 2 === 0 ? "X" : "O";
+        }
+
+        return (
+          <TicTacToeSquare
+            key={i}
+            value={value}
+            onSquareClick={() => makeMove(i)}
+            isHighlighted={winningLine.includes(i)}
+            isInCurrentView={isInCurrentView}
+            isCurrentUsersGo={isCurrentUsersGo}
+            currentPlayerNumber={currentPlayerNumber}
+          />
+        );
+      })}
     </div>
   );
 }

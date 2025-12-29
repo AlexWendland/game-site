@@ -1,7 +1,16 @@
-import { apiUrl } from "@/lib/apiCalls";
+import { apiUrl, getWSTokenAPI } from "@/lib/apiCalls";
+import { PlayerInfo } from "@/types/apiTypes";
 
-export async function getGameWebsocket(gameID: string): Promise<WebSocket> {
-  const socket = new WebSocket(apiUrl(`/game/${gameID}/ws`));
+export async function getGameWebsocket(
+  gameID: string,
+  token: string,
+): Promise<WebSocket> {
+  // Get a short-lived WebSocket token
+  const wsToken = await getWSTokenAPI(token, gameID);
+
+  // Connect to WebSocket with the WS token
+  const wsUrl = apiUrl(`/ws/game/${gameID}?token=${wsToken}`);
+  const socket = new WebSocket(wsUrl);
 
   await waitForSocketOpen(socket);
 
@@ -111,8 +120,7 @@ export function addAIPlayerOverWebsocket(
 interface SessionStateMessage {
   message_type: "session_state";
   parameters: {
-    player_positions: Record<number, string | null>;
-    user_position: number | null;
+    player_positions: Record<number, PlayerInfo>;
   };
 }
 
@@ -182,11 +190,7 @@ export function parseWebSocketMessage(event: MessageEvent): ParsedMessage {
 
     switch (message_type) {
       case "session_state":
-        if (
-          parameters &&
-          typeof parameters.player_positions === "object" &&
-          "user_position" in parameters
-        ) {
+        if (parameters && typeof parameters.player_positions === "object") {
           return {
             message_type: "session_state",
             parameters,

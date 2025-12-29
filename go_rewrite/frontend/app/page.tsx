@@ -3,12 +3,18 @@
 import { JoinGameButton } from "@/components/JoinGameButton";
 import { makeNewTicTacToeGameAPI } from "@/lib/apiCalls";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
   const router = useRouter();
+  const { getToken } = useAuth();
 
   const startNewTicTacToeGame = async () => {
-    const gameID: string = await makeNewTicTacToeGameAPI();
+    const token = getToken();
+    if (!token) {
+      throw new Error("Not authenticated");
+    }
+    const gameID: string = await makeNewTicTacToeGameAPI(token);
     router.push(`/tictactoe?gameID=${gameID}`);
   };
 

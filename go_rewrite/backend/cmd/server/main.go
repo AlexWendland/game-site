@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"log/slog"
 
 	"github.com/AlexWendland/games-site/internal/app"
 	"github.com/AlexWendland/games-site/internal/infra/api"
@@ -29,6 +30,12 @@ func main() {
 		staticPath = ""
 		log.Println("Running in development mode - static files NOT served")
 		log.Println("Start Next.js dev server separately: cd frontend && npm run dev")
+	}
+
+	// Set up logging
+	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
+	if !*prod {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 
 	// Create and start HTTP server

@@ -3,13 +3,12 @@ import { useState } from "react";
 import { AddAI, Join, Leave, RemoveAI } from "@/components/common/Icons";
 import { useIsMobile } from "@/context/BrowserContext";
 import { useTicTacToePlayerContext } from "@/components/tictactoe/TicTacToeContext";
+import { PlayerInfo } from "@/types/apiTypes";
 
 type PlayerPieceProps = {
   playerId: number;
-  playerName: string | null;
+  playerInfo: PlayerInfo | null;
   isCurrentUser: boolean;
-  isOccupiedByHuman: boolean;
-  isOccupiedByAI: boolean;
   aiModels: Record<string, string>;
   movePlayer: () => void;
   removePlayer: () => void;
@@ -20,10 +19,8 @@ type PlayerPieceProps = {
 
 function PlayerPiece({
   playerId,
-  playerName,
+  playerInfo,
   isCurrentUser,
-  isOccupiedByHuman,
-  isOccupiedByAI,
   aiModels,
   movePlayer,
   removePlayer,
@@ -35,6 +32,10 @@ function PlayerPiece({
   const [isHovered, setIsHovered] = useState(false);
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
   const [isAIDropdownOpen, setIsAIDropdownOpen] = useState(false);
+
+  const isOccupiedByAI = playerInfo?.is_ai ?? false;
+  const isOccupiedByHuman = playerInfo !== null && !isOccupiedByAI;
+  const playerName = playerInfo?.display_name ?? null;
 
   const hasActions =
     isCurrentUser || (!isOccupiedByHuman && !isOccupiedByAI) || isOccupiedByAI;
@@ -333,7 +334,6 @@ export function TicTacToePlayerPieces({
 }: TicTacToePlayerPiecesProps) {
   const {
     players,
-    aiPlayers,
     currentUserPosition,
     aiModels,
     currentPlayerNumber,
@@ -349,18 +349,15 @@ export function TicTacToePlayerPieces({
 
   const renderPlayerPiece = (player: { id: number; name: string }) => {
     const isSelected = currentUserPosition === player.id;
-    const isAI = player.id in aiPlayers;
-    const isOccupied = players[player.id] !== null;
+    const playerInfo = players[player.id];
     const isCurrentPlayerTurn = player.id === currentPlayerNumber;
 
     return (
       <PlayerPiece
         key={player.id}
         playerId={player.id}
-        playerName={players[player.id]}
+        playerInfo={playerInfo}
         isCurrentUser={isSelected}
-        isOccupiedByHuman={isOccupied && !isAI}
-        isOccupiedByAI={isAI}
         aiModels={aiModels}
         isCurrentPlayerTurn={isCurrentPlayerTurn}
         movePlayer={() => {

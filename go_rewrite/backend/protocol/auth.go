@@ -20,6 +20,10 @@ type AuthResponseParams struct {
 	UserID string `json:"user_id"`
 }
 
+type WSTokenResponseParams struct {
+	WSToken string `json:"ws_token"`
+}
+
 type UserInfoResponseParams struct {
 	UserID   string `json:"user_id"`
 	Username string `json:"username"`
