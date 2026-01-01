@@ -4,7 +4,7 @@ import "github.com/AlexWendland/games-site/protocol"
 
 // PlayerMapping handles the session-level player management
 // It translates between userIDs and game positions, manages AI players,
-// and handles session events like joining, leaving, and swapping positions
+// and handles session events like joining, leaving, and swapping positions.
 type PlayerMapping interface {
 	// HandleSessionEvent processes session-related requests (join, leave, add AI, etc.)
 	// Returns an error if the request is invalid or cannot be processed

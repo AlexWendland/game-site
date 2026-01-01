@@ -2,7 +2,7 @@ package domain
 
 import "github.com/AlexWendland/games-site/protocol"
 
-// Game is the core interface that all games must implement
+// Game is the core interface that all games must implement.
 type Game interface {
 	// HandleAction processes a player action from the protocol request
 	// Returns a protocol.Response (usually ErrorResponse) if the action is invalid

@@ -2,7 +2,7 @@ package protocol
 
 // Ultimate TicTacToe protocol definitions
 
-// UltimateGameStateResponse is sent from server to client
+// UltimateGameStateResponse is sent from server to client.
 type UltimateGameStateResponse struct {
 	MessageType MessageType                 `json:"message_type"`
 	Parameters  UltimateGameStateParameters `json:"parameters"`
@@ -16,12 +16,12 @@ type UltimateGameStateParameters struct {
 	WinningLine  []int  `json:"winning_line"`   // Empty if no winner
 }
 
-// UltimateMakeMoveRequest is sent from client to server
+// UltimateMakeMoveRequest is sent from client to server.
 type UltimateMakeMoveRequest struct {
 	Position int `json:"position"` // 0-80 board position
 }
 
-// UltimateMetadata describes the game configuration
+// UltimateMetadata describes the game configuration.
 type UltimateMetadata struct {
 	GameType   string `json:"game_type"`
 	MaxPlayers int    `json:"max_players"`

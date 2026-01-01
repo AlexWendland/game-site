@@ -25,7 +25,7 @@ func NewRESTHandler(registry *app.Registry, authService *auth.Service) *RESTHand
 	}
 }
 
-// ServeHTTP routes REST API requests to the appropriate handler
+// ServeHTTP routes REST API requests to the appropriate handler.
 func (h *RESTHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Validate authentication token
 	authHeader := r.Header.Get("Authorization")
@@ -64,7 +64,7 @@ func (h *RESTHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleNewTicTacToe creates a new Tic Tac Toe game
-// POST /api/new_game/tictactoe
+// POST /api/new_game/tictactoe.
 func (h *RESTHandler) HandleNewTicTacToe(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -100,11 +100,13 @@ func (h *RESTHandler) HandleNewTicTacToe(w http.ResponseWriter, r *http.Request)
 		},
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		slog.Error("Failed to encode response", "error", err)
+	}
 }
 
 // HandleGameMetadata returns metadata for a specific game
-// GET /api/game/{game_id}/metadata
+// GET /api/game/{game_id}/metadata.
 func (h *RESTHandler) HandleGameMetadata(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -125,11 +127,13 @@ func (h *RESTHandler) HandleGameMetadata(w http.ResponseWriter, r *http.Request)
 
 	metadata := session.GetMetadata()
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(metadata)
+	if err := json.NewEncoder(w).Encode(metadata); err != nil {
+		slog.Error("Failed to encode metadata", "error", err)
+	}
 }
 
 // HandleGameModels returns available AI models for a specific game
-// GET /api/game/{game_id}/models
+// GET /api/game/{game_id}/models.
 func (h *RESTHandler) HandleGameModels(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -150,10 +154,12 @@ func (h *RESTHandler) HandleGameModels(w http.ResponseWriter, r *http.Request) {
 
 	aiTypes := session.AITypes()
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(aiTypes)
+	if err := json.NewEncoder(w).Encode(aiTypes); err != nil {
+		slog.Error("Failed to encode AI types", "error", err)
+	}
 }
 
-// extractGameIDFromPath extracts game ID from paths like /api/game/{game_id}/metadata
+// extractGameIDFromPath extracts game ID from paths like /api/game/{game_id}/metadata.
 func extractGameIDFromPath(path string, suffix string) string {
 	path = strings.TrimSuffix(path, suffix)
 	path = strings.Trim(path, "/")

@@ -10,19 +10,19 @@ import (
 	"github.com/AlexWendland/games-site/protocol"
 )
 
-// AuthHandler handles authentication HTTP requests
+// AuthHandler handles authentication HTTP requests.
 type AuthHandler struct {
 	authService *auth.Service
 }
 
-// NewAuthHandler creates a new auth handler
+// NewAuthHandler creates a new auth handler.
 func NewAuthHandler(authService *auth.Service) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
 	}
 }
 
-// ServeHTTP routes auth requests to the appropriate handler
+// ServeHTTP routes auth requests to the appropriate handler.
 func (h *AuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 
@@ -46,7 +46,7 @@ func (h *AuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// HandleRegister handles user registration
+// HandleRegister handles user registration.
 func (h *AuthHandler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -56,36 +56,52 @@ func (h *AuthHandler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	var req protocol.RegisterRequestParams
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(protocol.ErrorResponse{
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
 			MessageType: protocol.MessageTypeError,
 			Parameters:  protocol.ErrorParameters{ErrorMessage: "Invalid request body"},
-		})
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
 		return
 	}
 
 	userID, err := h.authService.Register(req.Username, req.Password)
-	token, _, err := h.authService.Login(req.Username, req.Password)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(protocol.ErrorResponse{
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
 			MessageType: protocol.MessageTypeError,
 			Parameters:  protocol.ErrorParameters{ErrorMessage: err.Error()},
-		})
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
+		return
+	}
+
+	token, _, err := h.authService.Login(req.Username, req.Password)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
+			MessageType: protocol.MessageTypeError,
+			Parameters:  protocol.ErrorParameters{ErrorMessage: err.Error()},
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(protocol.Response{
+	if err := json.NewEncoder(w).Encode(protocol.Response{
 		MessageType: protocol.MessageTypeSimple,
 		Parameters: protocol.AuthResponseParams{
 			Token:  token,
 			UserID: userID,
 		},
-	})
+	}); err != nil {
+		slog.Error("Failed to encode response", "error", err)
+	}
 }
 
-// HandleLogin handles user login
+// HandleLogin handles user login.
 func (h *AuthHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -95,34 +111,40 @@ func (h *AuthHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	var req protocol.LoginRequestParams
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(protocol.ErrorResponse{
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
 			MessageType: protocol.MessageTypeError,
 			Parameters:  protocol.ErrorParameters{ErrorMessage: "Invalid request body"},
-		})
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
 		return
 	}
 
 	token, userID, err := h.authService.Login(req.Username, req.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(protocol.ErrorResponse{
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
 			MessageType: protocol.MessageTypeError,
 			Parameters:  protocol.ErrorParameters{ErrorMessage: "Invalid credentials"},
-		})
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(protocol.Response{
+	if err := json.NewEncoder(w).Encode(protocol.Response{
 		MessageType: protocol.MessageTypeSimple,
 		Parameters: protocol.AuthResponseParams{
 			Token:  token,
 			UserID: userID,
 		},
-	})
+	}); err != nil {
+		slog.Error("Failed to encode response", "error", err)
+	}
 }
 
-// HandleLogout handles user logout
+// HandleLogout handles user logout.
 func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -135,60 +157,72 @@ func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.authService.Logout(token)
+	if err := h.authService.Logout(token); err != nil {
+		slog.Error("Failed to logout", "error", err)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(protocol.SimpleResponse{
+	if err := json.NewEncoder(w).Encode(protocol.SimpleResponse{
 		MessageType: protocol.MessageTypeSimple,
 		Parameters:  protocol.SimpleParameters{Message: "logged out"},
-	})
+	}); err != nil {
+		slog.Error("Failed to encode response", "error", err)
+	}
 }
 
-// HandleMe returns current user info
+// HandleMe returns current user info.
 func (h *AuthHandler) HandleMe(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
 	if token == "" {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(protocol.ErrorResponse{
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
 			MessageType: protocol.MessageTypeError,
 			Parameters:  protocol.ErrorParameters{ErrorMessage: "No token provided"},
-		})
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
 		return
 	}
 
 	userID, err := h.authService.ValidateToken(token)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(protocol.ErrorResponse{
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
 			MessageType: protocol.MessageTypeError,
 			Parameters:  protocol.ErrorParameters{ErrorMessage: "Invalid token"},
-		})
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
 		return
 	}
 
 	user, err := h.authService.GetUser(userID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(protocol.ErrorResponse{
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
 			MessageType: protocol.MessageTypeError,
 			Parameters:  protocol.ErrorParameters{ErrorMessage: "User not found"},
-		})
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(protocol.Response{
+	if err := json.NewEncoder(w).Encode(protocol.Response{
 		MessageType: protocol.MessageTypeSimple,
 		Parameters: protocol.UserInfoResponseParams{
 			UserID:   user.ID,
 			Username: user.Username,
 		},
-	})
+	}); err != nil {
+		slog.Error("Failed to encode response", "error", err)
+	}
 }
 
 // HandleWSToken generates a short-lived WebSocket token
 // POST /auth/ws-token/{game_id}
-// Authorization: Bearer <token>
+// Authorization: Bearer <token>.
 func (h *AuthHandler) HandleWSToken(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -200,10 +234,12 @@ func (h *AuthHandler) HandleWSToken(w http.ResponseWriter, r *http.Request) {
 	if gameID == "" {
 		slog.Debug("WS token request rejected - missing game_id in path")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(protocol.ErrorResponse{
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
 			MessageType: protocol.MessageTypeError,
 			Parameters:  protocol.ErrorParameters{ErrorMessage: "Missing game_id in URL path"},
-		})
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
 		return
 	}
 
@@ -212,10 +248,12 @@ func (h *AuthHandler) HandleWSToken(w http.ResponseWriter, r *http.Request) {
 	if authHeader == "" {
 		slog.Debug("WS token request rejected - missing authorization header", "game_id", gameID)
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(protocol.ErrorResponse{
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
 			MessageType: protocol.MessageTypeError,
 			Parameters:  protocol.ErrorParameters{ErrorMessage: "Missing authorization token"},
-		})
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
 		return
 	}
 
@@ -225,10 +263,12 @@ func (h *AuthHandler) HandleWSToken(w http.ResponseWriter, r *http.Request) {
 	} else {
 		slog.Debug("WS token request rejected - invalid authorization header format", "game_id", gameID)
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(protocol.ErrorResponse{
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
 			MessageType: protocol.MessageTypeError,
 			Parameters:  protocol.ErrorParameters{ErrorMessage: "Invalid authorization header format"},
-		})
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
 		return
 	}
 
@@ -238,10 +278,12 @@ func (h *AuthHandler) HandleWSToken(w http.ResponseWriter, r *http.Request) {
 			"game_id", gameID,
 			"error", err.Error())
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(protocol.ErrorResponse{
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
 			MessageType: protocol.MessageTypeError,
 			Parameters:  protocol.ErrorParameters{ErrorMessage: "Invalid or expired token"},
-		})
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
 		return
 	}
 
@@ -253,10 +295,12 @@ func (h *AuthHandler) HandleWSToken(w http.ResponseWriter, r *http.Request) {
 			"game_id", gameID,
 			"error", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(protocol.ErrorResponse{
+		if err := json.NewEncoder(w).Encode(protocol.ErrorResponse{
 			MessageType: protocol.MessageTypeError,
 			Parameters:  protocol.ErrorParameters{ErrorMessage: "Failed to generate WebSocket token"},
-		})
+		}); err != nil {
+			slog.Error("Failed to encode error response", "error", err)
+		}
 		return
 	}
 
@@ -265,15 +309,17 @@ func (h *AuthHandler) HandleWSToken(w http.ResponseWriter, r *http.Request) {
 		"game_id", gameID)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(protocol.Response{
+	if err := json.NewEncoder(w).Encode(protocol.Response{
 		MessageType: protocol.MessageTypeSimple,
 		Parameters: protocol.WSTokenResponseParams{
 			WSToken: wsToken,
 		},
-	})
+	}); err != nil {
+		slog.Error("Failed to encode response", "error", err)
+	}
 }
 
-// extractGameIDFromWSTokenPath extracts game ID from paths like /auth/ws-token/{game_id}
+// extractGameIDFromWSTokenPath extracts game ID from paths like /auth/ws-token/{game_id}.
 func extractGameIDFromWSTokenPath(path string) string {
 	path = strings.Trim(path, "/")
 	parts := strings.Split(path, "/")

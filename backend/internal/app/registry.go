@@ -10,20 +10,20 @@ import (
 )
 
 // Registry manages multiple game sessions by ID
-// Thread-safe for concurrent access from HTTP handlers
+// Thread-safe for concurrent access from HTTP handlers.
 type Registry struct {
 	sessions map[string]*GameSession
 	mu       sync.RWMutex
 }
 
-// NewRegistry creates a new session registry
+// NewRegistry creates a new session registry.
 func NewRegistry() *Registry {
 	return &Registry{
 		sessions: make(map[string]*GameSession),
 	}
 }
 
-// Retrieves an existing game session (returns error if not found)
+// Retrieves an existing game session (returns error if not found).
 func (r *Registry) Get(gameID string) (*GameSession, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -38,7 +38,7 @@ func (r *Registry) Get(gameID string) (*GameSession, error) {
 
 // Creates a new game session with the given ID and game
 // Returns error if session already exists
-// Automatically starts the session's event loop
+// Automatically starts the session's event loop.
 func (r *Registry) Create(gameID string, game domain.Game, playerMapping domain.PlayerMapping, logger *slog.Logger) (*GameSession, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -69,7 +69,7 @@ func (r *Registry) Remove(gameID string) {
 }
 
 // GenerateUniqueGameID generates a unique 5-letter game ID
-// Retries if the generated ID already exists
+// Retries if the generated ID already exists.
 func (r *Registry) GenerateUniqueGameID() string {
 	const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	const idLength = 5
@@ -80,7 +80,9 @@ func (r *Registry) GenerateUniqueGameID() string {
 	for {
 		// Generate random 5-letter code
 		bytes := make([]byte, idLength)
-		rand.Read(bytes)
+		if _, err := rand.Read(bytes); err != nil {
+			panic(fmt.Sprintf("failed to generate random bytes: %v", err))
+		}
 
 		gameID := make([]byte, idLength)
 		for i := 0; i < idLength; i++ {

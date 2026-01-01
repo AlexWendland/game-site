@@ -34,7 +34,7 @@ func NewTicTacToeGame(logger *slog.Logger) *TicTacToeGame {
 	return game
 }
 
-// HandleAction processes a player action
+// HandleAction processes a player action.
 func (g *TicTacToeGame) HandleAction(playerPosition int, message protocol.Request) *protocol.ErrorResponse {
 	g.logger.Debug("Handling action",
 		"player_position", playerPosition,
@@ -86,7 +86,7 @@ func (g *TicTacToeGame) HandleAction(playerPosition int, message protocol.Reques
 	return g.makeMove(playerPosition, position)
 }
 
-// makeMove performs the actual move
+// makeMove performs the actual move.
 func (g *TicTacToeGame) makeMove(playerPosition int, position int) *protocol.ErrorResponse {
 	g.logger.Debug("Attempting move",
 		"player_position", playerPosition,
@@ -161,7 +161,7 @@ func (g *TicTacToeGame) makeMove(playerPosition int, position int) *protocol.Err
 	return nil
 }
 
-// checkWinner checks if there's a winner and updates game state
+// checkWinner checks if there's a winner and updates game state.
 func (g *TicTacToeGame) checkWinner() {
 	winningLine := CheckWinner(g.board)
 	if winningLine != nil {
@@ -175,7 +175,7 @@ func (g *TicTacToeGame) checkWinner() {
 	}
 }
 
-// GetStateForAll returns game state for all players
+// GetStateForAll returns game state for all players.
 func (g *TicTacToeGame) GetStateForAll() []domain.StateMessage {
 	return []domain.StateMessage{
 		{
@@ -192,7 +192,7 @@ func (g *TicTacToeGame) GetStateForAll() []domain.StateMessage {
 	}
 }
 
-// IsComplete returns true if the game has ended
+// IsComplete returns true if the game has ended.
 func (g *TicTacToeGame) IsComplete() bool {
 	// Game is complete if there's a winner or board is full
 	if g.winner != nil {
@@ -209,12 +209,12 @@ func (g *TicTacToeGame) IsComplete() bool {
 	return true
 }
 
-// GameType returns the game type identifier
+// GameType returns the game type identifier.
 func (g *TicTacToeGame) GameType() string {
 	return "tictactoe"
 }
 
-// AITypes returns all valid AI types for this game
+// AITypes returns all valid AI types for this game.
 func (g *TicTacToeGame) AITypes() map[string]string {
 	// TODO: Implement AI types when AI is added
 	return map[string]string{
@@ -224,7 +224,7 @@ func (g *TicTacToeGame) AITypes() map[string]string {
 	}
 }
 
-// GetMetadata returns the game metadata
+// GetMetadata returns the game metadata.
 func (g *TicTacToeGame) GetMetadata() any {
 	return protocol.TicTacToeMetadata{
 		GameType:   "tictactoe",

@@ -1,8 +1,9 @@
 package player_mapping
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"strings"
 	"time"
 
@@ -20,7 +21,7 @@ type PlayerSlot struct {
 	AIType      string
 }
 
-// PlayerPositionMapping implements domain.PlayerMapping for position-based games
+// PlayerPositionMapping implements domain.PlayerMapping for position-based games.
 type PlayerPositionMapping struct {
 	maxPlayers  int
 	slots       map[int]*PlayerSlot // position -> slot info
@@ -28,7 +29,7 @@ type PlayerPositionMapping struct {
 	userService domain.UserService  // For looking up display names
 }
 
-// NewPlayerPositionMapping creates a new position-based player mapping
+// NewPlayerPositionMapping creates a new position-based player mapping.
 func NewPlayerPositionMapping(maxPlayers int, userService domain.UserService) domain.PlayerMapping {
 	return &PlayerPositionMapping{
 		maxPlayers:  maxPlayers,
@@ -38,7 +39,7 @@ func NewPlayerPositionMapping(maxPlayers int, userService domain.UserService) do
 	}
 }
 
-// HandleSessionEvent processes session-related requests
+// HandleSessionEvent processes session-related requests.
 func (m *PlayerPositionMapping) HandleSessionEvent(userID string, request protocol.Request) error {
 	switch request.FunctionName {
 	case "join_position":
@@ -74,19 +75,19 @@ func (m *PlayerPositionMapping) HandleSessionEvent(userID string, request protoc
 	}
 }
 
-// GetPlayerPosition returns the position for a given userID
+// GetPlayerPosition returns the position for a given userID.
 func (m *PlayerPositionMapping) GetPlayerPosition(userID string) (int, bool) {
 	pos, ok := m.userToPos[userID]
 	return pos, ok
 }
 
-// GetSessionStateForPlayer returns session state with the user's position filled in
+// GetSessionStateForPlayer returns session state with the user's position filled in.
 func (m *PlayerPositionMapping) GetSessionStateForPlayer(userID string) protocol.SessionStateResponse {
 	state := m.buildSessionState()
 	return state
 }
 
-// GetSessionStateForAll returns session state for broadcast (no specific user position)
+// GetSessionStateForAll returns session state for broadcast (no specific user position).
 func (m *PlayerPositionMapping) GetSessionStateForAll() []domain.StateMessage {
 	state := m.buildSessionState()
 	return []domain.StateMessage{
@@ -100,7 +101,7 @@ func (m *PlayerPositionMapping) GetSessionStateForAll() []domain.StateMessage {
 	}
 }
 
-// buildSessionState constructs the session state from current slots
+// buildSessionState constructs the session state from current slots.
 func (m *PlayerPositionMapping) buildSessionState() protocol.SessionStateResponse {
 	playerPositions := make(map[int]*protocol.PlayerInfo)
 
@@ -132,7 +133,7 @@ func (m *PlayerPositionMapping) buildSessionState() protocol.SessionStateRespons
 	}
 }
 
-// joinPosition adds a player to a specific position
+// joinPosition adds a player to a specific position.
 func (m *PlayerPositionMapping) joinPosition(userID string, position int) error {
 	// Validate position
 	if position < 0 || position >= m.maxPlayers {
@@ -173,7 +174,7 @@ func (m *PlayerPositionMapping) joinPosition(userID string, position int) error 
 	return nil
 }
 
-// leavePosition removes a player from their position
+// leavePosition removes a player from their position.
 func (m *PlayerPositionMapping) leavePosition(userID string) error {
 	// Check if user has a position
 	position, ok := m.userToPos[userID]
@@ -188,7 +189,7 @@ func (m *PlayerPositionMapping) leavePosition(userID string) error {
 	return nil
 }
 
-// addAI adds an AI player to a specific position
+// addAI adds an AI player to a specific position.
 func (m *PlayerPositionMapping) addAI(position int, aiType string) error {
 	// Validate position
 	if position < 0 || position >= m.maxPlayers {
@@ -219,7 +220,7 @@ func (m *PlayerPositionMapping) addAI(position int, aiType string) error {
 }
 
 // generateAIName generates a random AI name following the pattern "AI-{name}"
-// Uses names from the constants list, avoiding names already in use
+// Uses names from the constants list, avoiding names already in use.
 func (m *PlayerPositionMapping) generateAIName() string {
 	const aiPrefix = "AI-"
 
@@ -246,11 +247,16 @@ func (m *PlayerPositionMapping) generateAIName() string {
 	}
 
 	// Pick a random available name
-	randomName := availableNames[rand.Intn(len(availableNames))]
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(availableNames))))
+	if err != nil {
+		// Fallback to first available name if random generation fails
+		return aiPrefix + availableNames[0]
+	}
+	randomName := availableNames[n.Int64()]
 	return aiPrefix + randomName
 }
 
-// removeAI removes an AI player from a specific position
+// removeAI removes an AI player from a specific position.
 func (m *PlayerPositionMapping) removeAI(position int) error {
 	// Validate position
 	if position < 0 || position >= m.maxPlayers {
@@ -273,7 +279,7 @@ func (m *PlayerPositionMapping) removeAI(position int) error {
 	return nil
 }
 
-// MarkConnected marks a player as connected
+// MarkConnected marks a player as connected.
 func (m *PlayerPositionMapping) MarkConnected(userID string) {
 	if pos, ok := m.userToPos[userID]; ok {
 		if slot := m.slots[pos]; slot != nil {
@@ -283,7 +289,7 @@ func (m *PlayerPositionMapping) MarkConnected(userID string) {
 	}
 }
 
-// MarkDisconnected marks a player as disconnected
+// MarkDisconnected marks a player as disconnected.
 func (m *PlayerPositionMapping) MarkDisconnected(userID string) {
 	if pos, ok := m.userToPos[userID]; ok {
 		if slot := m.slots[pos]; slot != nil {

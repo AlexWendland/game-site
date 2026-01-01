@@ -1,6 +1,6 @@
 package constants
 
-// AINames is the list of names used for AI players
+// AINames is the list of names used for AI players.
 var AINames = []string{
 	"Asha",
 	"Lila",

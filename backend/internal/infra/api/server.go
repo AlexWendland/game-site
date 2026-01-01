@@ -3,12 +3,13 @@ package api
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/AlexWendland/games-site/internal/app"
 	"github.com/AlexWendland/games-site/internal/infra/auth"
 )
 
-// corsMiddleware adds CORS headers to allow requests from the Next.js dev server
+// corsMiddleware adds CORS headers to allow requests from the Next.js dev server.
 func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Allow requests from Next.js dev server
@@ -27,7 +28,7 @@ func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// Server wraps the HTTP server configuration
+// Server wraps the HTTP server configuration.
 type Server struct {
 	addr        string
 	registry    *app.Registry
@@ -36,7 +37,7 @@ type Server struct {
 	production  bool
 }
 
-// NewServer creates a new HTTP server
+// NewServer creates a new HTTP server.
 func NewServer(addr string, registry *app.Registry, authService *auth.Service, staticPath string, production bool) *Server {
 	return &Server{
 		addr:        addr,
@@ -47,7 +48,7 @@ func NewServer(addr string, registry *app.Registry, authService *auth.Service, s
 	}
 }
 
-// Run starts the HTTP server (blocking)
+// Run starts the HTTP server (blocking).
 func (s *Server) Run() error {
 	// Helper function to conditionally apply CORS middleware
 	maybeWithCORS := func(handler http.HandlerFunc) http.HandlerFunc {
@@ -81,5 +82,14 @@ func (s *Server) Run() error {
 		log.Printf("CORS enabled for: http://localhost:3000")
 	}
 
-	return http.ListenAndServe(s.addr, nil)
+	// Create server with timeouts for security
+	server := &http.Server{
+		Addr:         s.addr,
+		Handler:      nil, // Uses DefaultServeMux
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
+	return server.ListenAndServe()
 }

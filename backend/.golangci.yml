@@ -1,0 +1,82 @@
+version: 2
+
+run:
+  timeout: 5m
+  tests: true
+  skip-dirs:
+    - vendor
+
+output:
+  sort-results: true
+
+linters:
+  enable:
+    # Enabled by default
+    - errcheck      # Check for unchecked errors
+    - govet         # Examines Go source code and reports suspicious constructs
+    - ineffassign   # Detect ineffectual assignments
+    - staticcheck   # Static analysis checks
+    - unused        # Check for unused constants, variables, functions and types
+
+    # Additional quality linters
+    - bodyclose     # Check HTTP response body is closed
+    - gocritic      # Opinionated Go source code checker
+    - gocyclo       # Computes cyclomatic complexity
+    - gosec         # Security checker
+    - misspell      # Find commonly misspelled English words
+    - unconvert     # Remove unnecessary type conversions
+    - unparam       # Report unused function parameters
+    - whitespace    # Detection of leading and trailing whitespace
+    - godot         # Check if comments end in a period
+    - nestif        # Reports deeply nested if statements
+    - errorlint     # Find code that can cause problems with error wrapping
+    - nilerr        # Find code that returns nil even if it checks error is not nil
+    - sqlclosecheck # Check sql.Rows and sql.Stmt are closed
+    - noctx         # Detects missing usage of context.Context
+    - prealloc      # Find slice declarations that could be pre-allocated
+  disable:
+    - revive        # Disabled - documentation requirements too strict
+
+linters-settings:
+  errcheck:
+    check-blank: true
+    check-type-assertions: true
+
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment  # Not critical for most cases
+      - shadow         # Can be too noisy
+
+  gocyclo:
+    min-complexity: 15
+
+  nestif:
+    min-complexity: 4
+
+  gosec:
+    excludes:
+      - G104  # Duplicates errcheck
+
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - style
+      - performance
+    disabled-checks:
+      - unnamedResult
+      - hugeParam
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+  exclude-rules:
+    # Exclude some linters from running on test files
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - gosec
+        - funlen

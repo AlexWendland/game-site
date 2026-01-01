@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Service handles user authentication
+// Service handles user authentication.
 type Service struct {
 	usersByUsername map[string]*User        // username → User
 	usersByID       map[string]*User        // userID → User
@@ -19,14 +19,14 @@ type Service struct {
 	mu              sync.RWMutex
 }
 
-// User represents a registered user
+// User represents a registered user.
 type User struct {
 	ID           string
 	Username     string
 	PasswordHash string
 }
 
-// WSTokenData represents a WebSocket token with metadata
+// WSTokenData represents a WebSocket token with metadata.
 type WSTokenData struct {
 	UserID    string
 	GameID    string
@@ -34,7 +34,7 @@ type WSTokenData struct {
 	Used      bool
 }
 
-// NewService creates a new auth service
+// NewService creates a new auth service.
 func NewService() *Service {
 	return &Service{
 		usersByUsername: make(map[string]*User),
@@ -44,7 +44,7 @@ func NewService() *Service {
 	}
 }
 
-// Register creates a new user account
+// Register creates a new user account.
 func (s *Service) Register(username, password string) (userID string, err error) {
 	if username == "" || password == "" {
 		return "", fmt.Errorf("username and password required")
@@ -81,7 +81,7 @@ func (s *Service) Register(username, password string) (userID string, err error)
 	return userID, nil
 }
 
-// Login authenticates a user and returns a session token
+// Login authenticates a user and returns a session token.
 func (s *Service) Login(username, password string) (token, userID string, err error) {
 	s.mu.RLock()
 	user, exists := s.usersByUsername[username]
@@ -110,7 +110,7 @@ func (s *Service) Login(username, password string) (token, userID string, err er
 	return token, user.ID, nil
 }
 
-// ValidateToken checks if a token is valid and returns the associated userID
+// ValidateToken checks if a token is valid and returns the associated userID.
 func (s *Service) ValidateToken(token string) (userID string, err error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -123,7 +123,7 @@ func (s *Service) ValidateToken(token string) (userID string, err error) {
 	return userID, nil
 }
 
-// Logout invalidates a session token
+// Logout invalidates a session token.
 func (s *Service) Logout(token string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -132,7 +132,7 @@ func (s *Service) Logout(token string) error {
 	return nil
 }
 
-// GetUser returns user info by userID
+// GetUser returns user info by userID.
 func (s *Service) GetUser(userID string) (*User, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -147,7 +147,7 @@ func (s *Service) GetUser(userID string) (*User, error) {
 
 // GetDisplayName returns the display name for a userID
 // This implements the domain.UserService interface
-// For now, we use the username as the display name
+// For now, we use the username as the display name.
 func (s *Service) GetDisplayName(userID string) (string, error) {
 	user, err := s.GetUser(userID)
 	if err != nil {
@@ -159,7 +159,7 @@ func (s *Service) GetDisplayName(userID string) (string, error) {
 }
 
 // GenerateWSToken creates a short-lived WebSocket token for a specific user and game
-// The token expires in 10 seconds and is single-use
+// The token expires in 10 seconds and is single-use.
 func (s *Service) GenerateWSToken(userID, gameID string) (string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -171,16 +171,16 @@ func (s *Service) GenerateWSToken(userID, gameID string) (string, error) {
 
 	// Generate unique token
 	var token string
-	exists := true
-	for exists {
+	for {
 		token = "ws-" + generateToken()
 		currentToken, exists := s.wsTokens[token]
-		if exists {
-			if currentToken.Used || currentToken.ExpiresAt.Before(time.Now()) {
-				// Token expired so delete it
-				delete(s.wsTokens, token)
-				exists = false
-			}
+		if !exists {
+			break
+		}
+		if currentToken.Used || currentToken.ExpiresAt.Before(time.Now()) {
+			// Token expired so delete it and use this token
+			delete(s.wsTokens, token)
+			break
 		}
 	}
 
@@ -197,7 +197,7 @@ func (s *Service) GenerateWSToken(userID, gameID string) (string, error) {
 
 // ValidateWSToken validates a WebSocket token for a specific game
 // The token is consumed (single-use) and deleted after validation
-// Returns the userID if valid, or an error if invalid/expired/wrong game
+// Returns the userID if valid, or an error if invalid/expired/wrong game.
 func (s *Service) ValidateWSToken(token string, expectedGameID string) (userID string, err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -234,12 +234,16 @@ func (s *Service) ValidateWSToken(token string, expectedGameID string) (userID s
 
 func generateToken() string {
 	bytes := make([]byte, 32)
-	rand.Read(bytes)
+	if _, err := rand.Read(bytes); err != nil {
+		panic(fmt.Sprintf("failed to generate random bytes: %v", err))
+	}
 	return hex.EncodeToString(bytes)
 }
 
 func generateID() string {
 	bytes := make([]byte, 16)
-	rand.Read(bytes)
+	if _, err := rand.Read(bytes); err != nil {
+		panic(fmt.Sprintf("failed to generate random bytes: %v", err))
+	}
 	return "user-" + hex.EncodeToString(bytes)
 }

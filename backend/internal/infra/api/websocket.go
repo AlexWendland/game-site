@@ -13,7 +13,7 @@ import (
 	"github.com/coder/websocket"
 )
 
-// WebSocketHandler handles WebSocket connections using a registry
+// WebSocketHandler handles WebSocket connections using a registry.
 type WebSocketHandler struct {
 	registry    *app.Registry
 	authService interface {
@@ -23,7 +23,7 @@ type WebSocketHandler struct {
 	production bool
 }
 
-// NewWebSocketHandler creates a new WebSocket handler
+// NewWebSocketHandler creates a new WebSocket handler.
 func NewWebSocketHandler(registry *app.Registry, authService interface {
 	ValidateToken(token string) (userID string, err error)
 	ValidateWSToken(token string, expectedGameID string) (userID string, err error)
@@ -37,7 +37,7 @@ func NewWebSocketHandler(registry *app.Registry, authService interface {
 
 // ServeHTTP handles incoming WebSocket connections
 // Expects URL pattern: /ws/game/{game_id}?token=xxx
-// Token can be either a WebSocket token (from /auth/ws-token) or a regular auth token (legacy)
+// Token can be either a WebSocket token (from /auth/ws-token) or a regular auth token (legacy).
 func (h *WebSocketHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	// Extract game_id from URL path: /ws/game/{game_id}
 	gameID := extractGameID(request.URL.Path)
@@ -102,7 +102,11 @@ func (h *WebSocketHandler) ServeHTTP(writer http.ResponseWriter, request *http.R
 		logger.Error("Failed to accept WebSocket connection", "error", err.Error())
 		return
 	}
-	defer conn.Close(websocket.StatusNormalClosure, "Connection closed")
+	defer func() {
+		if err := conn.Close(websocket.StatusNormalClosure, "Connection closed"); err != nil {
+			logger.Debug("Error closing WebSocket connection", "error", err.Error())
+		}
+	}()
 
 	logger.Info("WebSocket connection established")
 
@@ -117,7 +121,7 @@ func (h *WebSocketHandler) ServeHTTP(writer http.ResponseWriter, request *http.R
 }
 
 // extractGameID parses the game ID from the URL path
-// Expected format: /ws/game/{game_id}
+// Expected format: /ws/game/{game_id}.
 func extractGameID(path string) string {
 	// Remove leading/trailing slashes
 	path = strings.Trim(path, "/")

@@ -8,7 +8,7 @@ import (
 )
 
 // GameSession is an actor that manages a single game instance
-// It owns the game state and processes actions sequentially via channels
+// It owns the game state and processes actions sequentially via channels.
 type GameSession struct {
 	gameID        string
 	game          domain.Game
@@ -20,7 +20,7 @@ type GameSession struct {
 	logger        *slog.Logger
 }
 
-// NewGameSession creates a new game session
+// NewGameSession creates a new game session.
 func NewGameSession(gameID string, game domain.Game, playerMapping domain.PlayerMapping, logger *slog.Logger) *GameSession {
 	return &GameSession{
 		gameID:        gameID,
@@ -35,7 +35,7 @@ func NewGameSession(gameID string, game domain.Game, playerMapping domain.Player
 }
 
 // Run starts the game session's event loop (should be run in a goroutine)
-// This is the single-owner actor pattern - only this goroutine touches game state
+// This is the single-owner actor pattern - only this goroutine touches game state.
 func (s *GameSession) Run() {
 	// Close the done channel when the game session is over.
 	defer close(s.done)
@@ -54,7 +54,7 @@ func (s *GameSession) Run() {
 	}
 }
 
-// handleAction processes a player action
+// handleAction processes a player action.
 func (s *GameSession) handleAction(msg domain.ActionMessage) {
 	s.logger.Debug("Action received",
 		"player_id", msg.PlayerID,
@@ -191,7 +191,7 @@ func (s *GameSession) handleGameMessage(msg domain.ActionMessage) {
 	}
 }
 
-// sendError sends an error message to a specific player
+// sendError sends an error message to a specific player.
 func (s *GameSession) sendError(playerID string, errorMessage string) {
 	s.logger.Debug("Sending error to player",
 		"player_id", playerID,
@@ -221,12 +221,12 @@ func (s *GameSession) Shutdown() {
 	<-s.done // Wait for goroutine to finish
 }
 
-// GetMetadata returns the game metadata
+// GetMetadata returns the game metadata.
 func (s *GameSession) GetMetadata() any {
 	return s.game.GetMetadata()
 }
 
-// AITypes returns all valid AI types as a list
+// AITypes returns all valid AI types as a list.
 func (s *GameSession) AITypes() map[string]string {
 	return s.game.AITypes()
 }
