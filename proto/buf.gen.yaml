@@ -1,0 +1,18 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/AlexWendland/games-site/proto/gen/go
+plugins:
+  # Generate Go code
+  - remote: buf.build/protocolbuffers/go
+    out: ../backend/proto/gen
+    opt:
+      - paths=source_relative
+
+  # Generate TypeScript code
+  - remote: buf.build/bufbuild/es
+    out: ../frontend/proto/gen
+    opt:
+      - target=ts

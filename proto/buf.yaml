@@ -1,0 +1,14 @@
+version: v2
+modules:
+  - path: .
+lint:
+  use:
+    - STANDARD
+  except:
+    - PACKAGE_DIRECTORY_MATCH
+    - PACKAGE_SAME_DIRECTORY
+    - PACKAGE_VERSION_SUFFIX
+    - DIRECTORY_SAME_PACKAGE  # Allow multiple packages in same directory
+breaking:
+  use:
+    - FILE

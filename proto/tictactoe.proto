@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package gamessite.tictactoe;
+
+import "common.proto";
+
+option go_package = "github.com/AlexWendland/games-site/proto/gen/go/tictactoe;tictactoe";
+
+// TicTacToe game state sent from server to client
+message TicTacToeGameState{
+  repeated int32 board = 1;  // 9 elements: move numbers (-1 = empty, 0+ = move number)
+  optional int32 winner = 2;  // Player number who won (0 or 1), null if no winner
+  repeated int32 winning_line = 3;  // Board positions that form the winning line (empty if no winner)
+}
+
+// Client requests to make a move
+message MakeMoveRequest {
+  int32 position = 1;  // Board position 0-8
+}
+
+// TicTacToe model types
+enum TicTacToeModel{
+  TIC_TAC_TOE_MODEL_UNSPECIFIED = 0;
+  TIC_TAC_TOE_MODEL_EASY = 1;
+  TIC_TAC_TOE_MODEL_MEDIUM = 2;
+  TIC_TAC_TOE_MODEL_HARD = 3;
+}
+
+// Client requests to add an AI player in a particular position
+message TicTacToeAddAIPlayerInPositionRequest {
+  int32 position = 1;          // Player position (0 or 1)
+  TicTacToeModel model = 2;    // AI model type
+}
+
+message ClientTicTacToeWebsocketMessage {
+  oneof message {
+    MakeMoveRequest make_move = 1;
+    gamessite.SetPlayerPositionRequest set_player_position = 2;
+    gamessite.LeavePlayerPositionRequest leave_player_position = 3;
+    TicTacToeAddAIPlayerInPositionRequest add_ai_player = 4;
+    gamessite.RemoveAIPlayerInPositionRequest remove_ai_player = 5;
+  }
+}
+
+message ServerTicTacToeWebsocketMessage {
+  oneof message {
+    TicTacToeGameState game_state = 1;
+    gamessite.PositionSessionStateResponse session_state = 2;
+    gamessite.ErrorResponse error = 3;
+    gamessite.SimpleResponse simple_response = 4;
+  }
+}
+// Test comment for hook validation - adding more to trigger change

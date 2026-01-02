@@ -12,6 +12,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "^2.10.2",
     "@tailwindcss/postcss": "^4.1.11",
     "clsx": "2.1.1",
     "framer-motion": "^11.18.2",

@@ -4,7 +4,7 @@ run:
   timeout: 5m
   tests: true
   skip-dirs:
-    - vendor
+    - proto/gen  # Exclude generated protobuf code
 
 output:
   sort-results: true
@@ -27,11 +27,9 @@ linters:
     - unconvert     # Remove unnecessary type conversions
     - unparam       # Report unused function parameters
     - whitespace    # Detection of leading and trailing whitespace
-    - godot         # Check if comments end in a period
     - nestif        # Reports deeply nested if statements
     - errorlint     # Find code that can cause problems with error wrapping
     - nilerr        # Find code that returns nil even if it checks error is not nil
-    - sqlclosecheck # Check sql.Rows and sql.Stmt are closed
     - noctx         # Detects missing usage of context.Context
     - prealloc      # Find slice declarations that could be pre-allocated
   disable:

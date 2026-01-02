@@ -4,10 +4,17 @@
     pkgs.pre-commit
     pkgs.docker
     pkgs.golangci-lint
+    pkgs.buf
   ];
 
   scripts.back-up.exec = ''
     cd backend && go run ./cmd/server
+  '';
+
+  scripts.proto-gen.exec = ''
+    cd proto && buf generate
+    echo "✓ Generated Go types in backend/proto/gen/"
+    echo "✓ Generated TypeScript types in frontend/proto/gen/"
   '';
 
   languages.go = {
@@ -83,6 +90,22 @@
       enable = true;
       name = "go test";
       entry = "bash -c 'cd backend && go test ./...'";
+      pass_filenames = false;
+      always_run = true;
+    };
+
+    # Proto hooks
+    buf-lint = {
+      enable = true;
+      name = "Buf Lint";
+      entry = "bash -c 'cd proto && buf lint'";
+      pass_filenames = false;
+      always_run = true;
+    };
+    buf-generate-check = {
+      enable = true;
+      name = "Buf Generate Check";
+      entry = "bash -c 'cd proto && buf generate && git diff --exit-code ../backend/proto/gen ../frontend/proto/gen'";
       pass_filenames = false;
       always_run = true;
     };

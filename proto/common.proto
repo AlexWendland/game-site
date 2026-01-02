@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package gamessite;
+
+option go_package = "github.com/AlexWendland/games-site/proto/gen/go;gamessite";
+
+// PlayerInfo contains information about a player in a session
+message PlayerInfo {
+  string user_id = 1;       // For AI this is the AI type
+  string display_name = 2;  // Display name for the player
+  bool is_ai = 3;           // Whether this is an AI player
+}
+
+// ErrorResponse is sent when an error occurs
+message ErrorResponse {
+  string error_message = 1;
+}
+
+// SimpleResponse is sent for simple text messages
+message SimpleResponse {
+  string message = 1;
+}
+
+// --- Position-based state management ---
+
+// PositionSessionStateResponse contains the current lobby/session state for position based state management.
+message PositionSessionStateResponse {
+  map<int32, PlayerInfo> player_positions = 1;  // position -> player info
+}
+
+// Client requests to set their player position
+message SetPlayerPositionRequest {
+  int32 position = 1;  // Player position (0 or 1)
+}
+
+// Client requests to leave their current position
+message LeavePlayerPositionRequest {
+  // No parameters needed
+}
+
+// Client requests to remove an AI player
+message RemoveAIPlayerInPositionRequest {
+  int32 position = 1;  // Player position (0 or 1)
+}
