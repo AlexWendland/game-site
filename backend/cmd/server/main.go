@@ -5,9 +5,9 @@ import (
 	"log"
 	"log/slog"
 
-	"github.com/AlexWendland/games-site/internal/app"
-	"github.com/AlexWendland/games-site/internal/infra/api"
-	"github.com/AlexWendland/games-site/internal/infra/auth"
+	"github.com/AlexWendland/games-site/backend/internal"
+	"github.com/AlexWendland/games-site/backend/internal/api"
+	"github.com/AlexWendland/games-site/backend/internal/auth"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 	flag.Parse()
 
 	// Create session registry
-	registry := app.NewRegistry()
+	registry := internal.NewRegistry()
 
 	// Create auth service
 	authService := auth.NewService()
@@ -29,7 +29,6 @@ func main() {
 	} else {
 		staticPath = ""
 		log.Println("Running in development mode - static files NOT served")
-		log.Println("Start Next.js dev server separately: cd frontend && npm run dev")
 	}
 
 	// Set up logging

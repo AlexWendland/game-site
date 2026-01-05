@@ -2,36 +2,27 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"strings"
 
-	"github.com/AlexWendland/games-site/internal/app"
-	"github.com/AlexWendland/games-site/internal/domain"
-	"github.com/AlexWendland/games-site/protocol"
+	"github.com/AlexWendland/games-site/backend/internal"
 	"github.com/coder/websocket"
 )
 
 // WebSocketHandler handles WebSocket connections using a registry.
 type WebSocketHandler struct {
-	registry    *app.Registry
-	authService interface {
-		ValidateToken(token string) (userID string, err error)
-		ValidateWSToken(token string, expectedGameID string) (userID string, err error)
-	}
-	production bool
+	registry         *internal.Registry
+	tokenAuthService internal.TokenAuthService
+	production       bool
 }
 
 // NewWebSocketHandler creates a new WebSocket handler.
-func NewWebSocketHandler(registry *app.Registry, authService interface {
-	ValidateToken(token string) (userID string, err error)
-	ValidateWSToken(token string, expectedGameID string) (userID string, err error)
-}, production bool) *WebSocketHandler {
+func NewWebSocketHandler(registry *internal.Registry, tokenAuthService internal.TokenAuthService, production bool) *WebSocketHandler {
 	return &WebSocketHandler{
-		registry:    registry,
-		authService: authService,
-		production:  production,
+		registry:         registry,
+		tokenAuthService: tokenAuthService,
+		production:       production,
 	}
 }
 
@@ -39,7 +30,6 @@ func NewWebSocketHandler(registry *app.Registry, authService interface {
 // Expects URL pattern: /ws/game/{game_id}?token=xxx
 // Token can be either a WebSocket token (from /auth/ws-token) or a regular auth token (legacy).
 func (h *WebSocketHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	// Extract game_id from URL path: /ws/game/{game_id}
 	gameID := extractGameID(request.URL.Path)
 	if gameID == "" {
 		slog.Debug("WebSocket connection rejected - invalid game ID", "url", request.URL.String())
@@ -47,7 +37,6 @@ func (h *WebSocketHandler) ServeHTTP(writer http.ResponseWriter, request *http.R
 		return
 	}
 
-	// Authenticate user via token
 	token := request.URL.Query().Get("token")
 	if token == "" {
 		slog.Debug("WebSocket connection rejected - missing token",
@@ -57,11 +46,7 @@ func (h *WebSocketHandler) ServeHTTP(writer http.ResponseWriter, request *http.R
 		return
 	}
 
-	var userID string
-	var err error
-
-	// Validate WebSocket token (service handles gameID verification)
-	userID, err = h.authService.ValidateWSToken(token, gameID)
+	userID, err := h.tokenAuthService.ValidateWSToken(token, gameID)
 	if err != nil {
 		slog.Debug("WebSocket connection rejected - invalid WS token",
 			"game_id", gameID,
@@ -83,7 +68,6 @@ func (h *WebSocketHandler) ServeHTTP(writer http.ResponseWriter, request *http.R
 		return
 	}
 
-	// Create logger with WebSocket connection context
 	logger := slog.With(
 		"game_id", gameID,
 		"user_id", userID,
@@ -96,7 +80,6 @@ func (h *WebSocketHandler) ServeHTTP(writer http.ResponseWriter, request *http.R
 	acceptOptions := &websocket.AcceptOptions{
 		InsecureSkipVerify: !h.production,
 	}
-
 	conn, err := websocket.Accept(writer, request, acceptOptions)
 	if err != nil {
 		logger.Error("Failed to accept WebSocket connection", "error", err.Error())
@@ -137,10 +120,10 @@ func extractGameID(path string) string {
 	return ""
 }
 
-func (h *WebSocketHandler) readLoop(ctx context.Context, conn *websocket.Conn, gameSession *app.GameSession, userID string, logger *slog.Logger) {
+func (h *WebSocketHandler) readLoop(ctx context.Context, conn *websocket.Conn, gameExecutor internal.GameExecutor, userID string, logger *slog.Logger) {
 	logger.Debug("Read loop started")
 	for {
-		// msg will be a JSON string
+		// Read raw message from WebSocket
 		_, msg, err := conn.Read(ctx)
 
 		if err != nil {
@@ -150,55 +133,30 @@ func (h *WebSocketHandler) readLoop(ctx context.Context, conn *websocket.Conn, g
 
 		logger.Debug("WebSocket message received", "raw_message", string(msg))
 
-		// Parse msg into Request
-		var req protocol.Request
-		if err := json.Unmarshal(msg, &req); err != nil {
-			logger.Warn("Failed to parse WebSocket message",
-				"error", err.Error(),
-				"raw_message", string(msg))
-			// Send error response back to client
-			continue
-		}
-
-		logger.Debug("Sending action to game session",
-			"request_type", req.RequestType,
-			"function", req.FunctionName)
-
-		gameSession.ActionChannel() <- domain.ActionMessage{
-			PlayerID: userID,
-			Request:  req,
+		gameExecutor.ActionChannel() <- internal.TaggedMessage{
+			UserID:     userID,
+			RawMessage: msg,
 		}
 	}
 }
 
-func (h *WebSocketHandler) writeLoop(ctx context.Context, conn *websocket.Conn, gameSession *app.GameSession, userID string, logger *slog.Logger) {
+func (h *WebSocketHandler) writeLoop(ctx context.Context, conn *websocket.Conn, gameExecutor internal.GameExecutor, userID string, logger *slog.Logger) {
 	logger.Debug("Write loop started")
 	for {
 		select {
 		case <-ctx.Done():
 			logger.Debug("Write loop ended - context done")
 			return
-		case stateMsg := <-gameSession.OutgoingChannel():
+		case stateMsg := <-gameExecutor.OutgoingChannel():
 			logger.Debug("State message received from game session",
-				"target_player_id", stateMsg.PlayerID,
-				"message_type", stateMsg.Response.MessageType)
+				"target_player_id", stateMsg.UserID)
 
-			if stateMsg.PlayerID == "" || stateMsg.PlayerID == userID {
-				// Marshal response to JSON
-				responseJSON, err := json.Marshal(stateMsg.Response)
-				if err != nil {
-					logger.Warn("Failed to marshal response",
-						"error", err.Error(),
-						"message_type", stateMsg.Response.MessageType)
-					// Skip malformed responses
-					continue
-				}
-
+			if stateMsg.UserID == "" || stateMsg.UserID == userID {
 				logger.Debug("Sending message to WebSocket client",
-					"message_type", stateMsg.Response.MessageType,
-					"message", string(responseJSON))
+					"message", string(stateMsg.RawMessage))
 
-				if err := conn.Write(ctx, websocket.MessageText, responseJSON); err != nil {
+				// Send raw message directly to WebSocket
+				if err := conn.Write(ctx, websocket.MessageText, stateMsg.RawMessage); err != nil {
 					logger.Debug("Write loop ended - write error", "error", err.Error())
 					return
 				}
@@ -206,7 +164,7 @@ func (h *WebSocketHandler) writeLoop(ctx context.Context, conn *websocket.Conn, 
 				logger.Debug("Message sent successfully")
 			} else {
 				logger.Debug("Skipping message - not for this user",
-					"target_player_id", stateMsg.PlayerID)
+					"target_player_id", stateMsg.UserID)
 			}
 		}
 	}

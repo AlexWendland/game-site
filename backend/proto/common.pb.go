@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: common.proto
 
-package _go
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -367,8 +367,8 @@ const file_common_proto_rawDesc = "" +
 	"\bposition\x18\x01 \x01(\x05R\bposition\"\x1c\n" +
 	"\x1aLeavePlayerPositionRequest\"=\n" +
 	"\x1fRemoveAIPlayerInPositionRequest\x12\x1a\n" +
-	"\bposition\x18\x01 \x01(\x05R\bpositionB\x91\x01\n" +
-	"\rcom.gamessiteB\vCommonProtoP\x01Z/github.com/AlexWendland/games-site/proto/gen/go\xa2\x02\x03GXX\xaa\x02\tGamessite\xca\x02\tGamessite\xe2\x02\x15Gamessite\\GPBMetadata\xea\x02\tGamessiteb\x06proto3"
+	"\bposition\x18\x01 \x01(\x05R\bpositionB\x92\x01\n" +
+	"\rcom.gamessiteB\vCommonProtoP\x01Z0github.com/AlexWendland/games-site/backend/proto\xa2\x02\x03GXX\xaa\x02\tGamessite\xca\x02\tGamessite\xe2\x02\x15Gamessite\\GPBMetadata\xea\x02\tGamessiteb\x06proto3"
 
 var (
 	file_common_proto_rawDescOnce sync.Once

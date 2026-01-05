@@ -1,15 +1,18 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
 import { loginAPI, registerAPI } from '@/lib/apiCalls';
+import { AuthResponse } from '@/proto/auth_pb';
 
-export default function LoginPage() {
+interface LoginFormProps {
+  onSuccess: (authResponse: AuthResponse) => void;
+}
+
+export default function LoginForm({ onSuccess }: LoginFormProps) {
   const [isRegister, setIsRegister] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,13 +25,7 @@ export default function LoginPage() {
 
     try {
       const authResponse = await loginAPI(username, password);
-
-      // Store token and user info
-      localStorage.setItem('auth_token', authResponse.token);
-      localStorage.setItem('user_id', authResponse.user_id);
-
-      // Redirect to home page
-      router.push('/');
+      onSuccess(authResponse);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Network error. Please try again.');
     } finally {
@@ -55,16 +52,11 @@ export default function LoginPage() {
 
     try {
       const authResponse = await registerAPI(username, password);
-
-      // Store token and user info
-      localStorage.setItem('auth_token', authResponse.token);
-      localStorage.setItem('user_id', authResponse.user_id);
-
-      // Show success and redirect
-      setSuccess('Registration successful! Redirecting...');
+      setSuccess('Registration successful!');
+      // Call onSuccess after a brief delay to show the success message
       setTimeout(() => {
-        router.push('/');
-      }, 1500);
+        onSuccess(authResponse);
+      }, 500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Network error. Please try again.');
     } finally {

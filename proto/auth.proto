@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package gamessite.auth;
+
+option go_package = "github.com/AlexWendland/games-site/proto/auth;auth";
+
+message RegisterRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  string token = 1;
+  string user_id = 2;
+}
+
+message WSTokenResponse {
+  string ws_token = 1;
+}
+
+message UserInfoResponse {
+  string user_id = 1;
+  string username = 2;
+}

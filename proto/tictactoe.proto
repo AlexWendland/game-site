@@ -4,7 +4,7 @@ package gamessite.tictactoe;
 
 import "common.proto";
 
-option go_package = "github.com/AlexWendland/games-site/proto/gen/go/tictactoe;tictactoe";
+option go_package = "github.com/AlexWendland/games-site/proto/tictactoe;tictactoe";
 
 // TicTacToe game state sent from server to client
 message TicTacToeGameState{
@@ -50,4 +50,6 @@ message ServerTicTacToeWebsocketMessage {
     gamessite.SimpleResponse simple_response = 4;
   }
 }
-// Test comment for hook validation - adding more to trigger change
+
+message TicTacToeMetadataResponse {
+}

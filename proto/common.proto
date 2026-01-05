@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package gamessite;
 
-option go_package = "github.com/AlexWendland/games-site/proto/gen/go;gamessite";
+option go_package = "github.com/AlexWendland/games-site/proto/;gamessite";
 
 // PlayerInfo contains information about a player in a session
 message PlayerInfo {

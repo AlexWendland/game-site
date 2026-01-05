@@ -3,9 +3,16 @@ import {
   GravitySetting,
   QuantumHintLevel,
   SimpleResponse,
-  AuthResponse,
-  UserInfo,
 } from "@/types/apiTypes";
+import {
+  AuthResponse,
+  AuthResponseSchema,
+  UserInfoResponse,
+  UserInfoResponseSchema,
+  WSTokenResponse,
+  WSTokenResponseSchema,
+} from "@/proto/auth_pb";
+import { fromJson } from "@bufbuild/protobuf";
 
 // In production (static export), use relative URLs since the Go backend serves the frontend
 // In development, use NEXT_PUBLIC_BACKEND_URL to point to the backend (e.g., http://localhost:8080)
@@ -186,17 +193,15 @@ export async function loginAPI(
     body: JSON.stringify({ username, password }),
   });
 
-  const data = await response.json();
-
   if (!response.ok) {
-    const errorMsg = data.parameters?.error_message || "Login failed";
-    throw new Error(errorMsg);
+    // Backend now returns plain text errors
+    const errorMsg = await response.text();
+    throw new Error(errorMsg || "Login failed");
   }
 
-  return {
-    token: data.parameters.token,
-    user_id: data.parameters.user_id,
-  };
+  const json = await response.json();
+  // Parse JSON into protobuf message (converts user_id -> userId)
+  return fromJson(AuthResponseSchema, json);
 }
 
 export async function registerAPI(
@@ -209,17 +214,15 @@ export async function registerAPI(
     body: JSON.stringify({ username, password }),
   });
 
-  const data = await response.json();
-
   if (!response.ok) {
-    const errorMsg = data.parameters?.error_message || "Registration failed";
-    throw new Error(errorMsg);
+    // Backend now returns plain text errors
+    const errorMsg = await response.text();
+    throw new Error(errorMsg || "Registration failed");
   }
 
-  return {
-    token: data.parameters.token,
-    user_id: data.parameters.user_id,
-  };
+  const json = await response.json();
+  // Parse JSON into protobuf message (converts user_id -> userId)
+  return fromJson(AuthResponseSchema, json);
 }
 
 export async function logoutAPI(token: string): Promise<void> {
@@ -233,23 +236,20 @@ export async function logoutAPI(token: string): Promise<void> {
   }
 }
 
-export async function getUserInfoAPI(token: string): Promise<UserInfo> {
+export async function getUserInfoAPI(token: string): Promise<UserInfoResponse> {
   const response = await fetch(apiUrl("/auth/me"), {
     headers: { Authorization: token },
   });
 
-  const data = await response.json();
-
   if (!response.ok) {
-    const errorMsg =
-      data.parameters?.error_message || "Failed to get user info";
-    throw new Error(errorMsg);
+    // Backend now returns plain text errors
+    const errorMsg = await response.text();
+    throw new Error(errorMsg || "Failed to get user info");
   }
 
-  return {
-    user_id: data.parameters.user_id,
-    username: data.parameters.username,
-  };
+  const json = await response.json();
+  // Parse JSON into protobuf message (converts user_id -> userId)
+  return fromJson(UserInfoResponseSchema, json);
 }
 
 export async function getWSTokenAPI(
@@ -263,13 +263,14 @@ export async function getWSTokenAPI(
     },
   });
 
-  const data = await response.json();
-
   if (!response.ok) {
-    const errorMsg =
-      data.parameters?.error_message || "Failed to get WebSocket token";
-    throw new Error(errorMsg);
+    // Backend now returns plain text errors
+    const errorMsg = await response.text();
+    throw new Error(errorMsg || "Failed to get WebSocket token");
   }
 
-  return data.parameters.ws_token;
+  const json = await response.json();
+  // Parse JSON into protobuf message (converts ws_token -> wsToken)
+  const wsTokenResponse = fromJson(WSTokenResponseSchema, json);
+  return wsTokenResponse.wsToken;
 }

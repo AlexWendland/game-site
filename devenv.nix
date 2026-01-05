@@ -105,7 +105,7 @@
     buf-generate-check = {
       enable = true;
       name = "Buf Generate Check";
-      entry = "bash -c 'cd proto && buf generate && git diff --exit-code ../backend/proto/gen ../frontend/proto/gen'";
+      entry = "bash -c 'cd proto && buf generate && git diff --exit-code ../backend/proto ../frontend/proto'";
       pass_filenames = false;
       always_run = true;
     };

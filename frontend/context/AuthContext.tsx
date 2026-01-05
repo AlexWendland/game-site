@@ -7,8 +7,10 @@ import {
   useState,
   ReactNode,
 } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import { getUserInfoAPI, logoutAPI } from "@/lib/apiCalls";
+import { AuthResponse } from "@/proto/auth_pb";
+import LoginForm from "@/components/auth/LoginForm";
+import LoadingScreen from "@/components/auth/LoadingScreen";
 
 type User = {
   userId: string;
@@ -28,22 +30,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     async function checkAuth() {
-      // Skip auth check if we're on the login page
-      if (pathname === '/login') {
-        setIsLoading(false);
-        return;
-      }
-
       const token = localStorage.getItem('auth_token');
 
       if (!token) {
-        // No token, redirect to login
-        router.push('/login');
+        // No token, show login form
         setIsLoading(false);
         return;
       }
@@ -52,24 +45,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Verify token is still valid
         const userInfo = await getUserInfoAPI(token);
 
-        // Token valid, set user
+        // Token valid, set user (protobuf returns camelCase)
         setUser({
-          userId: userInfo.user_id,
+          userId: userInfo.userId,
           username: userInfo.username,
         });
         setIsLoading(false);
       } catch (error) {
         console.error('Auth check failed:', error);
-        // Token invalid or network error, clear and redirect to login
+        // Token invalid or network error, clear and show login
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user_id');
-        router.push('/login');
         setIsLoading(false);
       }
     }
 
     checkAuth();
-  }, [pathname, router]);
+  }, []);
+
+  const handleLoginSuccess = (authResponse: AuthResponse) => {
+    // Store token and user info (protobuf returns camelCase)
+    localStorage.setItem('auth_token', authResponse.token);
+    localStorage.setItem('user_id', authResponse.userId);
+
+    // Set user in context
+    // Note: We don't have username yet, will be filled by getUserInfoAPI
+    // Or we could fetch it here, but for now just set userId
+    setUser({
+      userId: authResponse.userId,
+      username: '', // Will be updated on next render
+    });
+
+    // Fetch full user info to get username
+    getUserInfoAPI(authResponse.token).then((userInfo) => {
+      setUser({
+        userId: userInfo.userId,
+        username: userInfo.username,
+      });
+    }).catch((error) => {
+      console.error('Failed to fetch user info after login:', error);
+    });
+  };
 
   const logout = async () => {
     const token = localStorage.getItem('auth_token');
@@ -87,9 +103,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_id');
     setUser(null);
-
-    // Redirect to login
-    router.push('/login');
   };
 
   const getUsername = () => {
@@ -100,22 +113,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return localStorage.getItem('auth_token');
   };
 
-  // Show loading screen while checking auth (except on login page)
-  if (isLoading && pathname !== '/login') {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="text-xl font-medium text-gray-700 dark:text-gray-300">
-            Loading...
-          </div>
-        </div>
-      </div>
-    );
+  // Show loading screen while checking auth
+  if (isLoading) {
+    return <LoadingScreen />;
   }
 
-  // Don't render children if not authenticated (except on login page)
-  if (!user && pathname !== '/login' && !isLoading) {
-    return null;
+  // Show login form if not authenticated
+  if (!user) {
+    return <LoginForm onSuccess={handleLoginSuccess} />;
   }
 
   return (
