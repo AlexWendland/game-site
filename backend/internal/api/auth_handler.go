@@ -80,7 +80,7 @@ func (h *AuthHandler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("User registered successfully")
 
-	writeJSON(w, &proto.AuthResponse{
+	writeJSON(logger, w, &proto.AuthResponse{
 		Token:  token,
 		UserId: userID,
 	})
@@ -113,7 +113,7 @@ func (h *AuthHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	logger = logger.With("user_id", userID)
 	logger.Info("User logged in successfully")
 
-	writeJSON(w, &proto.AuthResponse{
+	writeJSON(logger, w, &proto.AuthResponse{
 		Token:  token,
 		UserId: userID,
 	})
@@ -140,7 +140,7 @@ func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		logger.Info("User logged out successfully")
 	}
 
-	writeJSON(w, &proto.SimpleResponse{
+	writeJSON(logger, w, &proto.SimpleResponse{
 		Message: "logged out",
 	})
 }
@@ -173,7 +173,7 @@ func (h *AuthHandler) HandleMe(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debug("User info retrieved", "username", user.Username)
 
-	writeJSON(w, &proto.UserInfoResponse{
+	writeJSON(logger, w, &proto.UserInfoResponse{
 		UserId:   user.ID,
 		Username: user.Username,
 	})
@@ -235,7 +235,7 @@ func (h *AuthHandler) HandleWSToken(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("WebSocket token generated")
 
-	writeJSON(w, &proto.WSTokenResponse{
+	writeJSON(logger, w, &proto.WSTokenResponse{
 		WsToken: wsToken,
 	})
 }

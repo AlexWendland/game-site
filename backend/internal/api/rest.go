@@ -11,11 +11,11 @@ import (
 )
 
 // writeJSON sends a JSON response with the given status code and payload.
-func writeJSON(w http.ResponseWriter, v interface{}) {
+func writeJSON(logger *slog.Logger, w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(v); err != nil {
-		slog.Error("Failed to encode response", "error", err)
+		logger.Error("Failed to encode response", "error", err)
 	}
 }
 
@@ -54,19 +54,17 @@ func (h *RESTHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// path := r.URL.Path
+	path := r.URL.Path
 
 	// Route based on path
-	// switch {
+	switch {
 	// case path == "/api/new_game/tictactoe":
 	//	h.HandleNewTicTacToe(w, r)
-	// case strings.HasSuffix(path, "/metadata"):
-	//	h.HandleGameMetadata(w, r)
-	// case strings.HasSuffix(path, "/models"):
-	//	h.HandleGameModels(w, r)
-	// default:
-	//	http.Error(w, "Not found", http.StatusNotFound)
-	// }
+	case strings.HasSuffix(path, "/metadata"):
+		h.HandleGameMetadata(w, r)
+	default:
+		http.Error(w, "Not found", http.StatusNotFound)
+	}
 }
 
 // HandleNewTicTacToe creates a new Tic Tac Toe game
@@ -117,68 +115,42 @@ func (h *RESTHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // HandleGameMetadata returns metadata for a specific game
 // GET /api/game/{game_id}/metadata.
-// func (h *RESTHandler) HandleGameMetadata(w http.ResponseWriter, r *http.Request) {
-//	if r.Method != http.MethodGet {
-//		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-//		return
-//	}
-//
-//	gameID := extractGameIDFromPath(r.URL.Path, "/metadata")
-//	if gameID == "" {
-//		http.Error(w, "Invalid game ID", http.StatusBadRequest)
-//		return
-//	}
-//
-//	session, err := h.registry.Get(gameID)
-//	if err != nil {
-//		http.Error(w, "Game not found", http.StatusNotFound)
-//		return
-//	}
-//
-//	metadata := session.GetMetadata()
-//	w.Header().Set("Content-Type", "application/json")
-//	if err := json.NewEncoder(w).Encode(metadata); err != nil {
-//		slog.Error("Failed to encode metadata", "error", err)
-//	}
-// }
+func (h *RESTHandler) HandleGameMetadata(w http.ResponseWriter, r *http.Request) {
+	logger := GetLogger(r)
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-// HandleGameModels returns available AI models for a specific game
-// GET /api/game/{game_id}/models.
-// func (h *RESTHandler) HandleGameModels(w http.ResponseWriter, r *http.Request) {
-//	if r.Method != http.MethodGet {
-//		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-//		return
-//	}
-//
-//	gameID := extractGameIDFromPath(r.URL.Path, "/models")
-//	if gameID == "" {
-//		http.Error(w, "Invalid game ID", http.StatusBadRequest)
-//		return
-//	}
-//
-//	session, err := h.registry.Get(gameID)
-//	if err != nil {
-//		http.Error(w, "Game not found", http.StatusNotFound)
-//		return
-//	}
-//
-//	aiTypes := session.AITypes()
-//	w.Header().Set("Content-Type", "application/json")
-//	if err := json.NewEncoder(w).Encode(aiTypes); err != nil {
-//		slog.Error("Failed to encode AI types", "error", err)
-//	}
-// }
+	gameID := extractGameIDFromPath(r.URL.Path, "/metadata")
+	logger = logger.With("game_id", gameID)
+	if gameID == "" {
+		http.Error(w, "Invalid game ID", http.StatusBadRequest)
+		logger.Debug("Invalid game ID")
+		return
+	}
+
+	session, err := h.registry.Get(gameID)
+	if err != nil {
+		http.Error(w, "Game not found", http.StatusNotFound)
+		logger.Debug("Game not found")
+		return
+	}
+
+	metadata := session.GetMetadata()
+	writeJSON(logger, w, metadata)
+}
 
 // extractGameIDFromPath extracts game ID from paths like /api/game/{game_id}/metadata.
-// func extractGameIDFromPath(path string, suffix string) string {
-//	path = strings.TrimSuffix(path, suffix)
-//	path = strings.Trim(path, "/")
-//	parts := strings.Split(path, "/")
-//
-//	// Expected: ["api", "game", "{game_id}"]
-//	if len(parts) >= 3 && parts[0] == "api" && parts[1] == "game" {
-//		return parts[2]
-//	}
-//
-//	return ""
-// }
+func extractGameIDFromPath(path string, suffix string) string {
+	path = strings.TrimSuffix(path, suffix)
+	path = strings.Trim(path, "/")
+	parts := strings.Split(path, "/")
+
+	// Expected: ["api", "game", "{game_id}"]
+	if len(parts) >= 3 && parts[0] == "api" && parts[1] == "game" {
+		return parts[2]
+	}
+
+	return ""
+}

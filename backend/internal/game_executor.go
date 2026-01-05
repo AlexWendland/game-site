@@ -8,14 +8,9 @@ type GameExecutor interface {
 	// OutgoingChannel returns a read-only channel for receiving state updates
 	OutgoingChannel() <-chan TaggedMessage
 
-	// Run starts the session's event loop (should be run in a goroutine).
 	Run()
 
 	Shutdown()
 
-	// TODO: Think about how this should work.
-	// GetMetadata() Any
-
-	// TODO: Think about how this should work.
-	// AITypes() map[string]string
+	GetMetadata() any
 }
