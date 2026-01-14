@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package gamessite.metadata;
+
+import "tictactoe.proto";
+
+message GameMetadataResponse {
+  oneof metadata {
+    gamessite.tictactoe.TicTacToeMetadata tic_tac_toe_metadata = 1;
+  }
+}

@@ -1,149 +1,81 @@
 package tictactoe
 
-//
-// import (
-//	"fmt"
-//	"log/slog"
-//
-//	"github.com/AlexWendland/games-site/backend/proto"
-//	"github.com/AlexWendland/games-site/backend/protocol"
-// )
-//
-// type TicTacToeGame struct {
-//	board       [9]int // Move numbers (-1 = empty, 0+ = move number)
-//	moveNumber  int
-//	winner      *int
-//	winningLine []int // Positions of winning line
-//	logger      *slog.Logger
-// }
-//
-// func NewTicTacToeGame(logger *slog.Logger) *TicTacToeGame {
-//	game := &TicTacToeGame{
-//		moveNumber:  0,
-//		winner:      nil,
-//		winningLine: []int{},
-//		logger:      logger,
-//	}
-//
-//	// Initialize board with -1 (empty)
-//	for i := range game.board {
-//		game.board[i] = -1
-//	}
-//
-//	logger.Info("TicTacToe game initialized")
-//
-//	return game
-// }
-//
-// // makeMove performs the actual move.
-// func (g *TicTacToeGame) makeMove(playerPosition int, position int) *protocol.ErrorResponse {
-//	g.logger.Debug("Attempting move",
-//		"player_position", playerPosition,
-//		"board_position", position,
-//		"move_number", g.moveNumber)
-//
-//	// Validate position
-//	if position < 0 || position > 8 {
-//		g.logger.Debug("Invalid position - out of range",
-//			"position", position,
-//			"player_position", playerPosition)
-//		return &protocol.ErrorResponse{
-//			MessageType: protocol.MessageTypeError,
-//			Parameters: protocol.ErrorParameters{
-//				ErrorMessage: fmt.Sprintf("Position %d out of range (must be 0-8)", position),
-//			},
-//		}
-//	}
-//
-//	// Check if game is already over
-//	if g.winner != nil {
-//		g.logger.Debug("Move rejected - game already over",
-//			"winner", *g.winner,
-//			"player_position", playerPosition)
-//		return &protocol.ErrorResponse{
-//			MessageType: protocol.MessageTypeError,
-//			Parameters: protocol.ErrorParameters{
-//				ErrorMessage: fmt.Sprintf("Game already has a winner: player %d", *g.winner),
-//			},
-//		}
-//	}
-//
-//	// Check if it's this player's turn
-//	currentPlayer := g.moveNumber % 2
-//	if currentPlayer != playerPosition {
-//		g.logger.Debug("Move rejected - not player's turn",
-//			"player_position", playerPosition,
-//			"current_player", currentPlayer)
-//		return &protocol.ErrorResponse{
-//			MessageType: protocol.MessageTypeError,
-//			Parameters: protocol.ErrorParameters{
-//				ErrorMessage: fmt.Sprintf("Player %d is not the current player", playerPosition),
-//			},
-//		}
-//	}
-//
-//	// Check if position is already taken
-//	if g.board[position] != -1 {
-//		g.logger.Debug("Move rejected - position taken",
-//			"position", position,
-//			"player_position", playerPosition)
-//		return &protocol.ErrorResponse{
-//			MessageType: protocol.MessageTypeError,
-//			Parameters: protocol.ErrorParameters{
-//				ErrorMessage: fmt.Sprintf("Position %d is already taken", position),
-//			},
-//		}
-//	}
-//
-//	// Make the move
-//	g.board[position] = g.moveNumber
-//	g.moveNumber++
-//
-//	g.logger.Info("Move made",
-//		"player_position", playerPosition,
-//		"board_position", position,
-//		"move_number", g.moveNumber-1)
-//
-//	// Check for winner
-//	g.checkWinner()
-//
-//	return nil
-// }
-//
-// // checkWinner checks if there's a winner and updates game state.
-// func (g *TicTacToeGame) checkWinner() {
-//	winningLine := CheckWinner(g.board)
-//	if winningLine != nil {
-//		g.winningLine = winningLine
-//		// Determine winner from first position in winning line
-//		winnerPosition := g.board[winningLine[0]] % 2
-//		g.winner = &winnerPosition
-//		g.logger.Info("Game won",
-//			"winner_position", winnerPosition,
-//			"winning_line", winningLine)
-//	}
-// }
-//
-// // GameType returns the game type identifier.
-// func (g *TicTacToeGame) GameType() string {
-//	return "tictactoe"
-// }
-//
-// // AITypes returns all valid AI types for this game.
-// func (g *TicTacToeGame) AITypes() map[string]string {
-//	// TODO: Implement AI types when AI is added
-//	return map[string]string{
-//		"random":     "Easy",
-//		"blocker":    "Medium",
-//		"unbeatable": "Hard",
-//	}
-// }
-//
-// // GetMetadata returns the game metadata.
-// func (g *TicTacToeGame) GetMetadata() any {
-//	return protocol.TicTacToeMetadata{
-//		GameType:   "tictactoe",
-//		MaxPlayers: 2,
-//		Parameters: nil,
-//	}
-// }
+import (
+	"fmt"
+	"log/slog"
+)
+
+type TicTacToeGame struct {
+	board       [9]int // Move numbers (-1 = empty, 0+ = move number)
+	moveNumber  int
+	winner      *int
+	winningLine *[3]int // Positions of winning line
+}
+
+func NewTicTacToeGame(logger *slog.Logger) *TicTacToeGame {
+	game := &TicTacToeGame{
+		moveNumber:  0,
+		winner:      nil,
+		winningLine: nil,
+	}
+
+	// Initialize board with -1 (empty)
+	for i := range game.board {
+		game.board[i] = -1
+	}
+
+	logger.Info("TicTacToe game initialized")
+
+	return game
+}
+
+// makeMove performs the actual move.
+func (g *TicTacToeGame) makeMove(logger *slog.Logger, playerPosition int, position int) error {
+	logger = logger.With("player_position", playerPosition, "board_position", position, "move_number", g.moveNumber)
+	logger.Debug("Attempting move")
+
+	if position < 0 || position > 8 {
+		logger.Debug("Invalid position - out of range")
+		return fmt.Errorf("position %d out of range (must be 0-8)", position)
+	}
+
+	if g.winner != nil {
+		logger.Debug("Move rejected - game already over",
+			"winner", *g.winner)
+		return fmt.Errorf("game already has a winner: player %d", *g.winner)
+	}
+
+	currentPlayer := g.moveNumber % 2
+	if currentPlayer != playerPosition {
+		logger.Debug("Move rejected - not player's turn",
+			"current_player", currentPlayer)
+		return fmt.Errorf("player %d is not the current player", playerPosition)
+	}
+
+	if g.board[position] != -1 {
+		logger.Debug("Move rejected - position taken")
+		return fmt.Errorf("position %d is already taken", position)
+	}
+
+	g.board[position] = g.moveNumber
+	g.moveNumber++
+
+	logger.Info("Move made")
+
+	g.checkWinner(logger)
+	return nil
+}
+
+// checkWinner checks if there's a winner and updates game state.
+func (g *TicTacToeGame) checkWinner(logger *slog.Logger) {
+	winningLine := CheckWinner(g.board)
+	if winningLine != nil {
+		g.winningLine = winningLine
+		// Determine winner from first position in winning line
+		winnerPosition := g.board[winningLine[0]] % 2
+		g.winner = &winnerPosition
+		logger.Info("Game won",
+			"winner_position", winnerPosition,
+			"winning_line", winningLine)
+	}
+}

@@ -172,183 +172,11 @@ func (x *SimpleResponse) GetMessage() string {
 	return ""
 }
 
-// PositionSessionStateResponse contains the current lobby/session state for position based state management.
-type PositionSessionStateResponse struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	PlayerPositions map[int32]*PlayerInfo  `protobuf:"bytes,1,rep,name=player_positions,json=playerPositions,proto3" json:"player_positions,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // position -> player info
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
-}
-
-func (x *PositionSessionStateResponse) Reset() {
-	*x = PositionSessionStateResponse{}
-	mi := &file_common_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PositionSessionStateResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PositionSessionStateResponse) ProtoMessage() {}
-
-func (x *PositionSessionStateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_common_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PositionSessionStateResponse.ProtoReflect.Descriptor instead.
-func (*PositionSessionStateResponse) Descriptor() ([]byte, []int) {
-	return file_common_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *PositionSessionStateResponse) GetPlayerPositions() map[int32]*PlayerInfo {
-	if x != nil {
-		return x.PlayerPositions
-	}
-	return nil
-}
-
-// Client requests to set their player position
-type SetPlayerPositionRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Position      int32                  `protobuf:"varint,1,opt,name=position,proto3" json:"position,omitempty"` // Player position (0 or 1)
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SetPlayerPositionRequest) Reset() {
-	*x = SetPlayerPositionRequest{}
-	mi := &file_common_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SetPlayerPositionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SetPlayerPositionRequest) ProtoMessage() {}
-
-func (x *SetPlayerPositionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_common_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SetPlayerPositionRequest.ProtoReflect.Descriptor instead.
-func (*SetPlayerPositionRequest) Descriptor() ([]byte, []int) {
-	return file_common_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *SetPlayerPositionRequest) GetPosition() int32 {
-	if x != nil {
-		return x.Position
-	}
-	return 0
-}
-
-// Client requests to leave their current position
-type LeavePlayerPositionRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *LeavePlayerPositionRequest) Reset() {
-	*x = LeavePlayerPositionRequest{}
-	mi := &file_common_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *LeavePlayerPositionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*LeavePlayerPositionRequest) ProtoMessage() {}
-
-func (x *LeavePlayerPositionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_common_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use LeavePlayerPositionRequest.ProtoReflect.Descriptor instead.
-func (*LeavePlayerPositionRequest) Descriptor() ([]byte, []int) {
-	return file_common_proto_rawDescGZIP(), []int{5}
-}
-
-// Client requests to remove an AI player
-type RemoveAIPlayerInPositionRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Position      int32                  `protobuf:"varint,1,opt,name=position,proto3" json:"position,omitempty"` // Player position (0 or 1)
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RemoveAIPlayerInPositionRequest) Reset() {
-	*x = RemoveAIPlayerInPositionRequest{}
-	mi := &file_common_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RemoveAIPlayerInPositionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RemoveAIPlayerInPositionRequest) ProtoMessage() {}
-
-func (x *RemoveAIPlayerInPositionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_common_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RemoveAIPlayerInPositionRequest.ProtoReflect.Descriptor instead.
-func (*RemoveAIPlayerInPositionRequest) Descriptor() ([]byte, []int) {
-	return file_common_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *RemoveAIPlayerInPositionRequest) GetPosition() int32 {
-	if x != nil {
-		return x.Position
-	}
-	return 0
-}
-
 var File_common_proto protoreflect.FileDescriptor
 
 const file_common_proto_rawDesc = "" +
 	"\n" +
-	"\fcommon.proto\x12\tgamessite\"]\n" +
+	"\fcommon.proto\x12\x10gamessite.common\"]\n" +
 	"\n" +
 	"PlayerInfo\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12!\n" +
@@ -357,18 +185,8 @@ const file_common_proto_rawDesc = "" +
 	"\rErrorResponse\x12#\n" +
 	"\rerror_message\x18\x01 \x01(\tR\ferrorMessage\"*\n" +
 	"\x0eSimpleResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"\xe2\x01\n" +
-	"\x1cPositionSessionStateResponse\x12g\n" +
-	"\x10player_positions\x18\x01 \x03(\v2<.gamessite.PositionSessionStateResponse.PlayerPositionsEntryR\x0fplayerPositions\x1aY\n" +
-	"\x14PlayerPositionsEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\x05R\x03key\x12+\n" +
-	"\x05value\x18\x02 \x01(\v2\x15.gamessite.PlayerInfoR\x05value:\x028\x01\"6\n" +
-	"\x18SetPlayerPositionRequest\x12\x1a\n" +
-	"\bposition\x18\x01 \x01(\x05R\bposition\"\x1c\n" +
-	"\x1aLeavePlayerPositionRequest\"=\n" +
-	"\x1fRemoveAIPlayerInPositionRequest\x12\x1a\n" +
-	"\bposition\x18\x01 \x01(\x05R\bpositionB\x92\x01\n" +
-	"\rcom.gamessiteB\vCommonProtoP\x01Z0github.com/AlexWendland/games-site/backend/proto\xa2\x02\x03GXX\xaa\x02\tGamessite\xca\x02\tGamessite\xe2\x02\x15Gamessite\\GPBMetadata\xea\x02\tGamessiteb\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessageB\xb6\x01\n" +
+	"\x14com.gamessite.commonB\vCommonProtoP\x01Z0github.com/AlexWendland/games-site/backend/proto\xa2\x02\x03GCX\xaa\x02\x10Gamessite.Common\xca\x02\x10Gamessite\\Common\xe2\x02\x1cGamessite\\Common\\GPBMetadata\xea\x02\x11Gamessite::Commonb\x06proto3"
 
 var (
 	file_common_proto_rawDescOnce sync.Once
@@ -382,25 +200,18 @@ func file_common_proto_rawDescGZIP() []byte {
 	return file_common_proto_rawDescData
 }
 
-var file_common_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_common_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_common_proto_goTypes = []any{
-	(*PlayerInfo)(nil),                      // 0: gamessite.PlayerInfo
-	(*ErrorResponse)(nil),                   // 1: gamessite.ErrorResponse
-	(*SimpleResponse)(nil),                  // 2: gamessite.SimpleResponse
-	(*PositionSessionStateResponse)(nil),    // 3: gamessite.PositionSessionStateResponse
-	(*SetPlayerPositionRequest)(nil),        // 4: gamessite.SetPlayerPositionRequest
-	(*LeavePlayerPositionRequest)(nil),      // 5: gamessite.LeavePlayerPositionRequest
-	(*RemoveAIPlayerInPositionRequest)(nil), // 6: gamessite.RemoveAIPlayerInPositionRequest
-	nil,                                     // 7: gamessite.PositionSessionStateResponse.PlayerPositionsEntry
+	(*PlayerInfo)(nil),     // 0: gamessite.common.PlayerInfo
+	(*ErrorResponse)(nil),  // 1: gamessite.common.ErrorResponse
+	(*SimpleResponse)(nil), // 2: gamessite.common.SimpleResponse
 }
 var file_common_proto_depIdxs = []int32{
-	7, // 0: gamessite.PositionSessionStateResponse.player_positions:type_name -> gamessite.PositionSessionStateResponse.PlayerPositionsEntry
-	0, // 1: gamessite.PositionSessionStateResponse.PlayerPositionsEntry.value:type_name -> gamessite.PlayerInfo
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // [0:0] is the sub-list for method output_type
+	0, // [0:0] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_common_proto_init() }
@@ -414,7 +225,7 @@ func file_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_proto_rawDesc), len(file_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

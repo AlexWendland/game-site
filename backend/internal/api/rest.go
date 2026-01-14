@@ -138,7 +138,7 @@ func (h *RESTHandler) HandleGameMetadata(w http.ResponseWriter, r *http.Request)
 	}
 
 	metadata := session.GetMetadata()
-	writeJSON(logger, w, metadata)
+	writeJSON(logger, w, &metadata)
 }
 
 // extractGameIDFromPath extracts game ID from paths like /api/game/{game_id}/metadata.

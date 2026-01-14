@@ -3,8 +3,7 @@ syntax = "proto3";
 package gamessite.tictactoe;
 
 import "common.proto";
-
-option go_package = "github.com/AlexWendland/games-site/proto/tictactoe;tictactoe";
+import "lobby.proto";
 
 // TicTacToe game state sent from server to client
 message TicTacToeGameState{
@@ -13,12 +12,10 @@ message TicTacToeGameState{
   repeated int32 winning_line = 3;  // Board positions that form the winning line (empty if no winner)
 }
 
-// Client requests to make a move
 message MakeMoveRequest {
   int32 position = 1;  // Board position 0-8
 }
 
-// TicTacToe model types
 enum TicTacToeModel{
   TIC_TAC_TOE_MODEL_UNSPECIFIED = 0;
   TIC_TAC_TOE_MODEL_EASY = 1;
@@ -35,21 +32,20 @@ message TicTacToeAddAIPlayerInPositionRequest {
 message ClientTicTacToeWebsocketMessage {
   oneof message {
     MakeMoveRequest make_move = 1;
-    gamessite.SetPlayerPositionRequest set_player_position = 2;
-    gamessite.LeavePlayerPositionRequest leave_player_position = 3;
+    gamessite.lobby.SetPlayerPositionRequest set_player_position = 2;
+    gamessite.lobby.RemovePlayerPositionRequest remove_player_position = 3;
     TicTacToeAddAIPlayerInPositionRequest add_ai_player = 4;
-    gamessite.RemoveAIPlayerInPositionRequest remove_ai_player = 5;
   }
 }
 
 message ServerTicTacToeWebsocketMessage {
   oneof message {
     TicTacToeGameState game_state = 1;
-    gamessite.PositionSessionStateResponse session_state = 2;
-    gamessite.ErrorResponse error = 3;
-    gamessite.SimpleResponse simple_response = 4;
+    gamessite.lobby.PositionSessionStateResponse session_state = 2;
+    gamessite.common.ErrorResponse error = 3;
+    gamessite.common.SimpleResponse simple_response = 4;
   }
 }
 
-message TicTacToeMetadataResponse {
+message TicTacToeMetadata {
 }

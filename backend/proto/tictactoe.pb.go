@@ -21,7 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// TicTacToe model types
 type TicTacToeModel int32
 
 const (
@@ -135,7 +134,6 @@ func (x *TicTacToeGameState) GetWinningLine() []int32 {
 	return nil
 }
 
-// Client requests to make a move
 type MakeMoveRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Position      int32                  `protobuf:"varint,1,opt,name=position,proto3" json:"position,omitempty"` // Board position 0-8
@@ -239,9 +237,8 @@ type ClientTicTacToeWebsocketMessage struct {
 	//
 	//	*ClientTicTacToeWebsocketMessage_MakeMove
 	//	*ClientTicTacToeWebsocketMessage_SetPlayerPosition
-	//	*ClientTicTacToeWebsocketMessage_LeavePlayerPosition
+	//	*ClientTicTacToeWebsocketMessage_RemovePlayerPosition
 	//	*ClientTicTacToeWebsocketMessage_AddAiPlayer
-	//	*ClientTicTacToeWebsocketMessage_RemoveAiPlayer
 	Message       isClientTicTacToeWebsocketMessage_Message `protobuf_oneof:"message"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -302,10 +299,10 @@ func (x *ClientTicTacToeWebsocketMessage) GetSetPlayerPosition() *SetPlayerPosit
 	return nil
 }
 
-func (x *ClientTicTacToeWebsocketMessage) GetLeavePlayerPosition() *LeavePlayerPositionRequest {
+func (x *ClientTicTacToeWebsocketMessage) GetRemovePlayerPosition() *RemovePlayerPositionRequest {
 	if x != nil {
-		if x, ok := x.Message.(*ClientTicTacToeWebsocketMessage_LeavePlayerPosition); ok {
-			return x.LeavePlayerPosition
+		if x, ok := x.Message.(*ClientTicTacToeWebsocketMessage_RemovePlayerPosition); ok {
+			return x.RemovePlayerPosition
 		}
 	}
 	return nil
@@ -315,15 +312,6 @@ func (x *ClientTicTacToeWebsocketMessage) GetAddAiPlayer() *TicTacToeAddAIPlayer
 	if x != nil {
 		if x, ok := x.Message.(*ClientTicTacToeWebsocketMessage_AddAiPlayer); ok {
 			return x.AddAiPlayer
-		}
-	}
-	return nil
-}
-
-func (x *ClientTicTacToeWebsocketMessage) GetRemoveAiPlayer() *RemoveAIPlayerInPositionRequest {
-	if x != nil {
-		if x, ok := x.Message.(*ClientTicTacToeWebsocketMessage_RemoveAiPlayer); ok {
-			return x.RemoveAiPlayer
 		}
 	}
 	return nil
@@ -341,16 +329,12 @@ type ClientTicTacToeWebsocketMessage_SetPlayerPosition struct {
 	SetPlayerPosition *SetPlayerPositionRequest `protobuf:"bytes,2,opt,name=set_player_position,json=setPlayerPosition,proto3,oneof"`
 }
 
-type ClientTicTacToeWebsocketMessage_LeavePlayerPosition struct {
-	LeavePlayerPosition *LeavePlayerPositionRequest `protobuf:"bytes,3,opt,name=leave_player_position,json=leavePlayerPosition,proto3,oneof"`
+type ClientTicTacToeWebsocketMessage_RemovePlayerPosition struct {
+	RemovePlayerPosition *RemovePlayerPositionRequest `protobuf:"bytes,3,opt,name=remove_player_position,json=removePlayerPosition,proto3,oneof"`
 }
 
 type ClientTicTacToeWebsocketMessage_AddAiPlayer struct {
 	AddAiPlayer *TicTacToeAddAIPlayerInPositionRequest `protobuf:"bytes,4,opt,name=add_ai_player,json=addAiPlayer,proto3,oneof"`
-}
-
-type ClientTicTacToeWebsocketMessage_RemoveAiPlayer struct {
-	RemoveAiPlayer *RemoveAIPlayerInPositionRequest `protobuf:"bytes,5,opt,name=remove_ai_player,json=removeAiPlayer,proto3,oneof"`
 }
 
 func (*ClientTicTacToeWebsocketMessage_MakeMove) isClientTicTacToeWebsocketMessage_Message() {}
@@ -358,12 +342,10 @@ func (*ClientTicTacToeWebsocketMessage_MakeMove) isClientTicTacToeWebsocketMessa
 func (*ClientTicTacToeWebsocketMessage_SetPlayerPosition) isClientTicTacToeWebsocketMessage_Message() {
 }
 
-func (*ClientTicTacToeWebsocketMessage_LeavePlayerPosition) isClientTicTacToeWebsocketMessage_Message() {
+func (*ClientTicTacToeWebsocketMessage_RemovePlayerPosition) isClientTicTacToeWebsocketMessage_Message() {
 }
 
 func (*ClientTicTacToeWebsocketMessage_AddAiPlayer) isClientTicTacToeWebsocketMessage_Message() {}
-
-func (*ClientTicTacToeWebsocketMessage_RemoveAiPlayer) isClientTicTacToeWebsocketMessage_Message() {}
 
 type ServerTicTacToeWebsocketMessage struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -479,26 +461,26 @@ func (*ServerTicTacToeWebsocketMessage_Error) isServerTicTacToeWebsocketMessage_
 
 func (*ServerTicTacToeWebsocketMessage_SimpleResponse) isServerTicTacToeWebsocketMessage_Message() {}
 
-type TicTacToeMetadataResponse struct {
+type TicTacToeMetadata struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *TicTacToeMetadataResponse) Reset() {
-	*x = TicTacToeMetadataResponse{}
+func (x *TicTacToeMetadata) Reset() {
+	*x = TicTacToeMetadata{}
 	mi := &file_tictactoe_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *TicTacToeMetadataResponse) String() string {
+func (x *TicTacToeMetadata) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*TicTacToeMetadataResponse) ProtoMessage() {}
+func (*TicTacToeMetadata) ProtoMessage() {}
 
-func (x *TicTacToeMetadataResponse) ProtoReflect() protoreflect.Message {
+func (x *TicTacToeMetadata) ProtoReflect() protoreflect.Message {
 	mi := &file_tictactoe_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -510,8 +492,8 @@ func (x *TicTacToeMetadataResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use TicTacToeMetadataResponse.ProtoReflect.Descriptor instead.
-func (*TicTacToeMetadataResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use TicTacToeMetadata.ProtoReflect.Descriptor instead.
+func (*TicTacToeMetadata) Descriptor() ([]byte, []int) {
 	return file_tictactoe_proto_rawDescGZIP(), []int{5}
 }
 
@@ -519,7 +501,7 @@ var File_tictactoe_proto protoreflect.FileDescriptor
 
 const file_tictactoe_proto_rawDesc = "" +
 	"\n" +
-	"\x0ftictactoe.proto\x12\x13gamessite.tictactoe\x1a\fcommon.proto\"u\n" +
+	"\x0ftictactoe.proto\x12\x13gamessite.tictactoe\x1a\fcommon.proto\x1a\vlobby.proto\"u\n" +
 	"\x12TicTacToeGameState\x12\x14\n" +
 	"\x05board\x18\x01 \x03(\x05R\x05board\x12\x1b\n" +
 	"\x06winner\x18\x02 \x01(\x05H\x00R\x06winner\x88\x01\x01\x12!\n" +
@@ -529,22 +511,21 @@ const file_tictactoe_proto_rawDesc = "" +
 	"\bposition\x18\x01 \x01(\x05R\bposition\"~\n" +
 	"%TicTacToeAddAIPlayerInPositionRequest\x12\x1a\n" +
 	"\bposition\x18\x01 \x01(\x05R\bposition\x129\n" +
-	"\x05model\x18\x02 \x01(\x0e2#.gamessite.tictactoe.TicTacToeModelR\x05model\"\xdf\x03\n" +
+	"\x05model\x18\x02 \x01(\x0e2#.gamessite.tictactoe.TicTacToeModelR\x05model\"\x96\x03\n" +
 	"\x1fClientTicTacToeWebsocketMessage\x12C\n" +
-	"\tmake_move\x18\x01 \x01(\v2$.gamessite.tictactoe.MakeMoveRequestH\x00R\bmakeMove\x12U\n" +
-	"\x13set_player_position\x18\x02 \x01(\v2#.gamessite.SetPlayerPositionRequestH\x00R\x11setPlayerPosition\x12[\n" +
-	"\x15leave_player_position\x18\x03 \x01(\v2%.gamessite.LeavePlayerPositionRequestH\x00R\x13leavePlayerPosition\x12`\n" +
-	"\radd_ai_player\x18\x04 \x01(\v2:.gamessite.tictactoe.TicTacToeAddAIPlayerInPositionRequestH\x00R\vaddAiPlayer\x12V\n" +
-	"\x10remove_ai_player\x18\x05 \x01(\v2*.gamessite.RemoveAIPlayerInPositionRequestH\x00R\x0eremoveAiPlayerB\t\n" +
-	"\amessage\"\xbe\x02\n" +
+	"\tmake_move\x18\x01 \x01(\v2$.gamessite.tictactoe.MakeMoveRequestH\x00R\bmakeMove\x12[\n" +
+	"\x13set_player_position\x18\x02 \x01(\v2).gamessite.lobby.SetPlayerPositionRequestH\x00R\x11setPlayerPosition\x12d\n" +
+	"\x16remove_player_position\x18\x03 \x01(\v2,.gamessite.lobby.RemovePlayerPositionRequestH\x00R\x14removePlayerPosition\x12`\n" +
+	"\radd_ai_player\x18\x04 \x01(\v2:.gamessite.tictactoe.TicTacToeAddAIPlayerInPositionRequestH\x00R\vaddAiPlayerB\t\n" +
+	"\amessage\"\xd2\x02\n" +
 	"\x1fServerTicTacToeWebsocketMessage\x12H\n" +
 	"\n" +
-	"game_state\x18\x01 \x01(\v2'.gamessite.tictactoe.TicTacToeGameStateH\x00R\tgameState\x12N\n" +
-	"\rsession_state\x18\x02 \x01(\v2'.gamessite.PositionSessionStateResponseH\x00R\fsessionState\x120\n" +
-	"\x05error\x18\x03 \x01(\v2\x18.gamessite.ErrorResponseH\x00R\x05error\x12D\n" +
-	"\x0fsimple_response\x18\x04 \x01(\v2\x19.gamessite.SimpleResponseH\x00R\x0esimpleResponseB\t\n" +
-	"\amessage\"\x1b\n" +
-	"\x19TicTacToeMetadataResponse*\x89\x01\n" +
+	"game_state\x18\x01 \x01(\v2'.gamessite.tictactoe.TicTacToeGameStateH\x00R\tgameState\x12T\n" +
+	"\rsession_state\x18\x02 \x01(\v2-.gamessite.lobby.PositionSessionStateResponseH\x00R\fsessionState\x127\n" +
+	"\x05error\x18\x03 \x01(\v2\x1f.gamessite.common.ErrorResponseH\x00R\x05error\x12K\n" +
+	"\x0fsimple_response\x18\x04 \x01(\v2 .gamessite.common.SimpleResponseH\x00R\x0esimpleResponseB\t\n" +
+	"\amessage\"\x13\n" +
+	"\x11TicTacToeMetadata*\x89\x01\n" +
 	"\x0eTicTacToeModel\x12!\n" +
 	"\x1dTIC_TAC_TOE_MODEL_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16TIC_TAC_TOE_MODEL_EASY\x10\x01\x12\x1c\n" +
@@ -573,30 +554,28 @@ var file_tictactoe_proto_goTypes = []any{
 	(*TicTacToeAddAIPlayerInPositionRequest)(nil), // 3: gamessite.tictactoe.TicTacToeAddAIPlayerInPositionRequest
 	(*ClientTicTacToeWebsocketMessage)(nil),       // 4: gamessite.tictactoe.ClientTicTacToeWebsocketMessage
 	(*ServerTicTacToeWebsocketMessage)(nil),       // 5: gamessite.tictactoe.ServerTicTacToeWebsocketMessage
-	(*TicTacToeMetadataResponse)(nil),             // 6: gamessite.tictactoe.TicTacToeMetadataResponse
-	(*SetPlayerPositionRequest)(nil),              // 7: gamessite.SetPlayerPositionRequest
-	(*LeavePlayerPositionRequest)(nil),            // 8: gamessite.LeavePlayerPositionRequest
-	(*RemoveAIPlayerInPositionRequest)(nil),       // 9: gamessite.RemoveAIPlayerInPositionRequest
-	(*PositionSessionStateResponse)(nil),          // 10: gamessite.PositionSessionStateResponse
-	(*ErrorResponse)(nil),                         // 11: gamessite.ErrorResponse
-	(*SimpleResponse)(nil),                        // 12: gamessite.SimpleResponse
+	(*TicTacToeMetadata)(nil),                     // 6: gamessite.tictactoe.TicTacToeMetadata
+	(*SetPlayerPositionRequest)(nil),              // 7: gamessite.lobby.SetPlayerPositionRequest
+	(*RemovePlayerPositionRequest)(nil),           // 8: gamessite.lobby.RemovePlayerPositionRequest
+	(*PositionSessionStateResponse)(nil),          // 9: gamessite.lobby.PositionSessionStateResponse
+	(*ErrorResponse)(nil),                         // 10: gamessite.common.ErrorResponse
+	(*SimpleResponse)(nil),                        // 11: gamessite.common.SimpleResponse
 }
 var file_tictactoe_proto_depIdxs = []int32{
 	0,  // 0: gamessite.tictactoe.TicTacToeAddAIPlayerInPositionRequest.model:type_name -> gamessite.tictactoe.TicTacToeModel
 	2,  // 1: gamessite.tictactoe.ClientTicTacToeWebsocketMessage.make_move:type_name -> gamessite.tictactoe.MakeMoveRequest
-	7,  // 2: gamessite.tictactoe.ClientTicTacToeWebsocketMessage.set_player_position:type_name -> gamessite.SetPlayerPositionRequest
-	8,  // 3: gamessite.tictactoe.ClientTicTacToeWebsocketMessage.leave_player_position:type_name -> gamessite.LeavePlayerPositionRequest
+	7,  // 2: gamessite.tictactoe.ClientTicTacToeWebsocketMessage.set_player_position:type_name -> gamessite.lobby.SetPlayerPositionRequest
+	8,  // 3: gamessite.tictactoe.ClientTicTacToeWebsocketMessage.remove_player_position:type_name -> gamessite.lobby.RemovePlayerPositionRequest
 	3,  // 4: gamessite.tictactoe.ClientTicTacToeWebsocketMessage.add_ai_player:type_name -> gamessite.tictactoe.TicTacToeAddAIPlayerInPositionRequest
-	9,  // 5: gamessite.tictactoe.ClientTicTacToeWebsocketMessage.remove_ai_player:type_name -> gamessite.RemoveAIPlayerInPositionRequest
-	1,  // 6: gamessite.tictactoe.ServerTicTacToeWebsocketMessage.game_state:type_name -> gamessite.tictactoe.TicTacToeGameState
-	10, // 7: gamessite.tictactoe.ServerTicTacToeWebsocketMessage.session_state:type_name -> gamessite.PositionSessionStateResponse
-	11, // 8: gamessite.tictactoe.ServerTicTacToeWebsocketMessage.error:type_name -> gamessite.ErrorResponse
-	12, // 9: gamessite.tictactoe.ServerTicTacToeWebsocketMessage.simple_response:type_name -> gamessite.SimpleResponse
-	10, // [10:10] is the sub-list for method output_type
-	10, // [10:10] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	1,  // 5: gamessite.tictactoe.ServerTicTacToeWebsocketMessage.game_state:type_name -> gamessite.tictactoe.TicTacToeGameState
+	9,  // 6: gamessite.tictactoe.ServerTicTacToeWebsocketMessage.session_state:type_name -> gamessite.lobby.PositionSessionStateResponse
+	10, // 7: gamessite.tictactoe.ServerTicTacToeWebsocketMessage.error:type_name -> gamessite.common.ErrorResponse
+	11, // 8: gamessite.tictactoe.ServerTicTacToeWebsocketMessage.simple_response:type_name -> gamessite.common.SimpleResponse
+	9,  // [9:9] is the sub-list for method output_type
+	9,  // [9:9] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_tictactoe_proto_init() }
@@ -605,13 +584,13 @@ func file_tictactoe_proto_init() {
 		return
 	}
 	file_common_proto_init()
+	file_lobby_proto_init()
 	file_tictactoe_proto_msgTypes[0].OneofWrappers = []any{}
 	file_tictactoe_proto_msgTypes[3].OneofWrappers = []any{
 		(*ClientTicTacToeWebsocketMessage_MakeMove)(nil),
 		(*ClientTicTacToeWebsocketMessage_SetPlayerPosition)(nil),
-		(*ClientTicTacToeWebsocketMessage_LeavePlayerPosition)(nil),
+		(*ClientTicTacToeWebsocketMessage_RemovePlayerPosition)(nil),
 		(*ClientTicTacToeWebsocketMessage_AddAiPlayer)(nil),
-		(*ClientTicTacToeWebsocketMessage_RemoveAiPlayer)(nil),
 	}
 	file_tictactoe_proto_msgTypes[4].OneofWrappers = []any{
 		(*ServerTicTacToeWebsocketMessage_GameState)(nil),

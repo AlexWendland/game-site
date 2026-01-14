@@ -8,6 +8,7 @@ import (
 
 	"github.com/AlexWendland/games-site/backend/internal"
 	"github.com/coder/websocket"
+	"github.com/google/uuid"
 )
 
 // WebSocketHandler handles WebSocket connections using a registry.
@@ -31,48 +32,37 @@ func NewWebSocketHandler(registry *internal.Registry, tokenAuthService internal.
 // Token can be either a WebSocket token (from /auth/ws-token) or a regular auth token (legacy).
 func (h *WebSocketHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	gameID := extractGameID(request.URL.Path)
+	logger := GetLogger(request).With("game_id", gameID)
 	if gameID == "" {
-		slog.Debug("WebSocket connection rejected - invalid game ID", "url", request.URL.String())
+		logger.Debug("WebSocket connection rejected - invalid game ID")
 		http.Error(writer, "Invalid game ID", http.StatusBadRequest)
 		return
 	}
 
 	token := request.URL.Query().Get("token")
 	if token == "" {
-		slog.Debug("WebSocket connection rejected - missing token",
-			"game_id", gameID,
-			"url", request.URL.String())
+		logger.Debug("WebSocket connection rejected - missing token")
 		http.Error(writer, "Missing authentication token", http.StatusUnauthorized)
 		return
 	}
 
 	userID, err := h.tokenAuthService.ValidateWSToken(token, gameID)
 	if err != nil {
-		slog.Debug("WebSocket connection rejected - invalid WS token",
-			"game_id", gameID,
+		logger.Debug("WebSocket connection rejected - invalid WS token",
 			"error", err.Error())
 		http.Error(writer, "Invalid or expired WebSocket token", http.StatusUnauthorized)
 		return
 	}
+	logger = logger.With("user_id", userID)
 
-	slog.Debug("WebSocket token validated successfully",
-		"game_id", gameID,
-		"user_id", userID)
+	logger.Debug("WebSocket token validated successfully")
 
 	gameSession, err := h.registry.Get(gameID)
 	if err != nil {
-		slog.Debug("WebSocket connection rejected - game not found",
-			"game_id", gameID,
-			"user_id", userID)
+		logger.Debug("WebSocket connection rejected - game not found")
 		http.Error(writer, "Game not found", http.StatusNotFound)
 		return
 	}
-
-	logger := slog.With(
-		"game_id", gameID,
-		"user_id", userID,
-		"component", "websocket",
-	)
 
 	// Configure WebSocket accept options
 	// In development, skip origin verification to allow localhost:3000
@@ -136,36 +126,37 @@ func (h *WebSocketHandler) readLoop(ctx context.Context, conn *websocket.Conn, g
 		gameExecutor.ActionChannel() <- internal.TaggedMessage{
 			UserID:     userID,
 			RawMessage: msg,
+			Logger:     logger.With("message_id", uuid.New().String()[:8]),
 		}
 	}
 }
 
 func (h *WebSocketHandler) writeLoop(ctx context.Context, conn *websocket.Conn, gameExecutor internal.GameExecutor, userID string, logger *slog.Logger) {
 	logger.Debug("Write loop started")
+	outgoingChannel, err := gameExecutor.Register(logger, userID)
+	if err != nil {
+		logger.Debug("Failed to register user", "error", err.Error())
+		return
+	}
+	defer func() {
+		if err := gameExecutor.Unregister(logger, userID); err != nil {
+			logger.Warn("Failed to unregister user", "error", err.Error())
+		}
+	}()
 	for {
 		select {
 		case <-ctx.Done():
 			logger.Debug("Write loop ended - context done")
 			return
-		case stateMsg := <-gameExecutor.OutgoingChannel():
-			logger.Debug("State message received from game session",
-				"target_player_id", stateMsg.UserID)
+		case stateMsg := <-outgoingChannel:
+			logger.Debug("Sending message to WebSocket client",
+				"message", string(stateMsg.RawMessage))
 
-			if stateMsg.UserID == "" || stateMsg.UserID == userID {
-				logger.Debug("Sending message to WebSocket client",
-					"message", string(stateMsg.RawMessage))
-
-				// Send raw message directly to WebSocket
-				if err := conn.Write(ctx, websocket.MessageText, stateMsg.RawMessage); err != nil {
-					logger.Debug("Write loop ended - write error", "error", err.Error())
-					return
-				}
-
-				logger.Debug("Message sent successfully")
-			} else {
-				logger.Debug("Skipping message - not for this user",
-					"target_player_id", stateMsg.UserID)
+			if err := conn.Write(ctx, websocket.MessageText, stateMsg.RawMessage); err != nil {
+				logger.Debug("Write loop ended - write error", "error", err.Error())
+				return
 			}
+			logger.Debug("Message sent successfully")
 		}
 	}
 }

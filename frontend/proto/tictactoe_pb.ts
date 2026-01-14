@@ -4,15 +4,17 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { ErrorResponse, LeavePlayerPositionRequest, PositionSessionStateResponse, RemoveAIPlayerInPositionRequest, SetPlayerPositionRequest, SimpleResponse } from "./common_pb";
+import type { ErrorResponse, SimpleResponse } from "./common_pb";
 import { file_common } from "./common_pb";
+import type { PositionSessionStateResponse, RemovePlayerPositionRequest, SetPlayerPositionRequest } from "./lobby_pb";
+import { file_lobby } from "./lobby_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file tictactoe.proto.
  */
 export const file_tictactoe: GenFile = /*@__PURE__*/
-  fileDesc("Cg90aWN0YWN0b2UucHJvdG8SE2dhbWVzc2l0ZS50aWN0YWN0b2UiWQoSVGljVGFjVG9lR2FtZVN0YXRlEg0KBWJvYXJkGAEgAygFEhMKBndpbm5lchgCIAEoBUgAiAEBEhQKDHdpbm5pbmdfbGluZRgDIAMoBUIJCgdfd2lubmVyIiMKD01ha2VNb3ZlUmVxdWVzdBIQCghwb3NpdGlvbhgBIAEoBSJtCiVUaWNUYWNUb2VBZGRBSVBsYXllckluUG9zaXRpb25SZXF1ZXN0EhAKCHBvc2l0aW9uGAEgASgFEjIKBW1vZGVsGAIgASgOMiMuZ2FtZXNzaXRlLnRpY3RhY3RvZS5UaWNUYWNUb2VNb2RlbCKQAwofQ2xpZW50VGljVGFjVG9lV2Vic29ja2V0TWVzc2FnZRI5CgltYWtlX21vdmUYASABKAsyJC5nYW1lc3NpdGUudGljdGFjdG9lLk1ha2VNb3ZlUmVxdWVzdEgAEkIKE3NldF9wbGF5ZXJfcG9zaXRpb24YAiABKAsyIy5nYW1lc3NpdGUuU2V0UGxheWVyUG9zaXRpb25SZXF1ZXN0SAASRgoVbGVhdmVfcGxheWVyX3Bvc2l0aW9uGAMgASgLMiUuZ2FtZXNzaXRlLkxlYXZlUGxheWVyUG9zaXRpb25SZXF1ZXN0SAASUwoNYWRkX2FpX3BsYXllchgEIAEoCzI6LmdhbWVzc2l0ZS50aWN0YWN0b2UuVGljVGFjVG9lQWRkQUlQbGF5ZXJJblBvc2l0aW9uUmVxdWVzdEgAEkYKEHJlbW92ZV9haV9wbGF5ZXIYBSABKAsyKi5nYW1lc3NpdGUuUmVtb3ZlQUlQbGF5ZXJJblBvc2l0aW9uUmVxdWVzdEgAQgkKB21lc3NhZ2UijgIKH1NlcnZlclRpY1RhY1RvZVdlYnNvY2tldE1lc3NhZ2USPQoKZ2FtZV9zdGF0ZRgBIAEoCzInLmdhbWVzc2l0ZS50aWN0YWN0b2UuVGljVGFjVG9lR2FtZVN0YXRlSAASQAoNc2Vzc2lvbl9zdGF0ZRgCIAEoCzInLmdhbWVzc2l0ZS5Qb3NpdGlvblNlc3Npb25TdGF0ZVJlc3BvbnNlSAASKQoFZXJyb3IYAyABKAsyGC5nYW1lc3NpdGUuRXJyb3JSZXNwb25zZUgAEjQKD3NpbXBsZV9yZXNwb25zZRgEIAEoCzIZLmdhbWVzc2l0ZS5TaW1wbGVSZXNwb25zZUgAQgkKB21lc3NhZ2UiGwoZVGljVGFjVG9lTWV0YWRhdGFSZXNwb25zZSqJAQoOVGljVGFjVG9lTW9kZWwSIQodVElDX1RBQ19UT0VfTU9ERUxfVU5TUEVDSUZJRUQQABIaChZUSUNfVEFDX1RPRV9NT0RFTF9FQVNZEAESHAoYVElDX1RBQ19UT0VfTU9ERUxfTUVESVVNEAISGgoWVElDX1RBQ19UT0VfTU9ERUxfSEFSRBADQsgBChdjb20uZ2FtZXNzaXRlLnRpY3RhY3RvZUIOVGljdGFjdG9lUHJvdG9QAVowZ2l0aHViLmNvbS9BbGV4V2VuZGxhbmQvZ2FtZXMtc2l0ZS9iYWNrZW5kL3Byb3RvogIDR1RYqgITR2FtZXNzaXRlLlRpY3RhY3RvZcoCE0dhbWVzc2l0ZVxUaWN0YWN0b2XiAh9HYW1lc3NpdGVcVGljdGFjdG9lXEdQQk1ldGFkYXRh6gIUR2FtZXNzaXRlOjpUaWN0YWN0b2ViBnByb3RvMw", [file_common]);
+  fileDesc("Cg90aWN0YWN0b2UucHJvdG8SE2dhbWVzc2l0ZS50aWN0YWN0b2UiWQoSVGljVGFjVG9lR2FtZVN0YXRlEg0KBWJvYXJkGAEgAygFEhMKBndpbm5lchgCIAEoBUgAiAEBEhQKDHdpbm5pbmdfbGluZRgDIAMoBUIJCgdfd2lubmVyIiMKD01ha2VNb3ZlUmVxdWVzdBIQCghwb3NpdGlvbhgBIAEoBSJtCiVUaWNUYWNUb2VBZGRBSVBsYXllckluUG9zaXRpb25SZXF1ZXN0EhAKCHBvc2l0aW9uGAEgASgFEjIKBW1vZGVsGAIgASgOMiMuZ2FtZXNzaXRlLnRpY3RhY3RvZS5UaWNUYWNUb2VNb2RlbCLWAgofQ2xpZW50VGljVGFjVG9lV2Vic29ja2V0TWVzc2FnZRI5CgltYWtlX21vdmUYASABKAsyJC5nYW1lc3NpdGUudGljdGFjdG9lLk1ha2VNb3ZlUmVxdWVzdEgAEkgKE3NldF9wbGF5ZXJfcG9zaXRpb24YAiABKAsyKS5nYW1lc3NpdGUubG9iYnkuU2V0UGxheWVyUG9zaXRpb25SZXF1ZXN0SAASTgoWcmVtb3ZlX3BsYXllcl9wb3NpdGlvbhgDIAEoCzIsLmdhbWVzc2l0ZS5sb2JieS5SZW1vdmVQbGF5ZXJQb3NpdGlvblJlcXVlc3RIABJTCg1hZGRfYWlfcGxheWVyGAQgASgLMjouZ2FtZXNzaXRlLnRpY3RhY3RvZS5UaWNUYWNUb2VBZGRBSVBsYXllckluUG9zaXRpb25SZXF1ZXN0SABCCQoHbWVzc2FnZSKiAgofU2VydmVyVGljVGFjVG9lV2Vic29ja2V0TWVzc2FnZRI9CgpnYW1lX3N0YXRlGAEgASgLMicuZ2FtZXNzaXRlLnRpY3RhY3RvZS5UaWNUYWNUb2VHYW1lU3RhdGVIABJGCg1zZXNzaW9uX3N0YXRlGAIgASgLMi0uZ2FtZXNzaXRlLmxvYmJ5LlBvc2l0aW9uU2Vzc2lvblN0YXRlUmVzcG9uc2VIABIwCgVlcnJvchgDIAEoCzIfLmdhbWVzc2l0ZS5jb21tb24uRXJyb3JSZXNwb25zZUgAEjsKD3NpbXBsZV9yZXNwb25zZRgEIAEoCzIgLmdhbWVzc2l0ZS5jb21tb24uU2ltcGxlUmVzcG9uc2VIAEIJCgdtZXNzYWdlIhMKEVRpY1RhY1RvZU1ldGFkYXRhKokBCg5UaWNUYWNUb2VNb2RlbBIhCh1USUNfVEFDX1RPRV9NT0RFTF9VTlNQRUNJRklFRBAAEhoKFlRJQ19UQUNfVE9FX01PREVMX0VBU1kQARIcChhUSUNfVEFDX1RPRV9NT0RFTF9NRURJVU0QAhIaChZUSUNfVEFDX1RPRV9NT0RFTF9IQVJEEANCyAEKF2NvbS5nYW1lc3NpdGUudGljdGFjdG9lQg5UaWN0YWN0b2VQcm90b1ABWjBnaXRodWIuY29tL0FsZXhXZW5kbGFuZC9nYW1lcy1zaXRlL2JhY2tlbmQvcHJvdG+iAgNHVFiqAhNHYW1lc3NpdGUuVGljdGFjdG9lygITR2FtZXNzaXRlXFRpY3RhY3RvZeICH0dhbWVzc2l0ZVxUaWN0YWN0b2VcR1BCTWV0YWRhdGHqAhRHYW1lc3NpdGU6OlRpY3RhY3RvZWIGcHJvdG8z", [file_common, file_lobby]);
 
 /**
  * TicTacToe game state sent from server to client
@@ -50,8 +52,6 @@ export const TicTacToeGameStateSchema: GenMessage<TicTacToeGameState> = /*@__PUR
   messageDesc(file_tictactoe, 0);
 
 /**
- * Client requests to make a move
- *
  * @generated from message gamessite.tictactoe.MakeMoveRequest
  */
 export type MakeMoveRequest = Message<"gamessite.tictactoe.MakeMoveRequest"> & {
@@ -113,28 +113,22 @@ export type ClientTicTacToeWebsocketMessage = Message<"gamessite.tictactoe.Clien
     case: "makeMove";
   } | {
     /**
-     * @generated from field: gamessite.SetPlayerPositionRequest set_player_position = 2;
+     * @generated from field: gamessite.lobby.SetPlayerPositionRequest set_player_position = 2;
      */
     value: SetPlayerPositionRequest;
     case: "setPlayerPosition";
   } | {
     /**
-     * @generated from field: gamessite.LeavePlayerPositionRequest leave_player_position = 3;
+     * @generated from field: gamessite.lobby.RemovePlayerPositionRequest remove_player_position = 3;
      */
-    value: LeavePlayerPositionRequest;
-    case: "leavePlayerPosition";
+    value: RemovePlayerPositionRequest;
+    case: "removePlayerPosition";
   } | {
     /**
      * @generated from field: gamessite.tictactoe.TicTacToeAddAIPlayerInPositionRequest add_ai_player = 4;
      */
     value: TicTacToeAddAIPlayerInPositionRequest;
     case: "addAiPlayer";
-  } | {
-    /**
-     * @generated from field: gamessite.RemoveAIPlayerInPositionRequest remove_ai_player = 5;
-     */
-    value: RemoveAIPlayerInPositionRequest;
-    case: "removeAiPlayer";
   } | { case: undefined; value?: undefined };
 };
 
@@ -160,19 +154,19 @@ export type ServerTicTacToeWebsocketMessage = Message<"gamessite.tictactoe.Serve
     case: "gameState";
   } | {
     /**
-     * @generated from field: gamessite.PositionSessionStateResponse session_state = 2;
+     * @generated from field: gamessite.lobby.PositionSessionStateResponse session_state = 2;
      */
     value: PositionSessionStateResponse;
     case: "sessionState";
   } | {
     /**
-     * @generated from field: gamessite.ErrorResponse error = 3;
+     * @generated from field: gamessite.common.ErrorResponse error = 3;
      */
     value: ErrorResponse;
     case: "error";
   } | {
     /**
-     * @generated from field: gamessite.SimpleResponse simple_response = 4;
+     * @generated from field: gamessite.common.SimpleResponse simple_response = 4;
      */
     value: SimpleResponse;
     case: "simpleResponse";
@@ -187,21 +181,19 @@ export const ServerTicTacToeWebsocketMessageSchema: GenMessage<ServerTicTacToeWe
   messageDesc(file_tictactoe, 4);
 
 /**
- * @generated from message gamessite.tictactoe.TicTacToeMetadataResponse
+ * @generated from message gamessite.tictactoe.TicTacToeMetadata
  */
-export type TicTacToeMetadataResponse = Message<"gamessite.tictactoe.TicTacToeMetadataResponse"> & {
+export type TicTacToeMetadata = Message<"gamessite.tictactoe.TicTacToeMetadata"> & {
 };
 
 /**
- * Describes the message gamessite.tictactoe.TicTacToeMetadataResponse.
- * Use `create(TicTacToeMetadataResponseSchema)` to create a new message.
+ * Describes the message gamessite.tictactoe.TicTacToeMetadata.
+ * Use `create(TicTacToeMetadataSchema)` to create a new message.
  */
-export const TicTacToeMetadataResponseSchema: GenMessage<TicTacToeMetadataResponse> = /*@__PURE__*/
+export const TicTacToeMetadataSchema: GenMessage<TicTacToeMetadata> = /*@__PURE__*/
   messageDesc(file_tictactoe, 5);
 
 /**
- * TicTacToe model types
- *
  * @generated from enum gamessite.tictactoe.TicTacToeModel
  */
 export enum TicTacToeModel {

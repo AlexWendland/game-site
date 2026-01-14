@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package gamessite.lobby;
+
+import "common.proto";
+
+// Basic position-based lobby management
+
+// PositionSessionStateResponse contains the current lobby/session state for position based state management.
+message PositionSessionStateResponse {
+  map<int32, gamessite.common.PlayerInfo> player_positions = 1;
+}
+
+// Client requests to set their player position
+message SetPlayerPositionRequest {
+  int32 position = 1;
+}
+
+// Client requests to leave their current position
+message RemovePlayerPositionRequest {
+  int32 position = 1;
+}
