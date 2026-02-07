@@ -9,127 +9,71 @@ import {
   useMemo,
   ReactNode,
 } from "react";
-import { PlayerInfo } from "@/types/apiTypes";
+import { getGameWebsocket } from "@/lib/websocketFunctions";
 import {
-  getGameWebsocket,
-  leavePlayerPosition,
-  parseWebSocketMessage,
+  parseTicTacToeMessage,
+  makeMoveOverWebsocket,
   setPlayerPosition,
+  leavePlayerPosition,
   addAIPlayerOverWebsocket,
   removeAIPlayerOverWebsocket,
-} from "@/lib/websocketFunctions";
+  isGameStateMessage,
+  isSessionStateMessage,
+  isErrorMessage,
+  isSimpleMessage,
+} from "./websocket";
 import { useToast } from "@/context/ToastContext";
 import { usePathname } from "next/navigation";
 import { useGameContext } from "@/context/GameContext";
 import { getGameModels } from "@/lib/apiCalls";
 import { useAuth } from "@/context/AuthContext";
+import type { TicTacToeGameState } from "@/proto/tictactoe_pb";
+import type { PlayerInfo } from "@/proto/common_pb";
 
-type TicTacToeBoardContextType = {
-  board: number[];
+// ============================================================================
+// Context Types
+// ============================================================================
+
+type TicTacToeContextType = {
+  // Game state (directly from protobuf)
+  gameState: TicTacToeGameState | null;
+  players: Record<number, PlayerInfo>;
+
+  // Computed values
   currentMove: number;
-  winningLine: number[];
-  currentViewedMove: number;
+  currentPlayerNumber: number;
   isCurrentUsersGo: boolean;
-  currentPlayerNumber: number | null;
-  makeMove: (position: number) => void;
-};
 
-type TicTacToeGameContextType = {
-  players: Record<number, PlayerInfo | null>;
-  currentMove: number;
-  currentPlayer: PlayerInfo | null;
-  winner: number | null;
-  currentViewedMove: number;
-  setCurrentViewedMove: (newMove: number) => void;
-};
-
-type TicTacToePlayerContextType = {
-  players: Record<number, PlayerInfo | null>;
+  // Client-side state
   currentUserPosition: number | null;
+  currentViewedMove: number;
+  setCurrentViewedMove: (move: number) => void;
+
+  // AI models
   aiModels: Record<string, string>;
-  currentPlayerNumber: number | null;
-  updateCurrentUserPosition: (newPosition: number | null) => Promise<void>;
-  removeAIPlayer: (position: number) => Promise<void>;
+
+  // Actions
+  makeMove: (position: number) => void;
+  updateCurrentUserPosition: (position: number | null) => Promise<void>;
   addAIPlayer: (position: number, model: string) => Promise<void>;
+  removeAIPlayer: (position: number) => Promise<void>;
 };
 
-type TicTacToeGameState = {
-  board: number[];
-  winner: number | null;
-  winning_line: number[];
-};
+const TicTacToeContext = createContext<TicTacToeContextType | null>(null);
 
-function parseGameState(
-  parameters: Record<string, any>,
-): TicTacToeGameState | null {
-  if (
-    !Array.isArray((parameters as any).board) ||
-    !("winner" in parameters) ||
-    !Array.isArray((parameters as any).winning_line)
-  ) {
-    console.log("Invalid game state format:", parameters);
-    throw new Error("Invalid structure");
-  }
-  return parameters as TicTacToeGameState;
-}
-
-export function makeMoveOverWebsocket(
-  webSocket: WebSocket | null,
-  position: number,
-): void {
-  if (!webSocket) {
-    return;
-  }
-  webSocket.send(
-    JSON.stringify({
-      request_type: "game",
-      function_name: "make_move",
-      parameters: {
-        position: position,
-      },
-    }),
-  );
-}
-
-const TicTacToeBoardContext = createContext<TicTacToeBoardContextType | null>(
-  null,
-);
-const TicTacToePlayerContext = createContext<TicTacToePlayerContextType | null>(
-  null,
-);
-const TicTacToeGameContext = createContext<TicTacToeGameContextType | null>(
-  null,
-);
-
-export const useTicTacToeBoardContext = () => {
-  const context = useContext(TicTacToeBoardContext);
+export const useTicTacToeContext = () => {
+  const context = useContext(TicTacToeContext);
   if (!context) {
     throw new Error(
-      "useTicTacToeBoardContext must be used within a TicTacToeProvider",
+      "useTicTacToeContext must be used within a TicTacToeProvider",
     );
   }
   return context;
 };
 
-export const useTicTacToePlayerContext = () => {
-  const context = useContext(TicTacToePlayerContext);
-  if (!context) {
-    throw new Error(
-      "useTicTacToePlayerContext must be used within a TicTacToeProvider",
-    );
-  }
-  return context;
-};
-
-export const useTicTacToeGameContext = () => {
-  const context = useContext(TicTacToeGameContext);
-  if (!context) {
-    throw new Error(
-      "useTicTacToeGameContext must be used within a TicTacToeProvider",
-    );
-  }
-  return context;
-};
+// ============================================================================
+// Provider
+// ============================================================================
 
 export function TicTacToeProvider({
   gameID,
@@ -138,26 +82,33 @@ export function TicTacToeProvider({
   gameID: string;
   children: ReactNode;
 }) {
-  // Backend state
-  const [board, setBoard] = useState<number[]>(Array(9).fill(-1));
-  const [players, setPlayers] = useState<Record<number, PlayerInfo | null>>({
-    0: null,
-    1: null,
-  });
+  // State - using protobuf types directly
+  const [gameState, setGameState] = useState<TicTacToeGameState | null>(null);
+  const [players, setPlayers] = useState<Record<number, PlayerInfo>>({});
   const [aiModels, setAIModels] = useState<Record<string, string>>({});
-  const [winner, setWinner] = useState<number | null>(null);
-  const [winningLine, setWinningLine] = useState<number[]>([]);
-  // Client state
   const [currentUserPosition, setCurrentUserPosition] = useState<number | null>(
     null,
   );
   const [currentViewedMove, setCurrentViewedMove] = useState(0);
-  // Initial loading of state
   const [isLoading, setIsLoading] = useState(true);
-  // Websocket
+
+  // Refs
   const gameWebSocket = useRef<WebSocket | null>(null);
+
+  // Hooks
   const { addToast } = useToast();
   const { getToken } = useAuth();
+  const {
+    setGameCode,
+    setGameLink,
+    setGameState: setGameStatus,
+    clearGame,
+  } = useGameContext();
+  const pathname = usePathname();
+
+  // ============================================================================
+  // WebSocket Connection
+  // ============================================================================
 
   useEffect(() => {
     let isMounted = true;
@@ -171,56 +122,48 @@ export function TicTacToeProvider({
         const webSocket = await getGameWebsocket(gameID, token);
         setIsLoading(false);
 
-        if (!isMounted) return; // handle fast unmount
+        if (!isMounted) return;
 
         gameWebSocket.current = webSocket;
         webSocket.addEventListener("message", (event) => {
           try {
-            const parsedMessage = parseWebSocketMessage(event);
+            const message = parseTicTacToeMessage(event);
 
-            switch (parsedMessage.message_type) {
-              case "session_state":
-                // TODO: Work out to set user position
-                // setCurrentUserPosition();
-                setPlayers(parsedMessage.parameters.player_positions);
-                break;
+            if (isSessionStateMessage(message)) {
+              // Store protobuf PlayerInfo directly (no conversion!)
+              const playerPositions: Record<number, PlayerInfo> = {};
+              Object.entries(message.message.value.playerPositions).forEach(
+                ([pos, playerInfo]) => {
+                  if (playerInfo) {
+                    playerPositions[parseInt(pos)] = playerInfo;
+                  }
+                },
+              );
+              setPlayers(playerPositions);
+            } else if (isErrorMessage(message)) {
+              addToast({
+                message: message.message.value.errorMessage,
+                type: "error",
+              });
+            } else if (isGameStateMessage(message)) {
+              const newGameState = message.message.value;
+              const previousMaxMove = gameState
+                ? Math.max(...gameState.board) + 1
+                : 0;
 
-              case "error":
-                addToast({
-                  message: parsedMessage.parameters.error_message,
-                  type: "error",
-                });
-                break;
+              setGameState(newGameState);
 
-              case "game_state": {
-                const gameState = parseGameState(parsedMessage.parameters);
-                if (!gameState) {
-                  console.error(
-                    "Invalid game state: " + parsedMessage.parameters,
-                  );
-                  return;
-                }
-                const previousMaxMove = Math.max(...board) + 1;
-                setBoard(gameState.board);
-                setWinningLine(gameState.winning_line);
-                setWinner(gameState.winner);
-                // Calculate current move from board (max move number + 1)
-                const maxMove = Math.max(...gameState.board);
-                const calculatedMove = maxMove + 1;
-                if (
-                  previousMaxMove !== calculatedMove &&
-                  currentViewedMove === calculatedMove - 1
-                ) {
-                  setCurrentViewedMove(calculatedMove);
-                }
-                break;
+              // Auto-advance viewed move if we were watching latest
+              const maxMove = Math.max(...newGameState.board);
+              const calculatedMove = maxMove + 1;
+              if (
+                previousMaxMove !== calculatedMove &&
+                currentViewedMove === calculatedMove - 1
+              ) {
+                setCurrentViewedMove(calculatedMove);
               }
-              case "simple":
-                console.log(parsedMessage.parameters.message);
-
-              case "unknown":
-              default:
-                break;
+            } else if (isSimpleMessage(message)) {
+              console.log(message.message.value.message);
             }
           } catch (err) {
             console.error("Error processing message:", err);
@@ -250,7 +193,10 @@ export function TicTacToeProvider({
     };
   }, [gameID]);
 
-  // Get AI models
+  // ============================================================================
+  // Fetch AI Models
+  // ============================================================================
+
   useEffect(() => {
     const fetchAIModels = async () => {
       try {
@@ -268,68 +214,69 @@ export function TicTacToeProvider({
     fetchAIModels();
   }, [gameID, getToken]);
 
-  // Set game details in context.
-  const {
-    gameCode,
-    setGameCode,
-    gameLink,
-    setGameLink,
-    gameState,
-    setGameState,
-    clearGame,
-  } = useGameContext();
-  const pathname = usePathname();
+  // ============================================================================
+  // Game Context Integration
+  // ============================================================================
 
   useEffect(() => {
     setGameCode(gameID);
     setGameLink(pathname);
-    setGameState("Pending game start");
+    setGameStatus("Pending game start");
     return () => {
       clearGame();
     };
-  }, [gameID]);
+  }, [gameID, pathname, setGameCode, setGameLink, setGameStatus, clearGame]);
 
-  // Define meta parameters
+  // ============================================================================
+  // Computed Values
+  // ============================================================================
 
   const currentMove = useMemo(() => {
-    // Calculate current move from board (max move number + 1)
-    const maxMove = Math.max(...board);
+    if (!gameState) return 0;
+    const maxMove = Math.max(...gameState.board);
     return maxMove + 1;
-  }, [board]);
+  }, [gameState]);
 
   const currentPlayerNumber = useMemo(() => {
     return currentMove % 2;
   }, [currentMove]);
-  const currentPlayer = useMemo(() => {
-    return players[currentPlayerNumber];
-  }, [currentPlayerNumber, players]);
+
   const isCurrentUsersGo = useMemo(() => {
+    const winner = gameState?.winner ?? null;
     return currentUserPosition === currentPlayerNumber && winner === null;
-  }, [currentUserPosition, currentPlayerNumber, winner]);
+  }, [currentUserPosition, currentPlayerNumber, gameState?.winner]);
 
+  // Update game status
   useEffect(() => {
-    if (winner !== null || currentMove === 9) {
-      setGameState("Game over");
-      return;
-    } else if (currentMove > 0) {
-      setGameState("In game");
-    }
-  }, [currentMove, winner]);
+    if (!gameState) return;
 
-  // Define utility functions
+    const winner = gameState.winner ?? null;
+    if (winner !== null || currentMove === 9) {
+      setGameStatus("Game over");
+    } else if (currentMove > 0) {
+      setGameStatus("In game");
+    }
+  }, [currentMove, gameState?.winner, setGameStatus]);
+
+  // ============================================================================
+  // Actions
+  // ============================================================================
 
   const updateCurrentUserPosition = async (newPosition: number | null) => {
-    if (newPosition === null) {
-      leavePlayerPosition(gameWebSocket.current);
+    if (newPosition === null && currentUserPosition !== null) {
+      leavePlayerPosition(gameWebSocket.current, currentUserPosition);
       setCurrentUserPosition(null);
-    } else {
-      setPlayerPosition(newPosition, gameWebSocket.current);
+    } else if (newPosition !== null) {
+      setPlayerPosition(gameWebSocket.current, newPosition);
+      setCurrentUserPosition(newPosition);
     }
   };
 
-  const makeMove = async (position: number) => {
+  const makeMove = (position: number) => {
+    if (!gameState) return;
+    const winner = gameState.winner ?? null;
     if (winner !== null) return;
-    if (board[position] !== -1) return; // Position already taken
+    if (gameState.board[position] !== -1) return; // Position already taken
     if (currentUserPosition !== currentPlayerNumber) return;
     if (currentViewedMove !== currentMove) return;
     makeMoveOverWebsocket(gameWebSocket.current, position);
@@ -343,45 +290,31 @@ export function TicTacToeProvider({
     addAIPlayerOverWebsocket(gameWebSocket.current, position, model);
   };
 
-  // Provide tsx
-  if (isLoading) return <div>Loading game... </div>;
+  // ============================================================================
+  // Render
+  // ============================================================================
+
+  if (isLoading) return <div>Loading game...</div>;
 
   return (
-    <TicTacToeBoardContext.Provider
+    <TicTacToeContext.Provider
       value={{
-        board,
+        gameState,
+        players,
         currentMove,
-        winningLine,
-        currentViewedMove,
+        currentPlayerNumber,
         isCurrentUsersGo,
-        currentPlayerNumber: winner === null ? currentPlayerNumber : null,
+        currentUserPosition,
+        currentViewedMove,
+        setCurrentViewedMove,
+        aiModels,
         makeMove,
+        updateCurrentUserPosition,
+        addAIPlayer,
+        removeAIPlayer,
       }}
     >
-      <TicTacToePlayerContext.Provider
-        value={{
-          players,
-          currentUserPosition,
-          aiModels,
-          currentPlayerNumber: winner === null ? currentPlayerNumber : null,
-          updateCurrentUserPosition,
-          addAIPlayer,
-          removeAIPlayer,
-        }}
-      >
-        <TicTacToeGameContext.Provider
-          value={{
-            players,
-            currentMove,
-            currentPlayer,
-            winner,
-            currentViewedMove,
-            setCurrentViewedMove,
-          }}
-        >
-          {children}
-        </TicTacToeGameContext.Provider>
-      </TicTacToePlayerContext.Provider>
-    </TicTacToeBoardContext.Provider>
+      {children}
+    </TicTacToeContext.Provider>
   );
 }

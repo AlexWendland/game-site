@@ -12,7 +12,8 @@ import {
   WSTokenResponse,
   WSTokenResponseSchema,
 } from "@/proto/auth_pb";
-import { fromJson } from "@bufbuild/protobuf";
+import { SimpleResponseSchema } from "@/proto/common_pb";
+import { fromJson, fromJsonString } from "@bufbuild/protobuf";
 
 // In production (static export), use relative URLs since the Go backend serves the frontend
 // In development, use NEXT_PUBLIC_BACKEND_URL to point to the backend (e.g., http://localhost:8080)
@@ -34,11 +35,10 @@ export async function makeNewTicTacToeGameAPI(token: string): Promise<string> {
   if (!response.ok) {
     throw new Error(`Error creating Tic Tac Toe game: ${response.statusText}`);
   }
-  const data: SimpleResponse = await response.json();
-  if (data.parameters.message) {
-    return data.parameters.message;
-  }
-  throw new Error("Unexpected response format");
+  const json = await response.json();
+  // Parse JSON into protobuf message
+  const data = fromJson(SimpleResponseSchema, json);
+  return data.message;
 }
 
 export async function makeNewUltimateGameAPI(): Promise<string> {

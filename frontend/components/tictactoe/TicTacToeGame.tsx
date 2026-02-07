@@ -3,24 +3,27 @@
 import { TicTacToeBoard } from "@/components/tictactoe/TicTacToeBoard";
 import { TicTacToePlayerPieces } from "@/components/tictactoe/TicTacToePlayerPieces";
 import { Pagination } from "@/components/common/Pagination";
-import { useTicTacToeGameContext } from "@/components/tictactoe/TicTacToeContext";
+import { useTicTacToeContext } from "@/components/tictactoe/TicTacToeContext";
 
 export function TicTacToeGame() {
   const {
+    gameState,
     players,
     currentMove,
-    currentPlayer,
-    winner,
+    currentPlayerNumber,
     currentViewedMove,
     setCurrentViewedMove,
-  } = useTicTacToeGameContext();
+  } = useTicTacToeContext();
+
+  const winner = gameState?.winner ?? null;
+  const currentPlayer = players[currentPlayerNumber];
 
   const status =
     winner !== null
-      ? `Winner: ${players[winner] === null ? "Unassigned" : players[winner]?.display_name}`
+      ? `Winner: ${players[winner] ? players[winner].displayName : "Unassigned"}`
       : currentMove == 9
         ? "Draw"
-        : `Next player: ${currentPlayer === null ? "Unassigned" : currentPlayer?.display_name}`;
+        : `Next player: ${currentPlayer ? currentPlayer.displayName : "Unassigned"}`;
 
   return (
     <div>

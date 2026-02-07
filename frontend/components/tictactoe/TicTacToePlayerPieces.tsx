@@ -2,8 +2,8 @@ import clsx from "clsx";
 import { useState } from "react";
 import { AddAI, Join, Leave, RemoveAI } from "@/components/common/Icons";
 import { useIsMobile } from "@/context/BrowserContext";
-import { useTicTacToePlayerContext } from "@/components/tictactoe/TicTacToeContext";
-import { PlayerInfo } from "@/types/apiTypes";
+import { useTicTacToeContext } from "@/components/tictactoe/TicTacToeContext";
+import type { PlayerInfo } from "@/proto/common_pb";
 
 type PlayerPieceProps = {
   playerId: number;
@@ -33,9 +33,9 @@ function PlayerPiece({
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
   const [isAIDropdownOpen, setIsAIDropdownOpen] = useState(false);
 
-  const isOccupiedByAI = playerInfo?.is_ai ?? false;
+  const isOccupiedByAI = playerInfo?.isAi ?? false;
   const isOccupiedByHuman = playerInfo !== null && !isOccupiedByAI;
-  const playerName = playerInfo?.display_name ?? null;
+  const playerName = playerInfo?.displayName ?? null;
 
   const hasActions =
     isCurrentUser || (!isOccupiedByHuman && !isOccupiedByAI) || isOccupiedByAI;
@@ -340,7 +340,7 @@ export function TicTacToePlayerPieces({
     updateCurrentUserPosition,
     removeAIPlayer,
     addAIPlayer,
-  } = useTicTacToePlayerContext();
+  } = useTicTacToeContext();
 
   const availablePlayers = [
     { id: 0, name: "Cross" },
