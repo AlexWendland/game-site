@@ -83,11 +83,14 @@ func (h *WebSocketHandler) ServeHTTP(writer http.ResponseWriter, request *http.R
 
 	logger.Info("WebSocket connection established")
 
-	// Child context of the request context for the read/write loops
-	ctx, cancel := context.WithCancel(request.Context())
+	// Create a new context for the WebSocket connection
+	// We use context.Background() instead of request.Context() because after the
+	// WebSocket upgrade (via Hijack), the connection is no longer managed by the
+	// HTTP server and shouldn't be tied to the HTTP request lifecycle
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go h.readLoop(ctx, conn, gameSession, userID, logger)
+	go h.readLoop(ctx, cancel, conn, gameSession, userID, logger)
 	h.writeLoop(ctx, conn, gameSession, userID, logger)
 
 	logger.Info("WebSocket connection closed")
@@ -110,8 +113,10 @@ func extractGameID(path string) string {
 	return ""
 }
 
-func (h *WebSocketHandler) readLoop(ctx context.Context, conn *websocket.Conn, gameExecutor internal.GameExecutor, userID string, logger *slog.Logger) {
+func (h *WebSocketHandler) readLoop(ctx context.Context, cancel context.CancelFunc, conn *websocket.Conn, gameExecutor internal.GameExecutor, userID string, logger *slog.Logger) {
 	logger.Debug("Read loop started")
+	defer cancel() // Signal write loop to exit when read loop ends
+
 	for {
 		// Read raw message from WebSocket
 		_, msg, err := conn.Read(ctx)
@@ -133,13 +138,14 @@ func (h *WebSocketHandler) readLoop(ctx context.Context, conn *websocket.Conn, g
 
 func (h *WebSocketHandler) writeLoop(ctx context.Context, conn *websocket.Conn, gameExecutor internal.GameExecutor, userID string, logger *slog.Logger) {
 	logger.Debug("Write loop started")
-	outgoingChannel, err := gameExecutor.Register(logger, userID)
+	connID, outgoingChannel, err := gameExecutor.Register(logger, userID)
 	if err != nil {
 		logger.Debug("Failed to register user", "error", err.Error())
 		return
 	}
+	logger = logger.With("connection_id", connID)
 	defer func() {
-		if err := gameExecutor.Unregister(logger, userID); err != nil {
+		if err := gameExecutor.Unregister(logger, userID, connID); err != nil {
 			logger.Warn("Failed to unregister user", "error", err.Error())
 		}
 	}()
@@ -148,7 +154,12 @@ func (h *WebSocketHandler) writeLoop(ctx context.Context, conn *websocket.Conn, 
 		case <-ctx.Done():
 			logger.Debug("Write loop ended - context done")
 			return
-		case stateMsg := <-outgoingChannel:
+		case stateMsg, ok := <-outgoingChannel:
+			if !ok {
+				// Channel was closed (likely due to reconnection)
+				logger.Debug("Write loop ended - channel closed")
+				return
+			}
 			logger.Debug("Sending message to WebSocket client",
 				"message", string(stateMsg.RawMessage))
 

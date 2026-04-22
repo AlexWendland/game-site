@@ -34,7 +34,7 @@ function PlayerPiece({
   const [isAIDropdownOpen, setIsAIDropdownOpen] = useState(false);
 
   const isOccupiedByAI = playerInfo?.isAi ?? false;
-  const isOccupiedByHuman = playerInfo !== null && !isOccupiedByAI;
+  const isOccupiedByHuman = !!playerInfo && !isOccupiedByAI;
   const playerName = playerInfo?.displayName ?? null;
 
   const hasActions =

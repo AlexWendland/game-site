@@ -1,9 +1,11 @@
 package api
 
 import (
+	"bufio"
 	"context"
 	"log"
 	"log/slog"
+	"net"
 	"net/http"
 	"time"
 
@@ -47,6 +49,14 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 		rw.WriteHeader(http.StatusOK)
 	}
 	return rw.ResponseWriter.Write(b)
+}
+
+// Hijack implements http.Hijacker interface for WebSocket upgrades
+func (rw *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if hijacker, ok := rw.ResponseWriter.(http.Hijacker); ok {
+		return hijacker.Hijack()
+	}
+	return nil, nil, http.ErrNotSupported
 }
 
 // loggingMiddleware logs each request with method, path, status, duration, and request ID
@@ -151,13 +161,11 @@ func (s *Server) Run() error {
 		log.Printf("CORS enabled for: http://localhost:3000")
 	}
 
-	// Create server with timeouts for security
+	// Note: ReadTimeout and WriteTimeout are NOT set because of WebSocket connections
 	server := &http.Server{
-		Addr:         s.addr,
-		Handler:      nil, // Uses DefaultServeMux
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		Addr:        s.addr,
+		Handler:     nil, // Uses DefaultServeMux
+		IdleTimeout: 60 * time.Second,
 	}
 
 	return server.ListenAndServe()

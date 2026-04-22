@@ -12,9 +12,11 @@ type GameExecutor interface {
 	ActionChannel() chan<- TaggedMessage
 
 	// Register a user as a subscriber to the game.
-	Register(logger *slog.Logger, userID string) (<-chan TaggedMessage, error)
+	// Returns a connection ID and a channel for receiving messages.
+	Register(logger *slog.Logger, userID string) (string, <-chan TaggedMessage, error)
 
-	Unregister(logger *slog.Logger, userID string) error
+	// Unregister a specific connection for a user.
+	Unregister(logger *slog.Logger, userID string, connID string) error
 
 	Run(logger *slog.Logger)
 

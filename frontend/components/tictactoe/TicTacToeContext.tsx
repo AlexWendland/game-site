@@ -94,6 +94,7 @@ export function TicTacToeProvider({
 
   // Refs
   const gameWebSocket = useRef<WebSocket | null>(null);
+  const mountCount = useRef(0);
 
   // Hooks
   const { addToast } = useToast();
@@ -111,19 +112,29 @@ export function TicTacToeProvider({
   // ============================================================================
 
   useEffect(() => {
-    let isMounted = true;
+    console.log("Opening websocket");
 
-    const connectWebSocket = async () => {
-      try {
-        const token = getToken();
-        if (!token) {
-          throw new Error("No authentication token available");
+    let webSocket: WebSocket | null = null;
+    let shouldMount = true;
+
+    const token = getToken();
+    if (!token) {
+      console.error("No authentication token available");
+      return;
+    }
+
+    getGameWebsocket(gameID, token)
+      .then((ws) => {
+        webSocket = ws;
+
+        // Check if component unmounted while we were connecting
+        if (!shouldMount) {
+          console.log("Component unmounted during connection, closing WebSocket");
+          ws.close();
+          return;
         }
-        const webSocket = await getGameWebsocket(gameID, token);
+
         setIsLoading(false);
-
-        if (!isMounted) return;
-
         gameWebSocket.current = webSocket;
         webSocket.addEventListener("message", (event) => {
           try {
@@ -177,17 +188,23 @@ export function TicTacToeProvider({
         webSocket.addEventListener("error", (error) => {
           console.error("WebSocket error:", error);
         });
-      } catch (err) {
+      })
+      .catch((err) => {
         console.error("Failed to connect WebSocket:", err);
-      }
-    };
-
-    connectWebSocket();
+      });
 
     return () => {
-      isMounted = false;
-      if (gameWebSocket.current) {
-        gameWebSocket.current.close();
+      // Tell the async callback not to set up the connection
+      shouldMount = false;
+
+      // Close the WebSocket if it was already created
+      if (webSocket) {
+        console.log("Closing WebSocket");
+        webSocket.close();
+      }
+
+      // Clear the ref if this was the active connection
+      if (gameWebSocket.current === webSocket) {
         gameWebSocket.current = null;
       }
     };

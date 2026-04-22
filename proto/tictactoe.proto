@@ -49,3 +49,12 @@ message ServerTicTacToeWebsocketMessage {
 
 message TicTacToeMetadata {
 }
+
+// REST API Messages
+message CreateTicTacToeGameRequest {
+  // Currently no parameters needed
+}
+
+message CreateTicTacToeGameResponse {
+  string game_id = 1;  // The generated game ID
+}

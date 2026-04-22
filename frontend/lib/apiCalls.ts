@@ -9,11 +9,18 @@ import {
   AuthResponseSchema,
   UserInfoResponse,
   UserInfoResponseSchema,
-  WSTokenResponse,
   WSTokenResponseSchema,
 } from "@/proto/auth_pb";
-import { SimpleResponseSchema } from "@/proto/common_pb";
-import { fromJson, fromJsonString } from "@bufbuild/protobuf";
+import {
+  CreateTicTacToeGameResponseSchema,
+  TicTacToeMetadata,
+  TicTacToeMetadataSchema,
+} from "@/proto/tictactoe_pb";
+import { fromJson } from "@bufbuild/protobuf";
+import {
+  GameMetadataResponse,
+  GameMetadataResponseSchema,
+} from "@/proto/metadata_pb";
 
 // In production (static export), use relative URLs since the Go backend serves the frontend
 // In development, use NEXT_PUBLIC_BACKEND_URL to point to the backend (e.g., http://localhost:8080)
@@ -37,8 +44,27 @@ export async function makeNewTicTacToeGameAPI(token: string): Promise<string> {
   }
   const json = await response.json();
   // Parse JSON into protobuf message
-  const data = fromJson(SimpleResponseSchema, json);
-  return data.message;
+  const data = fromJson(CreateTicTacToeGameResponseSchema, json);
+  return data.gameId;
+}
+
+export async function getTicTacToeGameMetadata(
+  gameID: string,
+  token: string,
+): Promise<TicTacToeMetadata> {
+  const response = await fetch(apiUrl(`/api/game/${gameID}/metadata`), {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error fetching game metadata: ${response.statusText}`);
+  }
+  const json = await response.json();
+  // Parse JSON into protobuf message
+  const data = fromJson(TicTacToeMetadataSchema, json);
+  return data;
 }
 
 export async function makeNewUltimateGameAPI(): Promise<string> {
@@ -136,7 +162,7 @@ export async function makeNewQuantumGameAPI(
 export async function getGameMetadata(
   gameID: string,
   token: string,
-): Promise<GameMetadata> {
+): Promise<GameMetadataResponse> {
   const response = await fetch(apiUrl(`/api/game/${gameID}/metadata`), {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -147,19 +173,10 @@ export async function getGameMetadata(
     throw new Error(`Error fetching game metadata: ${response.statusText}`);
   }
 
-  const data = await response.json();
-  if (
-    !data ||
-    typeof data !== "object" ||
-    typeof (data as any).game_type !== "string" ||
-    typeof (data as any).max_players !== "number" ||
-    typeof (data as any).parameters !== "object"
-  ) {
-    console.error("Invalid Metadata message format:", data);
-    throw new Error("Invalid Metadata message format");
-  }
-
-  return data as GameMetadata;
+  const json = await response.json();
+  // Parse JSON into protobuf message
+  const data = fromJson(GameMetadataResponseSchema, json);
+  return data;
 }
 
 export async function getGameModels(

@@ -19,9 +19,10 @@ type TicTacToeSession struct {
 	outgoingChan  chan internal.TaggedMessage
 	quit          chan struct{}
 	done          chan struct{}
-	userChannels  map[string]chan internal.TaggedMessage
-	userMutex     sync.Mutex
-	aiModels      map[string]TicTacToeAI
+	// Map from connectionID (userID:connID) to output channel
+	userChannels map[string]chan internal.TaggedMessage
+	userMutex    sync.Mutex
+	aiModels     map[string]TicTacToeAI
 }
 
 func NewTicTacToeSession(gameID string, game *TicTacToeGame, playerMapping *utils.PlayerPositionMapping) *TicTacToeSession {
@@ -41,30 +42,62 @@ func (s *TicTacToeSession) ActionChannel() chan<- internal.TaggedMessage {
 	return s.actionChan
 }
 
-func (s *TicTacToeSession) Register(logger *slog.Logger, userID string) (<-chan internal.TaggedMessage, error) {
-	s.userMutex.Lock()
-	defer s.userMutex.Unlock()
-	_, exists := s.userChannels[userID]
-	if exists {
-		return nil, fmt.Errorf("user %s already registered", userID)
+// generateConnectionID creates a unique connection ID for a user
+// Must be called while holding userMutex
+func (s *TicTacToeSession) generateConnectionID(userID string) string {
+	for {
+		connID := uuid.New().String()[:8]
+		connectionKey := fmt.Sprintf("%s:%s", userID, connID)
+		if _, exists := s.userChannels[connectionKey]; !exists {
+			return connID
+		}
 	}
-	outputChannel := make(chan internal.TaggedMessage, 16)
-	s.userChannels[userID] = outputChannel
-	s.playerMapping.MarkConnected(logger, userID)
-	return outputChannel, nil
 }
 
-func (s *TicTacToeSession) Unregister(logger *slog.Logger, userID string) error {
+func (s *TicTacToeSession) Register(logger *slog.Logger, userID string) (string, <-chan internal.TaggedMessage, error) {
 	s.userMutex.Lock()
 	defer s.userMutex.Unlock()
-	outputChannel, exists := s.userChannels[userID]
+
+	// Generate unique connection ID
+	connID := s.generateConnectionID(userID)
+	connectionKey := fmt.Sprintf("%s:%s", userID, connID)
+
+	logger.Debug("Registering connection", "user_id", userID, "connection_id", connID)
+
+	outputChannel := make(chan internal.TaggedMessage, 16)
+	s.userChannels[connectionKey] = outputChannel
+	s.playerMapping.MarkConnected(logger, userID)
+	s.broadcastGameState(logger)
+	logger.Info("User connected", "user_id", userID, "connection_id", connID)
+	return connID, outputChannel, nil
+}
+
+func (s *TicTacToeSession) Unregister(logger *slog.Logger, userID string, connID string) error {
+	s.userMutex.Lock()
+	defer s.userMutex.Unlock()
+
+	connectionKey := fmt.Sprintf("%s:%s", userID, connID)
+	outputChannel, exists := s.userChannels[connectionKey]
 	if !exists {
-		return fmt.Errorf("user %s not registered", userID)
+		return nil
 	}
 	close(outputChannel)
-	delete(s.userChannels, userID)
+	delete(s.userChannels, connectionKey)
 
-	s.playerMapping.MarkDisconnected(logger, userID)
+	// Only mark disconnected if this was the last connection for this user
+	hasOtherConnections := false
+	for key := range s.userChannels {
+		if len(key) > len(userID) && key[:len(userID)] == userID && key[len(userID)] == ':' {
+			hasOtherConnections = true
+			break
+		}
+	}
+
+	if !hasOtherConnections {
+		s.playerMapping.MarkDisconnected(logger, userID)
+	}
+
+	logger.Info("User disconnected", "user_id", userID, "connection_id", connID)
 	return nil
 }
 
@@ -122,19 +155,24 @@ func (s *TicTacToeSession) fanOut(logger *slog.Logger) {
 				}
 				s.userMutex.Unlock()
 			} else {
-				// Send to specific user
+				// Send to specific user (all their connections)
 				s.userMutex.Lock()
-				ch, exists := s.userChannels[msg.UserID]
+				sentToAny := false
+				// Find all connections for this user
+				for connKey, ch := range s.userChannels {
+					if len(connKey) > len(msg.UserID) && connKey[:len(msg.UserID)] == msg.UserID && connKey[len(msg.UserID)] == ':' {
+						select {
+						case ch <- msg:
+							messageLogger.Debug("Message sent to user connection", "receiving_user_id", msg.UserID, "connection_key", connKey)
+							sentToAny = true
+						default:
+							messageLogger.Warn("Message dropped - channel full", "receiving_user_id", msg.UserID, "connection_key", connKey)
+						}
+					}
+				}
 				s.userMutex.Unlock()
 
-				if exists {
-					select {
-					case ch <- msg:
-						messageLogger.Debug("Message sent to user", "receiving_user_id", msg.UserID)
-					default:
-						messageLogger.Warn("Message dropped - channel full", "receiving_user_id", msg.UserID)
-					}
-				} else {
+				if !sentToAny {
 					messageLogger.Warn("User not registered", "receiving_user_id", msg.UserID)
 				}
 			}
@@ -251,8 +289,13 @@ func (s *TicTacToeSession) handleRemovePlayerPosition(logger *slog.Logger, userI
 		logger.Info("Stopping AI player", "ai_user_id", playerAtPosition)
 		ai.Stop()
 		delete(s.aiModels, playerAtPosition)
-		if err := s.Unregister(logger, playerAtPosition); err != nil {
-			logger.Warn("Failed to unregister AI player", "error", err.Error())
+		for key := range s.userChannels {
+			if len(key) > len(playerAtPosition) && key[:len(playerAtPosition)] == playerAtPosition && key[len(userID)] == ':' {
+				connID := key[len(playerAtPosition)+1:]
+				if err := s.Unregister(logger, playerAtPosition, connID); err != nil {
+					logger.Warn("Failed to unregister AI player", "error", err.Error())
+				}
+			}
 		}
 	}
 
@@ -272,7 +315,7 @@ func (s *TicTacToeSession) handleAddAIPlayer(logger *slog.Logger, userID string,
 		s.sendErrorResponse(logger, userID, err.Error())
 		return
 	}
-	outputChannel, err := s.Register(logger, aiUserID)
+	_, outputChannel, err := s.Register(logger, aiUserID)
 	if err != nil {
 		// We should never hit this path.
 		logger.Error("Failed to register AI user", "error", err.Error())

@@ -30,10 +30,10 @@ export default function TicTacToePage() {
           return;
         }
         const metadata = await getGameMetadata(gameID, token);
-        if (metadata.game_type !== "tictactoe") {
-          setIsValid(false);
-        } else {
+        if (metadata.metadata.case === "ticTacToeMetadata") {
           setIsValid(true);
+        } else {
+          setIsValid(false);
         }
       } catch (error) {
         console.error("Error fetching game state:", error);
